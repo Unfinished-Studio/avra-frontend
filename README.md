@@ -1,6 +1,6 @@
-# Unfinished dev-template-frontend
+# dev-template-frontend
 
-This is a frontend development template tailored to work well with Webflow sites.
+This is a frontend development template intended to be used with Webflow sites.
 
 ## Get Started
 
