@@ -1,23 +1,33 @@
 # dev-template-frontend
 
-This is a frontend development template intended to be used with Webflow sites.
+Frontend development template intended for use on Webflow sites.
 
-## Get Started
+This template uses Typescript and is intended to speed up the development process for coding for Webflow sites, if you are not familiar with Typescript, I would suggest using a site like https://codesandbox.io/ to write your javascript for your site.
 
-### Install pnpm
+## what's inside
+
+-   JQuery types
+    This project interacts with Webflow, hence the `window.Webflow.push()` in index.ts
+    the callback function will execute after Webflow's script has executed, if you would like to run code before that, keep it outside of the callback.
+    Weflow includes JQuery on all its sites, so this template includes types for it. Feel free to use JQuery inside of the callback.
+
+-   Finsweet TS Utils
+    This project also includes [Finsweet's Typescript Utils](https://github.com/finsweet/ts-utils), which includes some useful functions to help with developing for Webflow sites.
+
+## Getting Started
+
+This project uses pnpm, you can install it via npm:
 
 ```bash
 npm i -g pnpm
 ```
 
-### Install packages
+Then, cd into the project directory and install dependencies:
 
 ```bash
 pnpm install
 ```
 
-### Build
-
+After that, write some code and build the project
 `pnpm dev`: build and create a server on localhost to serve your files, the console provides a script tag to paste into your webflow <head> tag.
-
 `pnpm build`: build (and minify) files to (`dist`)
