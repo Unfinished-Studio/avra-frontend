@@ -7,12 +7,14 @@ This template uses Typescript and is intended to speed up the development proces
 ## what's inside
 
 -   JQuery types
-    This project interacts with Webflow, hence the `window.Webflow.push()` in index.ts
-    the callback function will execute after Webflow's script has executed, if you would like to run code before that, keep it outside of the callback.
-    Weflow includes JQuery on all its sites, so this template includes types for it. Feel free to use JQuery inside of the callback.
+
+This project interacts with Webflow, hence the `window.Webflow.push()` in index.ts
+the callback function will execute after Webflow's script has executed, if you would like to run code before that, keep it outside of the callback.
+Weflow includes JQuery on all its sites, so this template includes types for it. Feel free to use JQuery inside of the callback.
 
 -   Finsweet TS Utils
-    This project also includes [Finsweet's Typescript Utils](https://github.com/finsweet/ts-utils), which includes some useful functions to help with developing for Webflow sites.
+
+This project also includes [Finsweet's Typescript Utils](https://github.com/finsweet/ts-utils), which includes some useful functions to help with developing for Webflow sites.
 
 ## Getting Started
 
