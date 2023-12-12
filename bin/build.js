@@ -5,6 +5,7 @@ import { join, sep } from "path";
 // Config output
 const BUILD_DIRECTORY = "dist";
 const PRODUCTION = process.env.NODE_ENV === "production";
+const MINIFY = process.env.MINIFY === "true";
 
 // Config entrypoint files
 const ENTRY_POINTS = ["src/index.ts"];
@@ -19,7 +20,7 @@ const context = await esbuild.context({
     bundle: true,
     entryPoints: ENTRY_POINTS,
     outdir: BUILD_DIRECTORY,
-    minify: PRODUCTION,
+    minify: MINIFY ? true : false,
     sourcemap: !PRODUCTION,
     target: PRODUCTION ? "es2020" : "esnext",
     inject: LIVE_RELOAD ? ["./bin/live-reload.js"] : undefined,

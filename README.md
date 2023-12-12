@@ -2,7 +2,7 @@
 
 Frontend development template intended for use on Webflow sites.
 
-This template uses Typescript and is intended to speed up the development process for coding for Webflow sites, if you do not want to use Typescript, I would suggest using a site like https://codesandbox.io/ to write your Javascript for your site. (or try out Typescript)
+This template uses Typescript and is intended to speed up the development process for coding for Webflow sites, if you do not want to use Typescript, I would suggest using a site like https://codesandbox.io/ to write your Javascript for your site. (or try out Typescript!)
 
 ## what's inside
 

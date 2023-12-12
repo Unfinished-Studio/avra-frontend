@@ -25,8 +25,9 @@
     "main": "src/index.ts",
     "module": "src/index.ts",
     "scripts": {
-        "dev": "cross-env NODE_ENV=development node ./bin/build.js",
-        "build": "cross-env NODE_ENV=production node ./bin/build.js",
+        "dev": "cross-env NODE_ENV=development MINIFY=false node ./bin/build.js",
+        "build": "cross-env NODE_ENV=production MINIFY=true node ./bin/build.js",
+        "compile": "cross-env NODE_ENV=production MINIFY=false node ./bin/build.js",
         "check": "tsc --noEmit",
         "format": "prettier --write ./src",
         "update": "pnpm update -i -L -r"
