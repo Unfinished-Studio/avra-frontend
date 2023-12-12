@@ -32,11 +32,11 @@
         "update": "pnpm update -i -L -r"
     },
     "devDependencies": {
-        "@types/jquery": "^3.5.27",
+        "@types/jquery": "^3.5.29",
         "cross-env": "^7.0.3",
-        "esbuild": "^0.19.5",
-        "prettier": "^3.1.0",
-        "typescript": "^5.2.2"
+        "esbuild": "^0.19.9",
+        "prettier": "^3.1.1",
+        "typescript": "^5.3.3"
     },
     "dependencies": {
         "@finsweet/ts-utils": "^0.40.0"
