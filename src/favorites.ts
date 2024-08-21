@@ -50,4 +50,10 @@ window.Webflow.push(async () => {
     } else {
         podcastList.parentElement?.parentElement?.remove();
     }
+
+    if (!favArr.length) {
+        const emptyBanner = document.querySelector<HTMLElement>("[avra-element='empty-banner']");
+        if (!emptyBanner) return;
+        emptyBanner.classList.remove("hide");
+    }
 });
