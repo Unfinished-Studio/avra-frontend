@@ -2,8 +2,6 @@
 
 window.Webflow ||= [];
 window.Webflow.push(async () => {
-    if (!window.location.search.includes("test")) return;
-
     const ms = window.$memberstackDom;
     let json: any = await ms.getMemberJSON();
     console.log(json);
