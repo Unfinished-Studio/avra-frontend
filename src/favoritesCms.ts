@@ -2,17 +2,6 @@
 
 window.Webflow ||= [];
 window.Webflow.push(async () => {
-    const ms = window.$memberstackDom;
-    let json: any = await ms.getMemberJSON();
-    console.log(json);
-
-    let favArr: any[] = [];
-    if (json && json.data && json.favorites) {
-        favArr = json.favorites;
-    }
-
-    let favorited = favArr.some((x: any) => x.slug === slug);
-
     // handle favorites buttons
     const dataEl = document.querySelector<HTMLElement>("[avra-element='item-data']");
     if (!dataEl) throw new Error("No data element for this CMS page");
@@ -20,12 +9,27 @@ window.Webflow.push(async () => {
     const slug = dataEl.getAttribute("data-avra-slug");
     if (!slug) throw new Error("No slug for this CMS item");
 
+    const ms = window.$memberstackDom;
+    let json: any = await ms.getMemberJSON();
+    console.log(json);
+
+    let favArr: any[] = [];
+    if (json && (json.data || json.favorites)) {
+        favArr = json.favorites || json.data.favorites || json.data.data.favorites;
+    }
+    console.log(favArr);
+
+    let favorited = favArr.some((x: any) => {
+        console.log(x.slug, slug);
+        return x.slug === slug;
+    });
+
     const favoriteBtns = document.querySelectorAll<HTMLElement>("[avra-element='favorite-btn']");
     for (const btn of favoriteBtns) {
         if (favorited) {
-            btn.textContent = "Favorite Page";
-        } else {
             btn.textContent = "Unfavorite Page";
+        } else {
+            btn.textContent = "Favorite Page";
         }
 
         btn.addEventListener("click", async () => {
@@ -53,10 +57,6 @@ window.Webflow.push(async () => {
 
             console.log("new json", json);
         });
-
-        if (favorited) {
-            btn.textContent = "unfavorite";
-        }
         btn.classList.remove("hide");
     }
 
