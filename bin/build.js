@@ -8,7 +8,7 @@ const PRODUCTION = process.env.NODE_ENV === "production";
 const MINIFY = process.env.MINIFY === "true";
 
 // Config entrypoint files
-const ENTRY_POINTS = ["src/index.ts", "src/test.ts", "src/favorites.ts", "src/favoritesCms.ts", "src/favoritesBanner.ts"];
+const ENTRY_POINTS = ["src/index.ts", "src/test.ts", "src/favorites.ts", "src/favoritesCms.ts", "src/favoritesBanner.ts", "src/home.ts"];
 
 // Config dev serving
 const LIVE_RELOAD = !PRODUCTION;
