@@ -16,7 +16,8 @@ window.Webflow.push(async () => {
     const wikiList = document.querySelector<HTMLElement>("[avra-element='favorite-wiki-list']");
     const sessionList = document.querySelector<HTMLElement>("[avra-element='favorite-session-list']");
     const podcastList = document.querySelector<HTMLElement>("[avra-element='favorite-podcast-list']");
-    if (!wikiList || !sessionList || !podcastList) throw new Error("Missing list elements");
+    const studyList = document.querySelector<HTMLElement>("[avra-element='favorite-study-list']");
+    if (!wikiList || !sessionList || !podcastList || !studyList) throw new Error("Missing list elements");
 
     const wikiEls = [...wikiList.querySelectorAll<HTMLElement>("[data-avra-slug]")];
     const wikiKeep = wikiEls.filter((el) => {
@@ -49,6 +50,17 @@ window.Webflow.push(async () => {
         podcastList.replaceChildren(...podcastKeep);
     } else {
         podcastList.parentElement?.parentElement?.remove();
+    }
+
+    const studyEls = [...studyList.querySelectorAll<HTMLElement>("[data-avra-slug]")];
+    const studyKeep = studyEls.filter((el) => {
+        const slug = el.getAttribute("data-avra-slug");
+        return favArr.some((f) => f.slug === slug);
+    });
+    if (studyKeep.length) {
+        studyList.replaceChildren(...studyKeep);
+    } else {
+        studyList.parentElement?.parentElement?.remove();
     }
 
     if (!favArr.length) {
