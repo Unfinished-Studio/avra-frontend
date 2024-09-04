@@ -16,6 +16,7 @@ const ENTRY_POINTS = [
     "src/favoritesBanner.ts",
     "src/home.ts",
     "src/profile.ts",
+    "src/avraWiki.ts",
 ];
 
 // Config dev serving
