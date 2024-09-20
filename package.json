@@ -37,7 +37,7 @@
         "cross-env": "^7.0.3",
         "esbuild": "^0.23.1",
         "prettier": "^3.3.3",
-        "typescript": "^5.5.4"
+        "typescript": "^5.6.2"
     },
     "dependencies": {
         "@finsweet/ts-utils": "^0.40.0",
