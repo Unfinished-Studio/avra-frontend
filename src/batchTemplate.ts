@@ -2,8 +2,9 @@ window.Webflow ||= [];
 window.Webflow.push(async () => {
     console.log("webflow loaded");
 
-    const oldWpr = document.querySelector<HTMLElement>("[pfm-element='old-wrapper']");
-    const newWpr = document.querySelector<HTMLElement>("[pfm-element='new-wrapper']");
+    // TEMPORARY showing new page only when using test parameter
+    const oldWpr = document.querySelector<HTMLElement>("[avra-element='old-wrapper']");
+    const newWpr = document.querySelector<HTMLElement>("[avra-element='new-wrapper']");
     if (!oldWpr || !newWpr) return;
 
     if (!window.location.search.includes("test")) {
@@ -11,16 +12,24 @@ window.Webflow.push(async () => {
         newWpr.remove();
         return;
     }
-
     oldWpr.classList.add("hide");
     newWpr.classList.remove("hide");
 
-    // notification bar
-    // reveal notif bar if user has not set any vals
+    // TEMPORARY using old data for nested cms collections (to bypass limit)
+    const annWpr = document.querySelector<HTMLElement>("[avra-element='announcements-wrapper']");
+    const oldAnnWpr = document.querySelector<HTMLElement>("[avra-element='old-announcements-wrapper']");
+    if (annWpr && oldAnnWpr) {
+        annWpr.replaceWith(oldAnnWpr);
+    }
 
-    // podcast
+    const wikiWpr = document.querySelector<HTMLElement>("[avra-element='wiki-wrapper']");
+    const oldWikiWpr = document.querySelector<HTMLElement>("[avra-element='old-wiki-wrapper']");
+    if (wikiWpr && oldWikiWpr) {
+        wikiWpr.replaceWith(oldWikiWpr);
+    }
 
-    // events + events filter
-    // other batch members
+    // events filter
+    const eventsSelect = document.querySelector<HTMLSelectElement>("[avra-element='events-select']");
+
     // table of contents
 });
