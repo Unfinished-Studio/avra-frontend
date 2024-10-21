@@ -16,20 +16,20 @@ window.Webflow.push(async () => {
     newWpr.classList.remove("hide");
 
     // TEMPORARY using old data for nested cms collections (to bypass limit)
-    const annWpr = document.querySelector<HTMLElement>("[avra-element='announcements-wrapper']");
-    const oldAnnWpr = document.querySelector<HTMLElement>("[avra-element='old-announcements-wrapper']");
-    if (annWpr && oldAnnWpr) {
-        annWpr.replaceWith(oldAnnWpr);
-    }
+    // const annWpr = document.querySelector<HTMLElement>("[avra-element='announcements-wrapper']");
+    // const oldAnnWpr = document.querySelector<HTMLElement>("[avra-element='old-announcements-wrapper']");
+    // if (annWpr && oldAnnWpr) {
+    //     annWpr.replaceWith(oldAnnWpr);
+    // }
 
-    const wikiWpr = document.querySelector<HTMLElement>("[avra-element='wiki-wrapper']");
-    const oldWikiWpr = document.querySelector<HTMLElement>("[avra-element='old-wiki-wrapper']");
-    if (wikiWpr && oldWikiWpr) {
-        wikiWpr.replaceWith(oldWikiWpr);
-    }
+    // const wikiWpr = document.querySelector<HTMLElement>("[avra-element='wiki-wrapper']");
+    // const oldWikiWpr = document.querySelector<HTMLElement>("[avra-element='old-wiki-wrapper']");
+    // if (wikiWpr && oldWikiWpr) {
+    //     wikiWpr.replaceWith(oldWikiWpr);
+    // }
 
     // events filter
-    const eventsSelect = document.querySelector<HTMLSelectElement>("[avra-element='events-select']");
+    // const eventsSelect = document.querySelector<HTMLSelectElement>("[avra-element='events-select']");
 
     // table of contents
 });
