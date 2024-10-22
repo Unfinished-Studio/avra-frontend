@@ -1,7 +1,5 @@
 window.Webflow ||= [];
 window.Webflow.push(async () => {
-    console.log("webflow loaded");
-
     // TEMPORARY showing new page only when using test parameter
     const oldWpr = document.querySelector<HTMLElement>("[avra-element='old-wrapper']");
     const newWpr = document.querySelector<HTMLElement>("[avra-element='new-wrapper']");
