@@ -13,6 +13,12 @@ window.Webflow.push(async () => {
     oldWpr.classList.add("hide");
     newWpr.classList.remove("hide");
 
+    // open first announcement
+    const announceEl = document.querySelector<HTMLElement>("[avra-element='announcement']");
+    if (announceEl) {
+        announceEl.click();
+    }
+
     // TEMPORARY using old data for nested cms collections (to bypass limit)
     // const annWpr = document.querySelector<HTMLElement>("[avra-element='announcements-wrapper']");
     // const oldAnnWpr = document.querySelector<HTMLElement>("[avra-element='old-announcements-wrapper']");
