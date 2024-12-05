@@ -10,7 +10,7 @@ window.Webflow.push(async () => {
         newWpr.remove();
         return;
     }
-    oldWpr.classList.add("hide");
+    oldWpr.remove();
     newWpr.classList.remove("hide");
 
     // open first announcement
