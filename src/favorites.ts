@@ -4,7 +4,6 @@ window.Webflow.push(async () => {
 
     // get all favorites
     let json: any = await ms.getMemberJSON();
-    console.log(json);
 
     let favArr: any[] = [];
     if (json && json.data && json.data.data && json.data.data.favorites) {
