@@ -2,9 +2,6 @@
 
 window.Webflow ||= [];
 window.Webflow.push(async () => {
-    if (!window.location.search.includes("test")) return;
-    console.log("testmode");
-
     const wikiEls = document.querySelectorAll<HTMLElement>("[avra-element='wiki']");
 
     // hide all
