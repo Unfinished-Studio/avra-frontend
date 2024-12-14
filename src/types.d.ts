@@ -7,5 +7,8 @@ declare global {
         $msChannelEvents: any;
         fsAttributes: any;
         onGleamEvent: any;
+        Webflow: any[];
     }
 }
+
+export {};
