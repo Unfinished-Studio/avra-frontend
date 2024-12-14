@@ -63,7 +63,6 @@ window.Webflow.push(async () => {
     try {
         if (!window.location.search.includes("test")) throw new Error("Not in test mode");
 
-        // TODO: remove in prod
         const testOldEls = document.querySelectorAll<HTMLElement>("[avra-element='test-old']");
         const testNewEls = document.querySelectorAll<HTMLElement>("[avra-element='test-new']");
         for (const el of testOldEls) el.remove();
