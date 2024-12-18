@@ -25,11 +25,7 @@ window.Webflow.push(async () => {
 
     const favoriteBtns = document.querySelectorAll<HTMLElement>("[avra-element='favorite-btn']");
     for (const btn of favoriteBtns) {
-        if (favorited) {
-            btn.textContent = "Unfavorite Page";
-        } else {
-            btn.textContent = "Favorite Page";
-        }
+        favorited ? (btn.textContent = "Unfavorite Page") : (btn.textContent = "Favorite Page");
 
         btn.addEventListener("click", async () => {
             if (favorited) {
