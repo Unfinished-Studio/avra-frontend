@@ -61,12 +61,17 @@ window.Webflow.push(async () => {
 
     // Wiki Logic
     try {
-        if (!window.location.search.includes("test")) throw new Error("Not in test mode");
-
         const testOldEls = document.querySelectorAll<HTMLElement>("[avra-element='test-old']");
         const testNewEls = document.querySelectorAll<HTMLElement>("[avra-element='test-new']");
-        for (const el of testOldEls) el.remove();
-        for (const el of testNewEls) el.classList.remove("hide");
+        if (window.location.search.includes("test")) {
+            for (const el of testOldEls) el.remove();
+            for (const el of testNewEls) el.classList.remove("hide");
+            console.log("in test mode");
+        } else {
+            for (const el of testOldEls) el.classList.remove("hide");
+            for (const el of testNewEls) el.remove();
+            throw new Error("not in test mode");
+        }
 
         setTimeout(() => {
             const headingEls = document.querySelectorAll<HTMLHeadingElement>(
