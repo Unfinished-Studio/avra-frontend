@@ -69,47 +69,46 @@ window.Webflow.push(async () => {
             throw new Error("not in test mode");
         }
 
-        setTimeout(() => {
-            const headingEls = document.querySelectorAll<HTMLHeadingElement>(
-                "#wiki-content h1, #wiki-content h2, #wiki-content h3, #wiki-content h4"
-            );
-            const links: HTMLAnchorElement[] = [];
+        // create table of contents
+        const headingEls = document.querySelectorAll<HTMLHeadingElement>(
+            "#wiki-content h1, #wiki-content h2, #wiki-content h3, #wiki-content h4"
+        );
+        const links: HTMLAnchorElement[] = [];
 
-            const wikiNavEl = document.querySelector<HTMLElement>("[avra-element='wiki-nav-links']");
-            if (!wikiNavEl) throw new Error("No wiki nav");
+        const wikiNavEl = document.querySelector<HTMLElement>("[avra-element='wiki-nav-links']");
+        if (!wikiNavEl) throw new Error("No wiki nav");
 
-            for (let i = 0; i < headingEls.length; i++) {
-                const headingEl = headingEls[i];
-                if (!headingEl || !headingEl.textContent) continue;
+        for (let i = 0; i < headingEls.length; i++) {
+            const headingEl = headingEls[i];
+            if (!headingEl || !headingEl.textContent) continue;
 
-                const id = headingEl.textContent
-                    .trim()
-                    .toLowerCase()
-                    .replace(/[^a-z0-9]/g, "-");
-                headingEl.id = id;
+            const id = headingEl.textContent
+                .trim()
+                .toLowerCase()
+                .replace(/[^a-z0-9]/g, "-");
+            headingEl.id = id;
 
-                const link = document.createElement("a");
-                link.href = "#" + id;
-                link.textContent = headingEl.textContent;
-                link.className = "wiki-nav-link";
-                link.dataset.index = String(i); // Store index for reference
+            const link = document.createElement("a");
+            link.href = "#" + id;
+            link.textContent = headingEl.textContent;
+            link.className = "wiki-nav-link";
+            link.dataset.index = String(i); // Store index for reference
 
-                switch (headingEl.nodeName) {
-                    case "H1":
-                    case "H2":
-                        break;
-                    case "H3":
-                        link.classList.add("is-lv-2");
-                        break;
-                    case "H4":
-                        link.classList.add("is-lv-3");
-                        break;
-                }
-
-                wikiNavEl.appendChild(link);
-                links.push(link); // Store link for later use
+            switch (headingEl.nodeName) {
+                case "H1":
+                case "H2":
+                    break;
+                case "H3":
+                    link.classList.add("is-lv-2");
+                    break;
+                case "H4":
+                    link.classList.add("is-lv-3");
+                    break;
             }
-        }, 1000);
+
+            wikiNavEl.appendChild(link);
+            links.push(link); // Store link for later use
+        }
     } catch (err) {
         console.log("Error running wiki logic:", err);
     }
