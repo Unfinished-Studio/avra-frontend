@@ -108,6 +108,67 @@ window.Webflow.push(async () => {
 
             wikiNavEl.appendChild(link);
             links.push(link); // Store link for later use
+
+            // special for case studies
+            if (headingEl.textContent.includes("Case Studies")) {
+                // get next list elements and add
+                const listEls = headingEl.nextElementSibling?.querySelectorAll<HTMLElement>("ol > li");
+                if (listEls) {
+                    for (let i = 0; i < listEls.length; i++) {
+                        const listHead = listEls[i].querySelector<HTMLElement>("strong");
+                        const listItems = listEls[i].querySelectorAll<HTMLElement>("ul > li");
+
+                        const listDiv = document.createElement("div");
+                        listDiv.classList.add("wiki-nav-list");
+
+                        // handle heading
+                        if (!listHead || !listHead.textContent) continue;
+                        const listHeadId = listHead.textContent
+                            .trim()
+                            .toLowerCase()
+                            .replace(/[^a-z0-9]/g, "-");
+                        listHead.id = listHeadId;
+
+                        const listHeadLink = document.createElement("a");
+                        listHeadLink.href = "#" + listHeadId;
+                        listHeadLink.textContent = `${i + 1}. ${listHead.textContent}`;
+                        listHeadLink.className = "wiki-nav-link";
+                        listHeadLink.classList.add("is-lv-2");
+
+                        listDiv.appendChild(listHeadLink);
+                        links.push(listHeadLink);
+
+                        // handle items
+                        for (let index = 0; i < listItems.length; index++) {
+                            const item = listItems[index];
+                            if (!item) continue;
+
+                            let itemEl: HTMLElement | HTMLAnchorElement = item;
+                            if (item.querySelector<HTMLAnchorElement>("a")) {
+                                itemEl = item.querySelector<HTMLAnchorElement>("a")!;
+                            }
+
+                            if (!itemEl || !itemEl.textContent) continue;
+                            const itemId = itemEl.textContent
+                                .trim()
+                                .toLowerCase()
+                                .replace(/[^a-z0-9]/g, "-");
+                            itemEl.id = itemId;
+
+                            const listItemLink = document.createElement("a");
+                            listItemLink.href = "#" + itemId;
+                            listItemLink.textContent = `${index + 1}. ${itemEl.textContent}`;
+                            listItemLink.className = "wiki-nav-link";
+                            listItemLink.classList.add("is-lv-3");
+
+                            listDiv.appendChild(listItemLink);
+                            links.push(listItemLink);
+                        }
+
+                        wikiNavEl.appendChild(listDiv);
+                    }
+                }
+            }
         }
     } catch (err) {
         console.log("Error running wiki logic:", err);
