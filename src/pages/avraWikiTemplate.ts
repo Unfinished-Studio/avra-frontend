@@ -57,17 +57,17 @@ window.Webflow.push(async () => {
 
     // Wiki Logic
     try {
-        const testOldEls = document.querySelectorAll<HTMLElement>("[avra-element='test-old']");
-        const testNewEls = document.querySelectorAll<HTMLElement>("[avra-element='test-new']");
-        if (window.location.search.includes("test")) {
-            for (const el of testOldEls) el.remove();
-            for (const el of testNewEls) el.classList.remove("hide");
-            console.log("in test mode");
-        } else {
-            for (const el of testOldEls) el.classList.remove("hide");
-            for (const el of testNewEls) el.remove();
-            throw new Error("not in test mode");
-        }
+        // const testOldEls = document.querySelectorAll<HTMLElement>("[avra-element='test-old']");
+        // const testNewEls = document.querySelectorAll<HTMLElement>("[avra-element='test-new']");
+        // if (window.location.search.includes("test")) {
+        //     for (const el of testOldEls) el.remove();
+        //     for (const el of testNewEls) el.classList.remove("hide");
+        //     console.log("in test mode");
+        // } else {
+        //     for (const el of testOldEls) el.classList.remove("hide");
+        //     for (const el of testNewEls) el.remove();
+        //     throw new Error("not in test mode");
+        // }
 
         // create table of contents
         const headingEls = document.querySelectorAll<HTMLHeadingElement>(
