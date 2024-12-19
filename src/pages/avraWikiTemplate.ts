@@ -139,7 +139,7 @@ window.Webflow.push(async () => {
                         links.push(listHeadLink);
 
                         // handle items
-                        for (let index = 0; i < listItems.length; index++) {
+                        for (let index = 0; index < listItems.length; index++) {
                             const item = listItems[index];
                             if (!item) continue;
 
