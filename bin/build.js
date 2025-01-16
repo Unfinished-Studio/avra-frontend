@@ -10,10 +10,10 @@ const MINIFY = process.env.MINIFY === "true";
 // Config entrypoint files
 const ENTRY_POINTS = [
     "src/pages/avraWikiTemplate.ts",
+    "src/pages/favorites.ts",
 
     "src/index.ts",
     "src/test.ts",
-    "src/favorites.ts",
     "src/favoritesCms.ts",
     "src/favoritesBanner.ts",
     "src/home.ts",
