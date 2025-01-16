@@ -11,7 +11,6 @@ window.Webflow.push(async () => {
     if (json && json.data && json.data.data && json.data.data.favorites) {
         favArr = json.data.data.favorites;
     }
-    console.log(json, favArr);
 
     if (!favArr.length) {
         const emptyBanner = document.querySelector<HTMLElement>("[avra-element='empty-banner']");
