@@ -12,6 +12,7 @@ const ENTRY_POINTS = [
     "src/pages/avraWikiTemplate.ts",
     "src/pages/favorites.ts",
 
+    // TODO restructure pages
     "src/index.ts",
     "src/test.ts",
     "src/favoritesCms.ts",

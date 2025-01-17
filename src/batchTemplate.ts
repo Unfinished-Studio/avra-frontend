@@ -2,19 +2,6 @@ import { categories } from "./global";
 
 window.Webflow ||= [];
 window.Webflow.push(async () => {
-    // TEMPORARY showing new page only when using test parameter
-    const oldWpr = document.querySelector<HTMLElement>("[avra-element='old-wrapper']");
-    const newWpr = document.querySelector<HTMLElement>("[avra-element='new-wrapper']");
-    if (!oldWpr || !newWpr) return;
-
-    if (!window.location.search.includes("test")) {
-        oldWpr.classList.remove("hide");
-        newWpr.remove();
-        return;
-    }
-    oldWpr.remove();
-    newWpr.classList.remove("hide");
-
     // open first announcement
     const announceEl = document.querySelector<HTMLElement>("[avra-element='announcement']");
     if (announceEl) {
