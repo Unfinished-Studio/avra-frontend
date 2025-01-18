@@ -11,6 +11,7 @@ const MINIFY = process.env.MINIFY === "true";
 const ENTRY_POINTS = [
     "src/pages/avraWikiTemplate.ts",
     "src/pages/favorites.ts",
+    "src/pages/sessionInsightsTemplate.ts",
 
     // TODO restructure pages
     "src/index.ts",
