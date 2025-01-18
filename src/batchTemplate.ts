@@ -56,8 +56,8 @@ window.Webflow.push(async () => {
 
                     const cardEls = listEl.querySelectorAll<HTMLElement>(`[avra-category]`);
 
-                    // remove empty reading time and date
                     for (const cardEl of cardEls) {
+                        // remove empty reading time and date
                         const readingTimeEl = cardEl.querySelector<HTMLElement>("[avra-card-data='reading-time']");
                         if (readingTimeEl && !readingTimeEl.textContent) {
                             readingTimeEl.parentElement?.remove();
@@ -66,6 +66,29 @@ window.Webflow.push(async () => {
                         const dateEl = cardEl.querySelector<HTMLElement>("[avra-card-data='date']");
                         if (dateEl && !dateEl.textContent) {
                             dateEl.parentElement?.remove();
+                        }
+
+                        // remove hidden cards
+                        const category = cardEl.getAttribute("avra-category");
+                        if (hideAnnouncements && category === "Announcements") {
+                            console.log("removing announcement");
+                            cardEl.remove();
+                        }
+                        if (hideCommunity && category === "Community") {
+                            console.log("removing community");
+                            cardEl.remove();
+                        }
+                        if (hideEvents && category === "Events") {
+                            console.log("removing event");
+                            cardEl.remove();
+                        }
+                        if (hideSessionInsights && category === "Session Insights") {
+                            console.log("removing session insight");
+                            cardEl.remove();
+                        }
+                        if (hideWiki && category === "Wikis") {
+                            console.log("removing wiki");
+                            cardEl.remove();
                         }
                     }
 
