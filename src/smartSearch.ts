@@ -172,6 +172,7 @@ window.Webflow.push(async () => {
                 const titleEl = getElement("[avra-element='ss-wiki-title']", wikiEl);
                 const title = titleEl?.textContent?.toLowerCase() || "";
 
+                // todo, content filtering
                 // const contentEl = getElement("[avra-element='ss-wiki-content']", wikiEl);
                 // const content = contentEl?.textContent?.toLowerCase() || "";
 
