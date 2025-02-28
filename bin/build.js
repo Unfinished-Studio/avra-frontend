@@ -22,6 +22,7 @@ const ENTRY_POINTS = [
     "src/profile.ts",
     "src/avraWiki.ts",
     "src/batchTemplate.ts",
+    "src/smartSearch.ts",
 ];
 
 // Config dev serving
