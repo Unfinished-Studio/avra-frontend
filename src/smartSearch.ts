@@ -1,10 +1,42 @@
 import { getElement, getElements } from "utils/dom/elements";
 
+// const api = "http://localhost:8787";
+const api = "https://avra-worker.nic-f66.workers.dev";
+const searchDebounce = 1000;
+
+// query -> array of insights matching the search
+const handleSearch = async (query: string) => {
+    const params = new URLSearchParams();
+    params.set("query", query);
+    const response = await fetch(`${api}/search?${String(params)}`, {
+        method: "GET",
+        headers: {
+            "Content-Type": "application/json",
+        },
+    });
+    console.log(response.status);
+    if (!response.ok) {
+        console.log(await response.text());
+        throw new Error("Failed to fetch insights");
+    }
+
+    const data: {
+        insights: {
+            title: string;
+            slug: string;
+            transcript: string;
+            matchContext: string;
+        }[];
+    } = await response.json();
+
+    return data;
+};
+
 window.Webflow ||= [];
 window.Webflow.push(async () => {
-    if (!window.location.search.includes("test")) return;
+    // if (!window.location.search.includes("test")) return;
 
-    const searchInput = getElement("[avra-element='ss-search-input']");
+    const searchInput = getElement<HTMLInputElement>("[avra-element='ss-search-input']");
 
     const alumniBtn = getElement("[avra-element='ss-alumni-btn']");
     const alumniEmptyEl = getElement("[avra-element='ss-alumni-empty']");
@@ -23,6 +55,9 @@ window.Webflow.push(async () => {
 
     const wikiList = getElement("[avra-element='ss-wiki-list']");
     const wikiEls = getElements("[avra-element='ss-wiki']", wikiList);
+
+    alumniEmptyEl.style.display = "none";
+    contentEmptyEl.style.display = "none";
 
     // Show 5 random alumni elements at start
     const shuffledAlumni = [...alumniEls].sort(() => Math.random() - 0.5);
@@ -92,15 +127,62 @@ window.Webflow.push(async () => {
         shuffledWikis[i].style.display = "";
     }
 
-    // Add event listener for search input
-    searchInput?.addEventListener("input", (e) => {
-        const searchValue = (e.target as HTMLInputElement).value.toLowerCase().trim();
+    // Add debounce function to delay search
+    const debounce = <F extends (...args: any[]) => any>(func: F, delay: number) => {
+        let timeoutId: ReturnType<typeof setTimeout>;
+        return (...args: Parameters<F>) => {
+            clearTimeout(timeoutId);
+            timeoutId = setTimeout(() => func(...args), delay);
+        };
+    };
 
+    // Create debounced search handler
+    const debouncedSearch = debounce(async (searchValue: string) => {
         let visibleAlumniCount = 0;
         let hiddenAlumniCount = 0;
 
         let visibleContentCount = 0;
         let hiddenContentCount = 0;
+
+        let visiblePodcastCount = 0;
+        let visibleInsightCount = 0;
+        let visibleWikiCount = 0;
+
+        // Filter insight elements
+        try {
+            if (insightEls && insightEls.length > 0) {
+                const { insights } = await handleSearch(searchValue);
+
+                console.log("Insights:", insights);
+
+                for (const insightEl of insightEls) {
+                    const slug = insightEl.getAttribute("data-avra-slug");
+                    if (!slug) continue;
+
+                    const insight = insights.find((insight) => insight.slug === slug);
+
+                    console.log("Insight:", insight);
+
+                    const insightText = getElement("[avra-element='ss-insight-text']", insightEl);
+                    insightText.style.display = insight ? "block" : "none";
+                    insightEl.style.display = insight ? "block" : "none";
+
+                    if (insight) {
+                        insightText.innerHTML = insight.matchContext;
+                        visibleContentCount++;
+                        visibleInsightCount++;
+                    } else {
+                        hiddenContentCount++;
+                    }
+                }
+            }
+
+            if (insightList) {
+                insightList.parentElement!.style.display = visibleInsightCount === 0 ? "none" : "";
+            }
+        } catch (err) {
+            console.log("Error filtering Session Insight elements:", err);
+        }
 
         // Filter alumni elements based on search input
         for (const alumniEl of alumniEls) {
@@ -127,9 +209,15 @@ window.Webflow.push(async () => {
             }
         }
 
-        // Show/hide alumni empty state based on visible count
+        // Show/hide alumni list and empty state based on visible count
+        if (alumniList) {
+            alumniList.parentElement!.style.display = visibleAlumniCount === 0 ? "none" : "";
+        }
         if (alumniEmptyEl) {
             alumniEmptyEl.style.display = visibleAlumniCount === 0 ? "" : "none";
+            if (visibleAlumniCount === 0) {
+                alumniBtn.textContent = "View All";
+            }
         }
 
         // Filter podcast elements
@@ -143,27 +231,16 @@ window.Webflow.push(async () => {
 
                 if (isMatch) {
                     visibleContentCount++;
+                    visiblePodcastCount++;
                 } else {
                     hiddenContentCount++;
                 }
             }
         }
 
-        // Filter insight elements
-        if (insightEls && insightEls.length > 0) {
-            for (const insightEl of insightEls) {
-                const titleEl = getElement("[avra-element='ss-insight-title']", insightEl);
-                const title = titleEl?.textContent?.toLowerCase() || "";
-
-                const isMatch = title.includes(searchValue);
-                insightEl.style.display = isMatch ? "" : "none";
-
-                if (isMatch) {
-                    visibleContentCount++;
-                } else {
-                    hiddenContentCount++;
-                }
-            }
+        // Show/hide podcast list based on visible count
+        if (podcastList) {
+            podcastList.parentElement!.style.display = visiblePodcastCount === 0 ? "none" : "";
         }
 
         // Filter wiki elements
@@ -172,7 +249,6 @@ window.Webflow.push(async () => {
                 const titleEl = getElement("[avra-element='ss-wiki-title']", wikiEl);
                 const title = titleEl?.textContent?.toLowerCase() || "";
 
-                // todo, content filtering
                 // const contentEl = getElement("[avra-element='ss-wiki-content']", wikiEl);
                 // const content = contentEl?.textContent?.toLowerCase() || "";
 
@@ -182,10 +258,16 @@ window.Webflow.push(async () => {
 
                 if (isMatch) {
                     visibleContentCount++;
+                    visibleWikiCount++;
                 } else {
                     hiddenContentCount++;
                 }
             }
+        }
+
+        // Show/hide wiki list based on visible count
+        if (wikiList) {
+            wikiList.parentElement!.style.display = visibleWikiCount === 0 ? "none" : "";
         }
 
         // Show/hide content empty state based on visible count
@@ -202,5 +284,15 @@ window.Webflow.push(async () => {
         if (contentBtn) {
             contentBtn.textContent = hiddenContentCount > 0 ? `View ${hiddenContentCount} More` : "View All";
         }
+
+        if (visibleContentCount === 0) {
+            contentBtn.textContent = "View All";
+        }
+    }, searchDebounce);
+
+    // Add event listener for search input
+    searchInput.addEventListener("input", async (e) => {
+        const searchValue = (e.target as HTMLInputElement).value.toLowerCase().trim();
+        debouncedSearch(searchValue);
     });
 });
