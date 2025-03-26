@@ -13,10 +13,10 @@ const handleSearch = async (query: string) => {
             "Content-Type": "application/json",
         },
     });
-    console.log(response.status);
+
     if (!response.ok) {
-        console.log(await response.text());
-        throw new Error("Failed to fetch insights");
+        const res = await response.text();
+        throw new Error(`Failed to fetch insights - ${response.status} ${res}`);
     }
 
     const data: {
@@ -152,15 +152,13 @@ window.Webflow.push(async () => {
             if (insightEls && insightEls.length > 0) {
                 const { insights } = await handleSearch(searchValue);
 
-                console.log("Insights:", insights);
+                // console.log("Insights:", insights);
 
                 for (const insightEl of insightEls) {
                     const slug = insightEl.getAttribute("data-avra-slug");
                     if (!slug) continue;
 
                     const insight = insights.find((insight) => insight.slug === slug);
-
-                    console.log("Insight:", insight);
 
                     const insightText = getElement("[avra-element='ss-insight-text']", insightEl);
                     insightText.style.display = insight ? "block" : "none";
