@@ -1,6 +1,5 @@
 import { getElement, getElements } from "utils/dom/elements";
 
-// const api = "http://localhost:8787";
 const api = "https://avra-worker.nic-f66.workers.dev";
 const searchDebounce = 1000;
 
