@@ -1,6 +1,5 @@
-import { wikiSessionMappings, type WikiSession } from "src/wikiData";
 import { getElement } from "src/utils/dom/elements";
-import { testmode } from "src/global";
+import { wikiSessionMappings, type WikiSession } from "src/wikiData";
 
 window.Webflow ||= [];
 window.Webflow.push(async () => {

@@ -1,4 +1,4 @@
-import { categories } from "../global";
+import { categories } from "src/global";
 
 window.Webflow ||= [];
 window.Webflow.push(async () => {
