@@ -1,3 +1,7 @@
+import { wikiSessionMappings, type WikiSession } from "src/wikiData";
+import { getElement } from "src/utils/dom/elements";
+import { testmode } from "src/global";
+
 window.Webflow ||= [];
 window.Webflow.push(async () => {
     // TODO: abstract to function
@@ -172,5 +176,53 @@ window.Webflow.push(async () => {
         }
     } catch (err) {
         console.log("Error running wiki logic:", err);
+    }
+
+    try {
+        const wikiSessions: WikiSession[] = [];
+        const batches: number[] = [];
+
+        for (const [wikiSlug, sessions] of Object.entries(wikiSessionMappings)) {
+            if (wikiSlug !== slug) {
+                continue;
+            }
+
+            for (const session of sessions) {
+                wikiSessions.push(session);
+
+                if (!batches.includes(session.batch)) {
+                    batches.push(session.batch);
+                }
+            }
+        }
+
+        if (!wikiSessions.length) {
+            throw new Error("No wiki sessions found for slug: " + slug);
+        }
+        if (!batches.length) {
+            throw new Error("No batches found for slug: " + slug);
+        }
+
+        batches.sort((a, b) => a - b);
+
+        const wikiSessionContainer = getElement("[avra-element='wiki-session-links']");
+
+        for (const batch of batches) {
+            const batchElement = document.createElement("div");
+            batchElement.className = "wiki-nav-link";
+            batchElement.textContent = `Batch ${batch}`;
+            wikiSessionContainer.appendChild(batchElement);
+
+            const batchSessions = wikiSessions.filter((session) => session.batch === batch);
+            for (const session of batchSessions) {
+                const linkElement = document.createElement("a");
+                linkElement.className = "wiki-nav-link-sml";
+                linkElement.href = `/session-insights/${session.slug}`;
+                linkElement.textContent = session.name;
+                wikiSessionContainer.appendChild(linkElement);
+            }
+        }
+    } catch (error) {
+        console.error("Error creating dynamic elements:", error);
     }
 });
