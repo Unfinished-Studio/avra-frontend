@@ -1,0 +1,24 @@
+<!-- Development Scripts -->
+<script>
+    function globalAvraGetCookie(cookie) {
+        const name = cookie + "=";
+        const ca = document.cookie.split(";");
+        for (let i = 0; i < ca.length; i++) {
+            const c = ca[i].trim();
+            if (c.indexOf(name) === 0) {
+                return c.substr(name.length);
+            }
+        }
+        return null;
+    }
+    const globalScript = document.createElement("script");
+    if (globalAvraGetCookie("staging")) {
+        console.log("staging");
+        globalScript.src = "http://localhost:3000/index.js";
+    } else {
+        console.log("production");
+        globalScript.src = "https://avra-frontend.vercel.app/index.js";
+    }
+    globalScript.defer = true;
+    document.head.append(globalScript);
+</script>

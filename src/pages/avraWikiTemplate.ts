@@ -1,5 +1,5 @@
-import { getElement } from "src/utils/dom/elements";
-import { wikiSessionMappings, type WikiSession } from "src/wikiData";
+import { getElement } from "@/utils/dom/elements";
+import { wikiSessionMappings, type WikiSession } from "@/wikiData";
 
 window.Webflow ||= [];
 window.Webflow.push(async () => {

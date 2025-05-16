@@ -1,8 +1,8 @@
-import { getAdminAccess } from "utils/admin/getAdminAccess";
-import { getStaging } from "utils/admin/getStaging";
-import { getContentType, sortByContentType } from "utils/contentType";
-import { debounce } from "utils/debounce";
-import { getElement, getElements } from "utils/dom/elements";
+import { getAdminAccess } from "@/utils/admin/getAdminAccess";
+import { getStaging } from "@/utils/admin/getStaging";
+import { getContentType, sortByContentType } from "@/utils/contentType";
+import { debounce } from "@/utils/debounce";
+import { getElement, getElements } from "@/utils/dom/elements";
 
 // TODO: sync to types.ts of avra-worker
 type SwiftTypeSearchResult = {

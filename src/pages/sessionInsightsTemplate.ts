@@ -2,6 +2,8 @@
 
 window.Webflow ||= [];
 window.Webflow.push(async () => {
+    console.log("creating table of contents...");
+
     // handle favorites buttons
     const dataEl = document.querySelector<HTMLElement>("[avra-element='item-data']");
     if (!dataEl) throw new Error("No data element for this CMS page");
