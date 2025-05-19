@@ -65,8 +65,8 @@ const sendSlackNotification = async (data: { userId: string; url: string; timest
                 "Content-Type": "application/json",
             },
             body: JSON.stringify({
+                ...data,
                 text: `📣 Page Navigation: User (ID: ${data.userId}) navigated to ${data.url} at ${data.timestamp}`,
-                user_id: data.userId,
             }),
         });
 

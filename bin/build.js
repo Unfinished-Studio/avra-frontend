@@ -26,7 +26,6 @@ const ENTRY_POINTS = [
 ];
 
 // Config dev serving
-const LIVE_RELOAD = !PRODUCTION;
 const SERVE_PORT = 3000;
 const SERVE_ORIGIN = `http://localhost:${SERVE_PORT}`;
 
@@ -38,7 +37,6 @@ const context = await esbuild.context({
     minify: MINIFY ? true : false,
     sourcemap: !PRODUCTION,
     target: PRODUCTION ? "es2020" : "esnext",
-    inject: LIVE_RELOAD ? ["./bin/live-reload.js"] : undefined,
     define: {
         SERVE_ORIGIN: JSON.stringify(SERVE_ORIGIN),
     },

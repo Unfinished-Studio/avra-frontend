@@ -1,3 +1,5 @@
+import { getElement, getElements } from "@/utils/dom/elements";
+
 // Audio/Videos Template, Avra Wikis Template, Session Insights Template
 
 window.Webflow ||= [];
@@ -26,7 +28,7 @@ window.Webflow.push(async () => {
         return x.slug === slug;
     });
 
-    const favoriteBtns = document.querySelectorAll<HTMLElement>("[avra-element='favorite-btn']");
+    const favoriteBtns = getElements<HTMLElement>("[avra-element='favorite-btn']");
     for (const btn of favoriteBtns) {
         favorited ? (btn.textContent = "Unfavorite Page") : (btn.textContent = "Favorite Page");
 
@@ -163,5 +165,66 @@ window.Webflow.push(async () => {
         }
     } catch (err) {
         console.log("Error running wiki logic:", err);
+    }
+
+    function insertBreak(el: HTMLElement) {
+        const childNodes = el.childNodes;
+
+        if (childNodes.length > 0 && childNodes[0].nodeType === Node.TEXT_NODE) {
+            const hasBreak = Array.from(childNodes).some((node) => node.nodeName === "BR");
+            if (!hasBreak) {
+                const br = document.createElement("br");
+                const space = document.createTextNode("\u200D");
+                el.insertBefore(space, childNodes[1] || null);
+                el.insertBefore(br, childNodes[1] || null);
+                console.log("inserted br", el);
+            }
+        }
+    }
+
+    function correctListSpacing() {
+        const content = getElement(".wiki-rich-text.w-richtext");
+        if (!content) throw new Error("No content for this page");
+
+        const lists = getElements(":scope > ul", content);
+        if (!lists) return;
+
+        lists.forEach((list) => {
+            let insertedBr = false;
+
+            console.log(list);
+
+            const lastItem = getElement(":scope > li:last-child", list);
+            if (!lastItem) return;
+
+            const nestedLastItem = lastItem.querySelector<HTMLElement>(":scope > ul > li:last-child");
+            if (nestedLastItem) {
+                const secondNestedLastItem = nestedLastItem.querySelector<HTMLElement>(":scope > ul > li:last-child");
+                if (secondNestedLastItem) {
+                    insertBreak(secondNestedLastItem);
+                    insertedBr = true;
+                } else {
+                    insertBreak(nestedLastItem);
+                    insertedBr = true;
+                }
+            } else {
+                insertBreak(lastItem);
+                insertedBr = true;
+            }
+
+            if (insertedBr) {
+                const nextEl = list.nextElementSibling;
+                if (nextEl?.tagName === "P" && nextEl.textContent === "\u200D") {
+                    console.log("deleted empty following p");
+                    nextEl.remove();
+                }
+            }
+        });
+    }
+
+    try {
+        correctListSpacing();
+    } catch (err) {
+        console.log("Error running Session Insight Template logic:", err);
     }
 });
