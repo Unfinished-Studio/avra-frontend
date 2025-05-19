@@ -1,5 +1,6 @@
 import { COOKIE_NAMES, api } from "@/constants";
 import { avraGetCookie } from "./avraGetCookie";
+import { getUser } from "./memberstack/user";
 
 // Enable/disable debug mode
 const DEBUG = true;
@@ -59,6 +60,11 @@ const sendSlackNotification = async (data: { userId: string; url: string; timest
     try {
         debug("Sending Slack notification", data);
 
+        const user = await getUser();
+        if (!user) {
+            throw new Error("No logged in user");
+        }
+
         const response = await fetch(`${api}/api/slack/notify`, {
             method: "POST",
             headers: {
@@ -66,6 +72,9 @@ const sendSlackNotification = async (data: { userId: string; url: string; timest
             },
             body: JSON.stringify({
                 ...data,
+                name: user.customFields["first-name"] + " " + user.customFields["last-name"],
+                email: user.auth.email,
+                batch: user.customFields.batch,
                 text: `📣 Page Navigation: User (ID: ${data.userId}) navigated to ${data.url} at ${data.timestamp}`,
             }),
         });
