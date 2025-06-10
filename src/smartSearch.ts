@@ -81,6 +81,9 @@ window.Webflow.push(async () => {
     const modalEl = getElement("[avra-element='ss-modal']");
     const modalListEl = getElement("[avra-element='ss-modal-list']", modalEl);
 
+    const modalSearchForm = getElement("[avra-element='ss-modal-search-form']", modalEl);
+    const modalSearchInput = getElement<HTMLInputElement>("[avra-element='ss-modal-search-input']", modalSearchForm);
+
     const modalResultCountEl = getElement("[avra-element='ss-modal-result-count']", modalEl);
     const modalResultQueryEl = getElement("[avra-element='ss-modal-result-query']", modalEl);
 
@@ -131,6 +134,8 @@ window.Webflow.push(async () => {
                 type: getContentType(result.url),
             };
         });
+
+        console.log("results", results);
 
         // hide all content elements
         for (const el of allContentElements) {
@@ -214,11 +219,16 @@ window.Webflow.push(async () => {
     searchInput.addEventListener("input", async (e) => {
         const searchValue = (e.target as HTMLInputElement).value.toLowerCase().trim();
         if (searchValue.length > 0) {
-            debouncedSearch(searchValue);
+            debouncedSearchWithClearSelection(searchValue);
         }
     });
 
+    // remove webflow form functionality
     searchForm.addEventListener("submit", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+    });
+    modalSearchForm.addEventListener("submit", (e) => {
         e.preventDefault();
         e.stopPropagation();
     });
@@ -243,4 +253,91 @@ window.Webflow.push(async () => {
             closeModal();
         }
     });
+
+    // Keyboard navigation for search results
+    let selectedIndex = -1;
+    const selectedClass = "ss-selected";
+
+    const getVisibleElements = (): Element[] => {
+        return Array.from(resultsListEl.children).filter((el) => {
+            const htmlEl = el as HTMLElement;
+            return htmlEl.style.display !== "none";
+        });
+    };
+
+    const updateSelection = (newIndex: number) => {
+        const visibleElements = getVisibleElements();
+
+        // Clear previous selection
+        if (selectedIndex >= 0 && selectedIndex < visibleElements.length) {
+            visibleElements[selectedIndex].classList.remove(selectedClass);
+        }
+
+        // Set new selection
+        selectedIndex = newIndex;
+        if (selectedIndex >= 0 && selectedIndex < visibleElements.length) {
+            visibleElements[selectedIndex].classList.add(selectedClass);
+            // Scroll selected element into view
+            visibleElements[selectedIndex].scrollIntoView({
+                behavior: "smooth",
+                block: "nearest",
+            });
+        }
+    };
+
+    const clearSelection = () => {
+        updateSelection(-1);
+    };
+
+    const navigateToSelected = () => {
+        const visibleElements = getVisibleElements();
+        if (selectedIndex >= 0 && selectedIndex < visibleElements.length) {
+            const selectedElement = visibleElements[selectedIndex];
+            const link = selectedElement.querySelector("a");
+            if (link) {
+                console.log("navigating to selected element", link);
+                link.click();
+            }
+        }
+    };
+
+    // Add keyboard event listener
+    document.addEventListener("keydown", (e) => {
+        // Only handle keyboard navigation when search has results and modal is not open
+        const visibleElements = getVisibleElements();
+        if (visibleElements.length === 0 || modalEl.style.display === "block") {
+            return;
+        }
+
+        switch (e.key) {
+            case "ArrowDown":
+                e.preventDefault();
+                const nextIndex = selectedIndex < visibleElements.length - 1 ? selectedIndex + 1 : 0;
+                updateSelection(nextIndex);
+                break;
+
+            case "ArrowUp":
+                e.preventDefault();
+                const prevIndex = selectedIndex > 0 ? selectedIndex - 1 : visibleElements.length - 1;
+                updateSelection(prevIndex);
+                break;
+
+            case "Enter":
+                e.preventDefault();
+                navigateToSelected();
+                break;
+
+            case "Escape":
+                e.preventDefault();
+                clearSelection();
+                break;
+        }
+    });
+
+    // Clear selection when new search results are loaded
+    const originalDebouncedSearch = debouncedSearch;
+    const debouncedSearchWithClearSelection = debounce(async (searchValue: string) => {
+        clearSelection();
+        await originalDebouncedSearch(searchValue);
+    }, config.searchDebounce);
 });
