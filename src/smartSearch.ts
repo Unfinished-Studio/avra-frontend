@@ -64,6 +64,22 @@ const handleSearch = async (query: string) => {
     return data.results;
 };
 
+// Helper function to extract clean text from highlight
+const extractCleanHighlightText = (highlightBody: string): string => {
+    // Remove HTML tags and get the text between <em> tags
+    const tempDiv = document.createElement("div");
+    tempDiv.innerHTML = highlightBody;
+    const emElements = tempDiv.querySelectorAll("em");
+
+    if (emElements.length > 0) {
+        // Get the first highlighted term
+        return emElements[0].textContent?.trim() || "";
+    }
+
+    // Fallback: remove all HTML and get first few words
+    return tempDiv.textContent?.trim().split(" ").slice(0, 5).join(" ") || "";
+};
+
 window.Webflow ||= [];
 window.Webflow.push(async () => {
     console.log("config.api", config.api);
@@ -135,7 +151,7 @@ window.Webflow.push(async () => {
             };
         });
 
-        console.log("results", results);
+        // console.log("results", results);
 
         // hide all content elements
         for (const el of allContentElements) {
@@ -161,12 +177,37 @@ window.Webflow.push(async () => {
                     resultText.classList.remove("w-dyn-bind-empty");
                 }
 
+                // Add highlighted text as query parameter to anchor links
+                const highlightText = extractCleanHighlightText(result.highlight.body);
+                console.log("highlightText", highlightText);
+                const links = matchEl.querySelectorAll<HTMLAnchorElement>("a");
+                links.forEach((link) => {
+                    if (highlightText && link.href) {
+                        const url = new URL(link.href);
+                        url.searchParams.set("highlight", highlightText);
+                        link.href = url.toString();
+                    }
+                });
+
                 // add to results modal
                 if (visibleContentCount === 0) {
                     modalListEl.innerHTML = "";
                 }
                 const matchElClone = matchEl.cloneNode(true) as HTMLElement;
                 matchElClone.style.display = "block";
+
+                // Also add highlight query parameter to modal clone links
+                if (highlightText) {
+                    const cloneLinks = matchElClone.querySelectorAll<HTMLAnchorElement>("a");
+                    cloneLinks.forEach((link) => {
+                        if (link.href) {
+                            const url = new URL(link.href);
+                            url.searchParams.set("highlight", highlightText);
+                            link.href = url.toString();
+                        }
+                    });
+                }
+
                 modalListEl.appendChild(matchElClone);
 
                 // maximum

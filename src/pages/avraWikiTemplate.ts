@@ -3,6 +3,10 @@ import { wikiSessionMappings, type WikiSession } from "@/wikiData";
 
 window.Webflow ||= [];
 window.Webflow.push(async () => {
+    // Handle scroll-to-highlight functionality
+    const urlParams = new URLSearchParams(window.location.search);
+    const highlightText = urlParams.get("highlight");
+
     // TODO: abstract to function
     // Favorites Button
     const dataEl = document.querySelector<HTMLElement>("[avra-element='item-data']");
@@ -223,5 +227,53 @@ window.Webflow.push(async () => {
         }
     } catch (error) {
         console.error("Error creating dynamic elements:", error);
+    }
+
+    if (highlightText) {
+        // Function to find and scroll to matching text
+        const scrollToHighlightedText = () => {
+            const content = document.querySelector("#wiki-content");
+            if (!content) return;
+
+            // Create a walker to traverse all text nodes
+            const walker = document.createTreeWalker(content, NodeFilter.SHOW_TEXT, null);
+
+            let textNode;
+            while ((textNode = walker.nextNode())) {
+                const text = textNode.textContent?.toLowerCase() || "";
+                const searchText = highlightText.toLowerCase();
+
+                if (text.includes(searchText)) {
+                    // Found matching text, scroll to it
+                    const element = textNode.parentElement;
+                    console.log("element", element);
+                    if (element) {
+                        // Get element position and scroll with 100px offset
+                        const elementRect = element.getBoundingClientRect();
+                        const elementTop = elementRect.top + window.pageYOffset;
+
+                        window.scrollTo({
+                            top: elementTop - 120,
+                            behavior: "smooth",
+                        });
+
+                        // Highlight the text temporarily
+                        const originalHTML = element.innerHTML;
+                        const regex = new RegExp(`(${highlightText})`, "gi");
+                        element.innerHTML = originalHTML.replace(regex, '<mark style="background: yellow; padding: 2px;">$1</mark>');
+
+                        // Remove highlight after 3 seconds
+                        setTimeout(() => {
+                            element.innerHTML = originalHTML;
+                        }, 3000);
+
+                        break;
+                    }
+                }
+            }
+        };
+
+        // Wait for content to load, then scroll
+        setTimeout(scrollToHighlightedText, 500);
     }
 });
