@@ -3,40 +3,8 @@ import { getStaging } from "@/utils/admin/getStaging";
 import { getContentType, sortByContentType } from "@/utils/contentType";
 import { debounce } from "@/utils/debounce";
 import { getElement, getElements } from "@/utils/dom/elements";
-
-// TODO: sync to types.ts of avra-worker
-type SwiftTypeSearchResult = {
-    id: string;
-    title: string;
-    body: string;
-    url: string;
-    highlight: {
-        sections: string;
-        body: string;
-    };
-    published_at: string;
-    updated_at: string;
-};
-
-type SwiftTypeResults = {
-    results: SwiftTypeSearchResult[];
-};
-
-// TODO: extract to types file
-type SearchInsight = {
-    title: string;
-    slug: string;
-    transcript: string;
-    matchContext: string;
-};
-
-type ElementConfig = {
-    elements: Element[];
-    initialVisibleCount: number;
-    listElement: Element;
-    buttonElement?: Element;
-    emptyElement?: Element;
-};
+import { contentItems, WikiTagEnum, type WikiTag } from "@/data/content";
+import type { SwiftTypeResults, SwiftTypeSearchResult } from "@/types/smartSearch";
 
 // constants
 const config = {
@@ -44,6 +12,7 @@ const config = {
     searchDebounce: 500, // ms
     searchResults: 8, // the maximum number of results to show in the results preview
     contentTypeOrder: ["wiki", "insight", "podcast", "other"],
+    wikiTagFilters: Object.values(WikiTagEnum) as WikiTag[],
 } as const;
 
 const handleSearch = async (query: string) => {
@@ -80,6 +49,24 @@ const extractCleanHighlightText = (highlightBody: string): string => {
     return tempDiv.textContent?.trim().split(" ").slice(0, 5).join(" ") || "";
 };
 
+// Define wiki tag filter options using the WikiTag enum
+const WIKI_TAG_FILTERS: WikiTag[] = Object.values(WikiTagEnum);
+
+// Helper function to check if an item matches a wiki tag filter
+const itemMatchesWikiTag = (item: any, filterTag: string): boolean => {
+    if (!item.wikiTag || item.wikiTag === "n/a") return false;
+
+    // special case for mission, strategy, and metrics
+    const tag = item.wikiTag;
+    if (tag === WikiTagEnum.MISSION_STRATEGY_AND_METRICS) {
+        return tag === filterTag;
+    }
+
+    // Handle comma-separated tags
+    const itemTags = item.wikiTag.split(",").map((tag: string) => tag.trim());
+    return itemTags.includes(filterTag);
+};
+
 window.Webflow ||= [];
 window.Webflow.push(async () => {
     console.log("config.api", config.api);
@@ -98,7 +85,7 @@ window.Webflow.push(async () => {
     const modalListEl = getElement("[avra-element='ss-modal-list']", modalEl);
 
     const modalSearchForm = getElement("[avra-element='ss-modal-search-form']", modalEl);
-    const modalSearchInput = getElement<HTMLInputElement>("[avra-element='ss-modal-search-input']", modalSearchForm);
+    // const modalSearchInput = getElement<HTMLInputElement>("[avra-element='ss-modal-search-input']", modalSearchForm);
 
     const modalResultCountEl = getElement("[avra-element='ss-modal-result-count']", modalEl);
     const modalResultQueryEl = getElement("[avra-element='ss-modal-result-query']", modalEl);
@@ -112,6 +99,107 @@ window.Webflow.push(async () => {
     const wikiList = getElement("[avra-element='ss-wiki-list']");
     const wikiEls = getElements("[avra-element='ss-wiki']", wikiList);
 
+    const wikiFilterTemplate = getElement("[avra-element='ss-wiki-filter']");
+
+    const createWikiFilters = (templateEl: HTMLElement) => {
+        const filterList = templateEl.parentElement!;
+        const wikiFilterEls: HTMLElement[] = [];
+
+        console.log("creating wiki filters", WIKI_TAG_FILTERS);
+
+        for (const tag of WIKI_TAG_FILTERS) {
+            const filterEl = templateEl.cloneNode(true) as HTMLElement;
+            filterEl.classList.remove("ss-filter-active");
+
+            console.log(filterEl);
+
+            const filterInput = getElement<HTMLInputElement>("input", filterEl);
+            const filterTxt = getElement("span", filterEl);
+            const filterImg = getElement("img", filterEl);
+            filterImg.classList.remove("ss-filter-active");
+
+            filterInput.value = tag;
+            filterTxt.textContent = tag;
+
+            filterInput.addEventListener("change", (e) => {
+                const filterValue = (e.target as HTMLInputElement).value;
+                const checked = (e.target as HTMLInputElement).checked;
+
+                if (checked) {
+                    console.log("setting filter value:", filterValue);
+
+                    filterEl.classList.add("ss-filter-active");
+                    filterImg.classList.add("ss-filter-active");
+                } else {
+                    console.log("removing filter value:", filterValue);
+
+                    filterEl.classList.remove("ss-filter-active");
+                    filterImg.classList.remove("ss-filter-active");
+                }
+
+                for (const filter of wikiFilterEls) {
+                    const input = getElement<HTMLInputElement>("input", filter);
+                    if (input.value !== filterValue && input.checked) {
+                        filter.click();
+                    }
+                }
+
+                console.log("reset other filters");
+
+                handleWikiFilter(filterInput.value);
+            });
+
+            wikiFilterEls.push(filterEl);
+        }
+
+        filterList.textContent = "";
+        for (const filterEl of wikiFilterEls) {
+            filterList.appendChild(filterEl);
+        }
+
+        return wikiFilterEls;
+    };
+
+    let activeFilters = new Set<string>();
+    const handleWikiFilter = (filterValue: string) => {
+        console.log("handling filter change", filterValue);
+
+        if (activeFilters.has(filterValue)) {
+            activeFilters.delete(filterValue);
+        } else {
+            activeFilters.add(filterValue);
+        }
+        applyFilterToAllContent();
+    };
+
+    const applyFilterToAllContent = () => {
+        console.log("applying filter to all content", activeFilters);
+
+        let visibleCount = 0;
+
+        for (const el of allContentElements) {
+            const slug = el.getAttribute("data-avra-slug");
+            const contentItem = contentItems.find((item) => item.slug === slug);
+
+            if (
+                (activeFilters.size === 0 ||
+                    (contentItem && Array.from(activeFilters).some((filter) => itemMatchesWikiTag(contentItem, filter)))) &&
+                el.getAttribute("data-avra-hidden") !== "search"
+            ) {
+                el.style.display = "block";
+                visibleCount++;
+            } else {
+                el.style.display = "none";
+            }
+        }
+
+        if (contentEmptyEl) {
+            contentEmptyEl.style.display = visibleCount === 0 ? "" : "none";
+        }
+    };
+
+    createWikiFilters(wikiFilterTemplate);
+
     // Move all content elements to the visible list and sort them
     const allContentElements = [...wikiEls, ...insightEls, ...podcastEls].sort(sortByContentType);
 
@@ -124,7 +212,7 @@ window.Webflow.push(async () => {
             resultText.classList.remove("w-dyn-bind-empty");
         }
 
-        // show only wikis
+        // show only wikis initially (this logic might need adjustment based on your needs)
         const elementAttr = el.getAttribute("avra-element");
         if (elementAttr && elementAttr !== "ss-wiki") {
             el.style.display = "none";
@@ -151,35 +239,80 @@ window.Webflow.push(async () => {
             };
         });
 
-        // console.log("results", results);
+        // Check for keyword matches in content items
+        const searchTerms = searchValue.toLowerCase().split(/\s+/);
+        const keywordMatches = contentItems.filter((item) => {
+            // Check if any search term matches any keyword (case insensitive)
+            const keywordMatch = item.keywords.some((keyword) =>
+                searchTerms.some((term) => keyword.toLowerCase().includes(term) || term.includes(keyword.toLowerCase()))
+            );
+
+            // Apply wiki tag filter
+            const tagMatch = activeFilters.size === 0 || Array.from(activeFilters).some((filter) => itemMatchesWikiTag(item, filter));
+
+            return keywordMatch && tagMatch;
+        });
+
+        console.log("Keyword matches found:", keywordMatches);
+
+        // Get slugs from API results to avoid duplicates
+        const apiResultSlugs = new Set(
+            results.map((result) => {
+                const urlParts = result.url.split("/");
+                return urlParts[urlParts.length - 1];
+            })
+        );
+
+        // Filter API results by wiki tag
+        const filteredResults = results.filter((result) => {
+            if (activeFilters.size === 0) return true;
+
+            const slug = result.url.split("/").pop();
+            const contentItem = contentItems.find((item) => item.slug === slug);
+            return contentItem && Array.from(activeFilters).some((filter) => itemMatchesWikiTag(contentItem, filter));
+        });
+
+        // Filter out keyword matches that are already in API results
+        const newKeywordMatches = keywordMatches.filter((item) => !apiResultSlugs.has(item.slug));
+
+        console.log("New keyword matches (not in API results):", newKeywordMatches);
 
         // hide all content elements
         for (const el of allContentElements) {
             el.style.display = "none";
+            el.setAttribute("data-avra-hidden", "search");
         }
 
-        for (const result of results) {
+        // Helper function to process a result (API or keyword match)
+        const processResult = (result: any, isKeywordMatch = false) => {
             const matchEl = listEls.find((el) => {
                 const slug = el.getAttribute("data-avra-slug");
-                const urlParts = result.url.split("/");
-                const resultSlug = urlParts[urlParts.length - 1];
+                const resultSlug = isKeywordMatch ? result.slug : result.url.split("/").pop();
                 return slug === resultSlug;
             });
 
             if (matchEl) {
-                // console.log("found match:", result, matchEl);
-
                 // inject highlight text
                 const resultText = getElement("[avra-element='ss-card-text']", matchEl);
                 if (resultText) {
-                    // TODO: find text to highlight within body
-                    resultText.innerHTML = result.highlight.body.replace(/<em>/g, "<strong>").replace(/<\/em>/g, "</strong>");
+                    if (isKeywordMatch) {
+                        // For keyword matches, show matched keywords
+                        const matchedKeywords = result.keywords.filter((keyword: string) =>
+                            searchTerms.some((term: string) => keyword.toLowerCase().includes(term) || term.includes(keyword.toLowerCase()))
+                        );
+                        resultText.innerHTML = `Keyword match: <strong>${matchedKeywords.join(", ")}</strong>`;
+                    } else {
+                        // For API results, use highlight from search
+                        resultText.innerHTML = result.highlight.body.replace(/<em>/g, "<strong>").replace(/<\/em>/g, "</strong>");
+                    }
                     resultText.classList.remove("w-dyn-bind-empty");
                 }
 
                 // Add highlighted text as query parameter to anchor links
-                const highlightText = extractCleanHighlightText(result.highlight.body);
-                console.log("highlightText", highlightText);
+                const highlightText = isKeywordMatch ? searchValue : extractCleanHighlightText(result.highlight?.body || "");
+                if (!isKeywordMatch) {
+                    console.log("highlightText", highlightText);
+                }
                 const links = matchEl.querySelectorAll<HTMLAnchorElement>("a");
                 links.forEach((link) => {
                     if (highlightText && link.href) {
@@ -214,18 +347,33 @@ window.Webflow.push(async () => {
                 if (visibleContentCount >= config.searchResults) {
                     // console.log("max results reached, not showing in search results");
                     hiddenContentCount++;
-                    continue;
+                    return false; // don't show in main results
                 }
 
                 // make visible
                 matchEl.style.display = "block";
+                matchEl.removeAttribute("data-avra-hidden");
                 visibleContentCount++;
 
                 (listEl.parentElement as HTMLElement).style.display = "";
+                return true; // was shown in main results
             } else {
-                console.warn(`No matching element found for ${result.type} with slug from URL: ${result.url}`);
+                const resultType = isKeywordMatch ? result.type : result.type;
+                const resultSlug = isKeywordMatch ? result.slug : result.url;
+                console.warn(`No matching element found for ${resultType} with slug: ${resultSlug}`);
                 hiddenContentCount++;
+                return false;
             }
+        };
+
+        // Process filtered API results first
+        for (const result of filteredResults) {
+            processResult(result, false);
+        }
+
+        // Process keyword matches that weren't in API results
+        for (const keywordMatch of newKeywordMatches) {
+            processResult(keywordMatch, true);
         }
 
         // Show/hide content empty state based on visible count
@@ -243,7 +391,7 @@ window.Webflow.push(async () => {
         }
 
         // Update the modal result count and query
-        modalResultCountEl.textContent = `${visibleContentCount + hiddenContentCount} results for “${searchValue}”`;
+        modalResultCountEl.textContent = `${visibleContentCount + hiddenContentCount} results for "${searchValue}"`;
         modalResultQueryEl.textContent = searchValue;
 
         // sort modal results by content type
@@ -261,7 +409,11 @@ window.Webflow.push(async () => {
         const searchValue = (e.target as HTMLInputElement).value.toLowerCase().trim();
         if (searchValue.length > 0) {
             debouncedSearchWithClearSelection(searchValue);
+        } else {
+            // If search is cleared, apply current filter to all content
+            // applyFilterToAllContent();
         }
+        applyFilterToAllContent();
     });
 
     // remove webflow form functionality
