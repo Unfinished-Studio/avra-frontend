@@ -6,7 +6,7 @@ export enum WikiTagEnum {
     FINANCIAL_PLANNING_AND_FUNDRAISING = "Financial Planning and Fundraising",
     SCALING_ENGINEERING = "Scaling Engineering",
     SCALING_PEOPLE = "Scaling People",
-    HIRING_CASE_STUDY = "Hiring Case Study",
+    HIRING_CASE_STUDY = "Hiring Case Studies",
 }
 
 export type WikiTag = WikiTagEnum | "n/a";
@@ -640,7 +640,7 @@ export const contentItems: ContentItem[] = [
         name: "What does Tony Xu (CEO of Doordash) look for when hiring leaders?",
         slug: "what-does-tony-xu-ceo-of-doordash-look-for-when-hiring-leaders",
         batch: "n/a",
-        wikiTag: "Hiring Case Study",
+        wikiTag: "Hiring Case Studies",
         keywords: [
             "Hiring Executives",
             "Leadership",
@@ -668,7 +668,7 @@ export const contentItems: ContentItem[] = [
         name: "Chief of Staff",
         slug: "chief-of-staff",
         batch: "n/a",
-        wikiTag: "Hiring Case Study",
+        wikiTag: "Hiring Case Studies",
         keywords: [
             "Hiring Executives",
             "Leadership",
@@ -696,7 +696,7 @@ export const contentItems: ContentItem[] = [
         name: "Joshua Reeves's criteria for hiring leaders",
         slug: "joshua-reevess-criteria-for-hiring-leaders",
         batch: "n/a",
-        wikiTag: "Hiring Case Study",
+        wikiTag: "Hiring Case Studies",
         keywords: [
             "Hiring Executives",
             "Leadership",
@@ -740,7 +740,7 @@ export const contentItems: ContentItem[] = [
         name: "Jean-Denis (Plaid): Hiring a VP of Engineering",
         slug: "jean-denis-plaid-hiring-a-vp-of-engineering",
         batch: "n/a",
-        wikiTag: "Scaling Engineering, Hiring Case Study",
+        wikiTag: "Scaling Engineering, Hiring Case Studies",
         keywords: [
             "Hiring Executives",
             "Leadership",
@@ -768,7 +768,7 @@ export const contentItems: ContentItem[] = [
         name: "Building High Performing Teams",
         slug: "building-high-performing-teams",
         batch: "n/a",
-        wikiTag: "Hiring Case Study",
+        wikiTag: "Hiring Case Studies",
         keywords: [
             "Hiring Executives",
             "Leadership",
@@ -796,7 +796,7 @@ export const contentItems: ContentItem[] = [
         name: "Webflow's CPO",
         slug: "webflows-cpo",
         batch: "n/a",
-        wikiTag: "Hiring Case Study",
+        wikiTag: "Hiring Case Studies",
         keywords: [
             "Hiring Executives",
             "Leadership",
@@ -824,7 +824,7 @@ export const contentItems: ContentItem[] = [
         name: "Brex's CPO",
         slug: "brexs-cpo",
         batch: "n/a",
-        wikiTag: "Hiring Case Study",
+        wikiTag: "Hiring Case Studies",
         keywords: [
             "Hiring Executives",
             "Leadership",
@@ -860,7 +860,7 @@ export const contentItems: ContentItem[] = [
         name: "Communicating the value of Equity",
         slug: "communicating-the-value-of-equity",
         batch: "n/a",
-        wikiTag: "Hiring Case Study",
+        wikiTag: "Hiring Case Studies",
         keywords: [
             "Hiring Executives",
             "Leadership",
@@ -888,7 +888,7 @@ export const contentItems: ContentItem[] = [
         name: "Compensation Philosophy",
         slug: "compensation-philosophy",
         batch: "n/a",
-        wikiTag: "Hiring Case Study",
+        wikiTag: "Hiring Case Studies",
         keywords: [
             "Hiring Executives",
             "Leadership",
@@ -916,7 +916,7 @@ export const contentItems: ContentItem[] = [
         name: "Promotions and Workforce Planning",
         slug: "promotions-and-planning",
         batch: "n/a",
-        wikiTag: "Hiring Case Study, Operating Cadence",
+        wikiTag: "Hiring Case Studies, Operating Cadence",
         keywords: [
             "Hiring Executives",
             "Leadership",
@@ -944,7 +944,7 @@ export const contentItems: ContentItem[] = [
         name: "Levels and Career Development",
         slug: "levels-and-career-development",
         batch: "n/a",
-        wikiTag: "Hiring Case Study, Operating Cadence",
+        wikiTag: "Hiring Case Studies, Operating Cadence",
         keywords: [
             "Hiring Executives",
             "Leadership",
@@ -972,7 +972,7 @@ export const contentItems: ContentItem[] = [
         name: "Manager expectation setting and training",
         slug: "manager-expectation-setting-and-training",
         batch: "n/a",
-        wikiTag: "Hiring Case Study",
+        wikiTag: "Hiring Case Studies",
         keywords: [
             "Hiring Executives",
             "Leadership",
@@ -1000,7 +1000,7 @@ export const contentItems: ContentItem[] = [
         name: "Performance and Feedback Examples",
         slug: "performance-management-examples",
         batch: "n/a",
-        wikiTag: "Hiring Case Study",
+        wikiTag: "Hiring Case Studies",
         keywords: [
             "Hiring Executives",
             "Leadership",
@@ -1028,7 +1028,7 @@ export const contentItems: ContentItem[] = [
         name: "HR and People Job Descriptions",
         slug: "sample-job-descriptions",
         batch: "n/a",
-        wikiTag: "Hiring Case Study",
+        wikiTag: "Hiring Case Studies",
         keywords: [
             "Hiring Executives",
             "Leadership",
@@ -1094,7 +1094,7 @@ export const contentItems: ContentItem[] = [
         name: "Gusto: Executive Hiring Framework & Process",
         slug: "gusto-executive-hiring-framework-process",
         batch: "n/a",
-        wikiTag: "Hiring Case Study",
+        wikiTag: "Hiring Case Studies",
         keywords: [
             "Hiring Executives",
             "Leadership",
@@ -1122,7 +1122,7 @@ export const contentItems: ContentItem[] = [
         name: "Scale: Executive Hiring Criteria",
         slug: "scale-executives",
         batch: "n/a",
-        wikiTag: "Hiring Case Study",
+        wikiTag: "Hiring Case Studies",
         keywords: [
             "Hiring Executives",
             "Leadership",
@@ -1150,7 +1150,7 @@ export const contentItems: ContentItem[] = [
         name: "Generic Executive Interview Question Bank",
         slug: "generic-executive-interview-question-bank",
         batch: "n/a",
-        wikiTag: "Hiring Case Study",
+        wikiTag: "Hiring Case Studies",
         keywords: [
             "Hiring Executives",
             "Leadership",
@@ -1178,7 +1178,7 @@ export const contentItems: ContentItem[] = [
         name: "DoorDash: Tony Xu's Criteria for Exec Hiring",
         slug: "doordash-criteria-for-a-executives",
         batch: "n/a",
-        wikiTag: "Hiring Case Study",
+        wikiTag: "Hiring Case Studies",
         keywords: [
             "Hiring Executives",
             "Leadership",
@@ -1206,7 +1206,7 @@ export const contentItems: ContentItem[] = [
         name: "Ironclad: VP of Sales",
         slug: "ironclad-vp-of-sales",
         batch: "n/a",
-        wikiTag: "Hiring Case Study, Operating Cadence",
+        wikiTag: "Hiring Case Studies, Operating Cadence",
         keywords: [
             "Hiring Executives",
             "Leadership",
@@ -1234,7 +1234,7 @@ export const contentItems: ContentItem[] = [
         name: "Faire: VP of Engineering",
         slug: "faire-vp-of-engineering",
         batch: "n/a",
-        wikiTag: "Scaling Engineering, Hiring Case Study",
+        wikiTag: "Scaling Engineering, Hiring Case Studies",
         keywords: [
             "Hiring Executives",
             "Leadership",
@@ -1278,7 +1278,7 @@ export const contentItems: ContentItem[] = [
         name: "Benchling: VP of Engineering",
         slug: "benchling-vp-of-engineering",
         batch: "n/a",
-        wikiTag: "Scaling Engineering, Hiring Case Study",
+        wikiTag: "Scaling Engineering, Hiring Case Studies",
         keywords: [
             "Hiring Executives",
             "Leadership",
