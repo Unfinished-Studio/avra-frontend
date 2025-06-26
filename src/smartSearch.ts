@@ -407,6 +407,15 @@ window.Webflow.push(async () => {
         });
     }, config.searchDebounce);
 
+    // Function to trigger immediate search
+    const triggerImmediateSearch = async () => {
+        const searchValue = searchInput.value.toLowerCase().trim();
+        if (searchValue.length > 0) {
+            clearSelection();
+            await debouncedSearch(searchValue);
+        }
+    };
+
     searchInput.addEventListener("input", async (e) => {
         const searchValue = (e.target as HTMLInputElement).value.toLowerCase().trim();
 
@@ -427,10 +436,19 @@ window.Webflow.push(async () => {
         applyFilterToAllContent();
     });
 
-    // remove webflow form functionality
-    searchForm.addEventListener("submit", (e) => {
+    // Add submit button click handler
+    if (submitButton) {
+        submitButton.addEventListener("click", async (e) => {
+            e.preventDefault();
+            await triggerImmediateSearch();
+        });
+    }
+
+    // remove webflow form functionality and trigger immediate search
+    searchForm.addEventListener("submit", async (e) => {
         e.preventDefault();
         e.stopPropagation();
+        await triggerImmediateSearch();
     });
     modalSearchForm.addEventListener("submit", (e) => {
         e.preventDefault();
