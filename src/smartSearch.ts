@@ -76,6 +76,8 @@ window.Webflow.push(async () => {
 
     const searchForm = getElement("[avra-element='ss-search-form']");
     const searchInput = getElement<HTMLInputElement>("[avra-element='ss-search-input']", searchForm);
+    const submitButton = getElement("[avra-element='submit-button']");
+    submitButton.classList.remove("is-active");
 
     const contentBtn = getElement("[avra-element='ss-content-btn']");
     const contentEmptyEl = getElement("[avra-element='ss-content-empty']");
@@ -407,6 +409,15 @@ window.Webflow.push(async () => {
 
     searchInput.addEventListener("input", async (e) => {
         const searchValue = (e.target as HTMLInputElement).value.toLowerCase().trim();
+
+        if (submitButton) {
+            if (searchValue.length > 0) {
+                submitButton.classList.add("is-active");
+            } else {
+                submitButton.classList.remove("is-active");
+            }
+        }
+
         if (searchValue.length > 0) {
             debouncedSearchWithClearSelection(searchValue);
         } else {
