@@ -10,7 +10,7 @@ const config = {
     api: getStaging() ? "http://localhost:8787" : "https://avra-worker.nic-f66.workers.dev", // TODO: use avracap.com domain in prod
     searchDebounce: 500, // ms
     searchResults: 8, // the maximum number of results to show in the results preview
-    contentTypeOrder: ["wiki", "insight", "podcast", "other"],
+    contentTypeOrder: ["wiki", "insight", "podcast", "case-study", "other"],
     wikiTagFilters: Object.values(WikiTagEnum) as WikiTag[],
 } as const;
 
@@ -97,6 +97,9 @@ window.Webflow.push(async () => {
     const wikiList = getElement("[avra-element='ss-wiki-list']");
     const wikiEls = getElements("[avra-element='ss-wiki']", wikiList);
 
+    const caseStudyList = getElement("[avra-element='ss-case-study-list']");
+    const caseStudyEls = getElements("[avra-element='ss-case-study']", caseStudyList);
+
     const wikiFilterTemplate = getElement("[avra-element='ss-wiki-filter']");
 
     const createWikiFilters = (templateEl: HTMLElement) => {
@@ -163,7 +166,15 @@ window.Webflow.push(async () => {
         } else {
             activeFilters.add(filterValue);
         }
-        applyFilterToAllContent();
+
+        // If there's an active search query, re-run the search with new filter
+        const hasActiveSearch = searchInput.value.toLowerCase().trim().length > 0;
+        if (hasActiveSearch) {
+            const searchValue = searchInput.value.toLowerCase().trim();
+            debouncedSearch(searchValue);
+        } else {
+            applyFilterToAllContent();
+        }
     };
 
     const applyFilterToAllContent = () => {
@@ -175,11 +186,16 @@ window.Webflow.push(async () => {
             const slug = el.getAttribute("data-avra-slug");
             const contentItem = contentItems.find((item) => item.slug === slug);
 
-            if (
-                (activeFilters.size === 0 ||
-                    (contentItem && Array.from(activeFilters).some((filter) => itemMatchesWikiTag(contentItem, filter)))) &&
-                el.getAttribute("data-avra-hidden") !== "search"
-            ) {
+            // Check if element matches tag filter
+            const matchesTagFilter =
+                activeFilters.size === 0 ||
+                (contentItem && Array.from(activeFilters).some((filter) => itemMatchesWikiTag(contentItem, filter)));
+
+            // If there's no active search, show/hide based on tag filter only
+            // If there's an active search, only show elements that match tag filter AND are not hidden by search
+            const hasActiveSearch = searchInput.value.toLowerCase().trim().length > 0;
+
+            if (matchesTagFilter && (!hasActiveSearch || el.getAttribute("data-avra-hidden") !== "search")) {
                 el.style.display = "block";
                 visibleCount++;
             } else {
@@ -195,7 +211,7 @@ window.Webflow.push(async () => {
     createWikiFilters(wikiFilterTemplate);
 
     // Move all content elements to the visible list and sort them
-    const allContentElements = [...wikiEls, ...insightEls, ...podcastEls].sort(sortByContentType);
+    const allContentElements = [...wikiEls, ...insightEls, ...podcastEls, ...caseStudyEls].sort(sortByContentType);
 
     resultsListEl.innerHTML = "";
     allContentElements.forEach((el) => {
@@ -277,7 +293,7 @@ window.Webflow.push(async () => {
             el.setAttribute("data-avra-hidden", "search");
         }
 
-        // Helper function to process a result (API or keyword match)
+        // Helper function to process a result (API or keyword match) (modifies the html card)
         const processResult = (result: any, isKeywordMatch = false) => {
             const matchEl = listEls.find((el) => {
                 const slug = el.getAttribute("data-avra-slug");
@@ -348,8 +364,8 @@ window.Webflow.push(async () => {
                 matchEl.style.display = "block";
                 matchEl.removeAttribute("data-avra-hidden");
                 visibleContentCount++;
-
                 (listEl.parentElement as HTMLElement).style.display = "";
+
                 return true; // was shown in main results
             } else {
                 const resultType = isKeywordMatch ? result.type : result.type;
@@ -361,6 +377,7 @@ window.Webflow.push(async () => {
         };
 
         // Process filtered API results first
+        // show/hide based on matching tag
         for (const result of filteredResults) {
             processResult(result, false);
         }
@@ -554,4 +571,9 @@ window.Webflow.push(async () => {
         clearSelection();
         await originalDebouncedSearch(searchValue);
     }, config.searchDebounce);
+
+    searchInput.addEventListener("keyup", (e) => {
+        const value = (e.target as HTMLInputElement).value;
+        (e.target as HTMLInputElement).value = value.replace(/\r?\n/gi, "");
+    });
 });

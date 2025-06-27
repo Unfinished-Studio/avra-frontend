@@ -1,12 +1,13 @@
-type ContentType = "wiki" | "insight" | "podcast" | "other";
+type ContentType = "wiki" | "insight" | "podcast" | "case-study" | "other";
 
 const contentTypeUrlMappings: Record<string, ContentType> = {
     "/avra-wiki/": "wiki",
     "/session-insights/": "insight",
     "/audio-video/": "podcast",
+    "/case-studies/": "case-study",
 };
 
-const contentTypeOrder = ["wiki", "insight", "podcast", "other"] as const;
+const contentTypeOrder = ["wiki", "insight", "podcast", "case-study", "other"] as const;
 
 export const getContentType = (url: string): ContentType => {
     for (const [urlPattern, contentType] of Object.entries(contentTypeUrlMappings)) {
@@ -22,7 +23,7 @@ export const sortByContentType = (a: Element, b: Element) => {
     const typeB = getContentType(b.getAttribute("href") || "");
 
     if (typeA !== typeB) {
-        return (contentTypeOrder.indexOf(typeA) || 3) - (contentTypeOrder.indexOf(typeB) || 3);
+        return (contentTypeOrder.indexOf(typeA) || 4) - (contentTypeOrder.indexOf(typeB) || 4);
     }
 
     const titleA = a.querySelector('[avra-element="title"]')?.textContent || "";
