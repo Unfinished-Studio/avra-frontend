@@ -1,4 +1,3 @@
-import { getAdminAccess } from "@/utils/admin/getAdminAccess";
 import { getStaging } from "@/utils/admin/getStaging";
 import { getContentType, sortByContentType } from "@/utils/contentType";
 import { debounce } from "@/utils/debounce";
@@ -71,9 +70,6 @@ window.Webflow ||= [];
 window.Webflow.push(async () => {
     console.log("config.api", config.api);
 
-    const adminAccess = getAdminAccess();
-    if (!adminAccess) return;
-
     const searchForm = getElement("[avra-element='ss-search-form']");
     const searchInput = getElement<HTMLInputElement>("[avra-element='ss-search-input']", searchForm);
     const submitButton = getElement("[avra-element='submit-button']");
@@ -117,8 +113,6 @@ window.Webflow.push(async () => {
 
             const filterInput = getElement<HTMLInputElement>("input", filterEl);
             const filterTxt = getElement("span", filterEl);
-            const filterImg = getElement("img", filterEl);
-            filterImg.classList.remove("ss-filter-active");
 
             filterInput.value = tag;
             filterTxt.textContent = tag;
@@ -131,12 +125,10 @@ window.Webflow.push(async () => {
                     console.log("setting filter value:", filterValue);
 
                     filterEl.classList.add("ss-filter-active");
-                    filterImg.classList.add("ss-filter-active");
                 } else {
                     console.log("removing filter value:", filterValue);
 
                     filterEl.classList.remove("ss-filter-active");
-                    filterImg.classList.remove("ss-filter-active");
                 }
 
                 for (const filter of wikiFilterEls) {
