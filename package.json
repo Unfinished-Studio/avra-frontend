@@ -34,11 +34,11 @@
     },
     "devDependencies": {
         "@types/jquery": "^3.5.32",
-        "cross-env": "^7.0.3",
-        "esbuild": "^0.25.4",
-        "prettier": "^3.5.3",
+        "cross-env": "^10.0.0",
+        "esbuild": "^0.25.8",
+        "prettier": "^3.6.2",
         "typescript": "^5.8.3",
-        "wrangler": "^4.14.3"
+        "wrangler": "^4.26.1"
     },
     "dependencies": {
         "@finsweet/ts-utils": "^0.40.0",
