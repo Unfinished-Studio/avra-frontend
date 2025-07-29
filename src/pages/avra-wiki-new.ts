@@ -1,13 +1,37 @@
-// Page: Avra Wiki
-
+import { Sidebar } from "@/components/sidebar";
 import { SMART_SEARCH_CONFIG } from "@/constants";
+import { CONTENT_ITEMS } from "@/data/content";
+import { initContentPage } from "@/pages/page-initializer";
+import type { SwiftTypeResults } from "@/types/smart-search";
 import { getContentType, sortByContentType } from "@/utils/content-type";
 import { debounce } from "@/utils/debounce";
 import { getElement, getElements } from "@/utils/dom/elements";
-import type { SwiftTypeResults } from "@/types/smart-search";
 import Swup from "swup";
-import { Sidebar } from "@/components/sidebar";
-import { CONTENT_ITEMS } from "@/data/content";
+
+const swupLinkSelector = 'a[href*="/avra-wiki/"], a[href*="/session-insights/"], a[href*="/case-studies/"], a[href*="/audio-video/"]';
+let swup: Swup | null = null;
+
+export const updateSwupLinks = (newLinkSelector: string) => {
+    if (swup) {
+        swup.destroy();
+    }
+    swup = new Swup({
+        animationSelector: '[class*="transition-"]',
+        containers: ["[avra-element='wiki-content']"],
+        linkSelector: newLinkSelector,
+        cache: false,
+    });
+
+    // re-register hooks
+    swup.hooks.on("content:replace", () => {
+        console.log("new content available");
+    });
+    swup.hooks.on("visit:end", (visit) => {
+        Sidebar();
+        initContentPage();
+        updateSidebar();
+    });
+};
 
 const handleSearch = async (query: string) => {
     const params = new URLSearchParams([["query", query]]);
@@ -38,7 +62,7 @@ const extractCleanHighlightText = (highlightBody: string): string => {
     return tempDiv.textContent?.trim().split(" ").slice(0, 5).join(" ") || "";
 };
 
-export const smartSearch = () => {
+const smartSearch = () => {
     console.log("using api", SMART_SEARCH_CONFIG.api);
 
     const searchForm = getElement("[avra-element='ss-search-form']");
@@ -257,6 +281,7 @@ export const smartSearch = () => {
         e.preventDefault();
         e.stopPropagation();
         await triggerImmediateSearch();
+        updateSwupLinks(swupLinkSelector);
     });
 
     // Keyboard navigation for search results
@@ -352,8 +377,57 @@ export const smartSearch = () => {
     });
 };
 
+const updateSidebar = () => {
+    const sessionInsightsSection = getElement("[data-title='Session Insights']");
+    const sessionLinks = getElements("[avra-element='wiki-session-links'] a");
+
+    if (sessionInsightsSection) {
+        // Clear existing session links
+        const existingLinks = sessionInsightsSection.querySelectorAll("a");
+        existingLinks.forEach((link) => link.remove());
+
+        // Add new session links
+        sessionLinks.forEach((link) => {
+            sessionInsightsSection.appendChild(link);
+        });
+    }
+};
+
+const initSwup = () => {
+    return new Swup({
+        animationSelector: '[class*="transition-"]',
+        containers: ["[avra-element='wiki-content']"],
+        linkSelector: swupLinkSelector,
+        cache: false,
+    });
+};
+
 window.Webflow ||= [];
 window.Webflow.push(async () => {
     Sidebar();
     smartSearch();
+    initContentPage();
+    updateSidebar();
+
+    swup = initSwup();
+    swup.hooks.on("content:replace", () => {
+        // remove/change certain elements on the wiki page
+        const elementsToRemove = document.querySelectorAll<HTMLElement>(
+            ".wiki-dropdown-wrapper, .sub-nav.smaller, .sub-nav.tall, .confidential"
+        );
+        for (const element of elementsToRemove) {
+            element.remove();
+        }
+
+        const backBtn = document.querySelector<HTMLAnchorElement>(".back-button");
+        if (backBtn) {
+            backBtn.href = "/avra-wiki-new";
+            backBtn.textContent = "Return to Wiki";
+        }
+    });
+    swup.hooks.on("visit:end", (visit) => {
+        Sidebar();
+        initContentPage();
+        updateSidebar();
+    });
 });

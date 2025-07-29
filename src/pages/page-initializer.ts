@@ -1,12 +1,60 @@
-import { getElement } from "@/utils/dom/elements";
 import { WIKI_SESSION_MAPPINGS, type WikiSession } from "@/data/wiki-data";
+import { getElement } from "@/utils/dom/elements";
 
-export const initContentPage = async () => {
-    // Handle scroll-to-highlight functionality
+const handleScrollToHighlight = () => {
     const urlParams = new URLSearchParams(window.location.search);
     const highlightText = urlParams.get("highlight");
 
-    // Favorites Button
+    if (highlightText) {
+        // Function to find and scroll to matching text
+        const scrollToHighlightedText = () => {
+            const content = document.querySelector("[avra-element='wiki-content']");
+            if (!content) return;
+
+            // Create a walker to traverse all text nodes
+            const walker = document.createTreeWalker(content, NodeFilter.SHOW_TEXT, null);
+
+            let textNode;
+            while ((textNode = walker.nextNode())) {
+                const text = textNode.textContent?.toLowerCase() || "";
+                const searchText = highlightText.toLowerCase();
+
+                if (text.includes(searchText)) {
+                    // Found matching text, scroll to it
+                    const element = textNode.parentElement;
+                    console.log("element", element);
+                    if (element) {
+                        // Get element position and scroll with 100px offset
+                        const elementRect = element.getBoundingClientRect();
+                        const elementTop = elementRect.top + window.pageYOffset;
+
+                        window.scrollTo({
+                            top: elementTop - 120,
+                            behavior: "smooth",
+                        });
+
+                        // Highlight the text temporarily
+                        const originalHTML = element.innerHTML;
+                        const regex = new RegExp(`(${highlightText})`, "gi");
+                        element.innerHTML = originalHTML.replace(regex, '<mark style="background: yellow; padding: 2px;">$1</mark>');
+
+                        // Remove highlight after 3 seconds
+                        setTimeout(() => {
+                            element.innerHTML = originalHTML;
+                        }, 3000);
+
+                        break;
+                    }
+                }
+            }
+        };
+
+        // Wait for content to load, then scroll
+        setTimeout(scrollToHighlightedText, 500);
+    }
+};
+
+const initFavoritesButton = async () => {
     const dataEl = document.querySelector<HTMLElement>("[avra-element='item-data']");
     if (!dataEl) throw new Error("No data element for this CMS page");
 
@@ -59,8 +107,9 @@ export const initContentPage = async () => {
         });
         btn.classList.remove("hide");
     }
+};
 
-    // Wiki Logic
+const createTableOfContents = () => {
     try {
         // create table of contents
         const contentContainer = getElement("[avra-element='wiki-content']");
@@ -166,6 +215,13 @@ export const initContentPage = async () => {
     } catch (err) {
         console.log("Error running wiki logic:", err);
     }
+};
+
+const createSessionLinks = () => {
+    const dataEl = document.querySelector<HTMLElement>("[avra-element='item-data']");
+    if (!dataEl) return;
+    const slug = dataEl.getAttribute("data-avra-slug");
+    if (!slug) return;
 
     try {
         const wikiSessions: WikiSession[] = [];
@@ -215,52 +271,11 @@ export const initContentPage = async () => {
     } catch (error) {
         console.error("Error creating dynamic elements:", error);
     }
+};
 
-    if (highlightText) {
-        // Function to find and scroll to matching text
-        const scrollToHighlightedText = () => {
-            const content = document.querySelector("[avra-element='wiki-content']");
-            if (!content) return;
-
-            // Create a walker to traverse all text nodes
-            const walker = document.createTreeWalker(content, NodeFilter.SHOW_TEXT, null);
-
-            let textNode;
-            while ((textNode = walker.nextNode())) {
-                const text = textNode.textContent?.toLowerCase() || "";
-                const searchText = highlightText.toLowerCase();
-
-                if (text.includes(searchText)) {
-                    // Found matching text, scroll to it
-                    const element = textNode.parentElement;
-                    console.log("element", element);
-                    if (element) {
-                        // Get element position and scroll with 100px offset
-                        const elementRect = element.getBoundingClientRect();
-                        const elementTop = elementRect.top + window.pageYOffset;
-
-                        window.scrollTo({
-                            top: elementTop - 120,
-                            behavior: "smooth",
-                        });
-
-                        // Highlight the text temporarily
-                        const originalHTML = element.innerHTML;
-                        const regex = new RegExp(`(${highlightText})`, "gi");
-                        element.innerHTML = originalHTML.replace(regex, '<mark style="background: yellow; padding: 2px;">$1</mark>');
-
-                        // Remove highlight after 3 seconds
-                        setTimeout(() => {
-                            element.innerHTML = originalHTML;
-                        }, 3000);
-
-                        break;
-                    }
-                }
-            }
-        };
-
-        // Wait for content to load, then scroll
-        setTimeout(scrollToHighlightedText, 500);
-    }
+export const initContentPage = async () => {
+    // handleScrollToHighlight();
+    initFavoritesButton();
+    // createTableOfContents();
+    // createSessionLinks();
 };
