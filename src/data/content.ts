@@ -22,7 +22,7 @@ export type ContentItem = {
     type: ContentType;
 };
 
-export const contentItems: ContentItem[] = [
+export const CONTENT_ITEMS: ContentItem[] = [
     {
         name: "Ali Ghodsi on the 5 Ingredients a CEO Needs",
         slug: "ali-ghodsi-on-leadership",

@@ -1,21 +1,31 @@
-import { getStaging } from "@/utils/admin/getStaging";
+import { getStaging } from "@/utils/admin/get-staging";
+import { WikiTagEnum, type WikiTag } from "@/data/content";
 
-export const testmode = window.location.search.includes("test");
+export const TEST_MODE = window.location.search.includes("test");
 
 // TODO: configure worker to use avracap.com domain
-export const api = getStaging() ? "http://localhost:8787" : "https://avra-worker.nic-f66.workers.dev";
+export const API = getStaging() ? "http://localhost:8787" : "https://avra-worker.nic-f66.workers.dev";
 
-export const categories = ["Session Insights", "Podcasts", "Case Studies", "Wikis"];
+export const CATEGORIES = ["Session Insights", "Podcasts", "Case Studies", "Wikis"];
 
 // Slack webhook URL for page navigation notification
-// dev
-export const SLACK_WEBHOOK_URL = "https://hooks.slack.com/services/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";
-// prod
-// export const SLACK_WEBHOOK_URL = "https://hooks.slack.com/services/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";
+export const SLACK_NOTIFIER = false;
+export const SLACK_WEBHOOK_URL = "https://hooks.slack.com/services/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"; // dev
+// export const SLACK_WEBHOOK_URL = "https://hooks.slack.com/services/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"; // prod
 
-// Cookie names
 export const COOKIE_NAMES = {
-    USER_ID: "id",
+    USER_ID: "ajs_user_id",
     LOGIN_REDIRECT: "avra_login_redirect",
     LOGIN_LOG: "avra_log",
+    LOGGED_IN: "ms-auth",
 };
+
+export const SMART_SEARCH_CONFIG = {
+    api: getStaging() ? "http://localhost:8787" : "https://avra-worker.nic-f66.workers.dev", // TODO: use avracap.com domain in prod
+    searchDebounce: 500, // ms
+    searchResults: 8, // the maximum number of results to show in the results preview
+    contentTypeOrder: ["wiki", "insight", "podcast", "case-study", "other"],
+    wikiTagFilters: Object.values(WikiTagEnum) as WikiTag[],
+    resultsElement: "[avra-element='ss-results']",
+    resultsCounterElement: "[avra-element='ss-results-counter']",
+} as const;

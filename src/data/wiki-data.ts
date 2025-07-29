@@ -4,7 +4,7 @@ export type WikiSession = {
     batch: number;
 };
 
-export const wikiSessionMappings: { [key: string]: WikiSession[] } = {
+export const WIKI_SESSION_MAPPINGS: { [key: string]: WikiSession[] } = {
     "hiring-and-managing-execs": [
         {
             name: "Ali Ghodsi on the 5 Ingredients a CEO Needs",

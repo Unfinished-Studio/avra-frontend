@@ -1,5 +1,5 @@
-import { avraGetCookie } from "@/utils/avraGetCookie";
-import { avraSetCookie } from "@/utils/avraSetCookie";
+import { avraGetCookie } from "@/utils/avra-get-cookie";
+import { avraSetCookie } from "@/utils/avra-set-cookie";
 
 declare const jwt_decode: any;
 declare const google: any;

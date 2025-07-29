@@ -1,8 +1,8 @@
-import { COOKIE_NAMES } from "@/constants";
-import { avraGetCookie } from "@/utils/avraGetCookie";
-import { avraSetCookie } from "@/utils/avraSetCookie";
+import { COOKIE_NAMES, SLACK_NOTIFIER } from "@/constants";
+import { avraGetCookie } from "@/utils/avra-get-cookie";
+import { avraSetCookie } from "@/utils/avra-set-cookie";
 import { getUser } from "@/utils/memberstack/user";
-import { initNavigationTracking } from "@/utils/slackNotifier";
+import { initNavigationTracking } from "@/utils/slack-notifier";
 
 async function trackLogin() {
     const user = await getUser();
@@ -19,11 +19,12 @@ async function trackLogin() {
         avraSetCookie(COOKIE_NAMES.USER_ID, user.id, expire_date);
     }
 
-    initNavigationTracking(loginCookie ? false : true);
+    if (SLACK_NOTIFIER) {
+        initNavigationTracking(loginCookie ? false : true);
+    }
 }
 
-window.Webflow ||= [];
-window.Webflow.push(async () => {
+window.addEventListener("load", async () => {
     try {
         await trackLogin();
     } catch (err) {

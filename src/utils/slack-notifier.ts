@@ -1,5 +1,5 @@
-import { COOKIE_NAMES, api } from "@/constants";
-import { avraGetCookie } from "./avraGetCookie";
+import { COOKIE_NAMES, API } from "@/constants";
+import { avraGetCookie } from "./avra-get-cookie";
 import { getUser } from "./memberstack/user";
 
 // Enable/disable debug mode
@@ -65,7 +65,7 @@ const sendSlackNotification = async (data: { userId: string; url: string; timest
             throw new Error("No logged in user");
         }
 
-        const response = await fetch(`${api}/api/slack/notify`, {
+        const response = await fetch(`${API}/api/slack/notify`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",

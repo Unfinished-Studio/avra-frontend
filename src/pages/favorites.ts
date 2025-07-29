@@ -1,4 +1,4 @@
-import { categories } from "@/constants";
+import { CATEGORIES } from "@/constants";
 
 window.Webflow ||= [];
 window.Webflow.push(async () => {
@@ -46,7 +46,7 @@ window.Webflow.push(async () => {
             const selectEl = document.querySelector<HTMLSelectElement>("[name='Filter-Favorites']");
             if (!selectEl) throw new Error("No select element");
 
-            for (const category of categories) {
+            for (const category of CATEGORIES) {
                 const cards = listEl.querySelectorAll<HTMLElement>(`[avra-category="${category}"]`);
                 console.log("found", cards.length, "cards for", category);
 

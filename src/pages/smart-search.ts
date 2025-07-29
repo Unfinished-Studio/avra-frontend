@@ -1,12 +1,12 @@
-import { getStaging } from "@/utils/admin/getStaging";
-import { getContentType, sortByContentType } from "@/utils/contentType";
+import { getStaging } from "@/utils/admin/get-staging";
+import { getContentType, sortByContentType } from "@/utils/content-type";
 import { debounce } from "@/utils/debounce";
 import { getElement, getElements } from "@/utils/dom/elements";
-import { contentItems, WikiTagEnum, type WikiTag } from "@/data/content";
-import type { SwiftTypeResults, SwiftTypeSearchResult } from "@/types/smartSearch";
+import { CONTENT_ITEMS, WikiTagEnum, type WikiTag } from "@/data/content";
+import type { SwiftTypeResults, SwiftTypeSearchResult } from "@/types/smart-search";
 
 // constants
-const config = {
+const SMART_SEARCH_CONFIG = {
     api: getStaging() ? "http://localhost:8787" : "https://avra-worker.nic-f66.workers.dev", // TODO: use avracap.com domain in prod
     searchDebounce: 500, // ms
     searchResults: 8, // the maximum number of results to show in the results preview
@@ -16,7 +16,7 @@ const config = {
 
 const handleSearch = async (query: string) => {
     const params = new URLSearchParams([["query", query]]);
-    const response = await fetch(`${config.api}/api/site-search?${String(params)}`, {
+    const response = await fetch(`${SMART_SEARCH_CONFIG.api}/api/site-search?${String(params)}`, {
         method: "GET",
         headers: {
             "Content-Type": "application/json",
@@ -68,7 +68,10 @@ const itemMatchesWikiTag = (item: any, filterTag: string): boolean => {
 
 window.Webflow ||= [];
 window.Webflow.push(async () => {
-    console.log("config.api", config.api);
+    if (!SMART_SEARCH_CONFIG) {
+        return;
+    }
+    console.log("config.api", SMART_SEARCH_CONFIG.api);
 
     const searchForm = getElement("[avra-element='ss-search-form']");
     const searchInput = getElement<HTMLInputElement>("[avra-element='ss-search-input']", searchForm);
@@ -184,7 +187,7 @@ window.Webflow.push(async () => {
 
         for (const el of allContentElements) {
             const slug = el.getAttribute("data-avra-slug");
-            const contentItem = contentItems.find((item) => item.slug === slug);
+            const contentItem = CONTENT_ITEMS.find((item) => item.slug === slug);
 
             // Check if element matches tag filter
             const matchesTagFilter =
@@ -251,7 +254,7 @@ window.Webflow.push(async () => {
 
         // Check for keyword matches in content items
         const searchTerms = searchValue.toLowerCase().split(/\s+/);
-        const keywordMatches = contentItems.filter((item) => {
+        const keywordMatches = CONTENT_ITEMS.filter((item) => {
             // Check if any search term matches any keyword (case insensitive)
             const keywordMatch = item.keywords.some((keyword) =>
                 searchTerms.some((term) => keyword.toLowerCase().includes(term) || term.includes(keyword.toLowerCase()))
@@ -278,7 +281,7 @@ window.Webflow.push(async () => {
             if (activeFilters.size === 0) return true;
 
             const slug = result.url.split("/").pop();
-            const contentItem = contentItems.find((item) => item.slug === slug);
+            const contentItem = CONTENT_ITEMS.find((item) => item.slug === slug);
             return contentItem && Array.from(activeFilters).some((filter) => itemMatchesWikiTag(contentItem, filter));
         });
 
@@ -354,7 +357,7 @@ window.Webflow.push(async () => {
                 modalListEl.appendChild(matchElClone);
 
                 // maximum
-                if (visibleContentCount >= config.searchResults) {
+                if (visibleContentCount >= SMART_SEARCH_CONFIG.searchResults) {
                     // console.log("max results reached, not showing in search results");
                     hiddenContentCount++;
                     return false; // don't show in main results
@@ -414,7 +417,7 @@ window.Webflow.push(async () => {
         sortedElements.forEach((element) => {
             modalListEl.appendChild(element);
         });
-    }, config.searchDebounce);
+    }, SMART_SEARCH_CONFIG.searchDebounce);
 
     // Function to trigger immediate search
     const triggerImmediateSearch = async () => {
@@ -570,7 +573,7 @@ window.Webflow.push(async () => {
     const debouncedSearchWithClearSelection = debounce(async (searchValue: string) => {
         clearSelection();
         await originalDebouncedSearch(searchValue);
-    }, config.searchDebounce);
+    }, SMART_SEARCH_CONFIG.searchDebounce);
 
     searchInput.addEventListener("keyup", (e) => {
         const value = (e.target as HTMLInputElement).value;

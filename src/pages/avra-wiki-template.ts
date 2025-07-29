@@ -1,5 +1,5 @@
 import { getElement } from "@/utils/dom/elements";
-import { wikiSessionMappings, type WikiSession } from "@/wikiData";
+import { WIKI_SESSION_MAPPINGS, type WikiSession } from "@/data/wiki-data";
 
 window.Webflow ||= [];
 window.Webflow.push(async () => {
@@ -185,7 +185,7 @@ window.Webflow.push(async () => {
         const wikiSessions: WikiSession[] = [];
         const batches: number[] = [];
 
-        for (const [wikiSlug, sessions] of Object.entries(wikiSessionMappings)) {
+        for (const [wikiSlug, sessions] of Object.entries(WIKI_SESSION_MAPPINGS)) {
             if (wikiSlug !== slug) {
                 continue;
             }
