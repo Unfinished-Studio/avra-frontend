@@ -9,17 +9,16 @@ const MINIFY = process.env.MINIFY === "true";
 
 // Config entrypoint files
 const ENTRY_POINTS = [
-    "src/pages/index.ts",
-    "src/pages/test.ts",
-    "src/pages/favorites-cms.ts",
-    "src/pages/favorites-banner.ts",
-    "src/pages/home.ts",
-    "src/pages/profile.ts",
-    "src/pages/avra-wiki.ts",
     "src/pages/avra-wiki-template.ts",
+    "src/pages/avra-wiki.ts",
     "src/pages/batch-template.ts",
-    "src/pages/smart-search.ts",
+    "src/pages/favorites-cms.ts",
+    "src/pages/favorites.ts",
+    "src/pages/home.ts",
+    "src/pages/index.ts",
+    "src/pages/profile.ts",
     "src/pages/session-insights-template.ts",
+    "src/pages/smart-search.ts",
 ];
 
 // Config dev serving
