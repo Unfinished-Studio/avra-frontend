@@ -1,14 +1,19 @@
 import { WIKI_SESSION_MAPPINGS, type WikiSession } from "@/data/wiki-data";
-import { getElement } from "@/utils/dom/elements";
+import { getElement, getAvraElement } from "@/utils/dom/elements";
 
+// TODO: rewrite to work with new scroll to highlight logic
 const handleScrollToHighlight = () => {
     const urlParams = new URLSearchParams(window.location.search);
     const highlightText = urlParams.get("highlight");
 
+    const wikiContainer = getAvraElement("wiki-container");
+
+    console.log("highlightText", highlightText);
+
     if (highlightText) {
         // Function to find and scroll to matching text
         const scrollToHighlightedText = () => {
-            const content = document.querySelector("[avra-element='wiki-content']");
+            const content = document.querySelector("#wiki-content");
             if (!content) return;
 
             // Create a walker to traverse all text nodes
@@ -28,20 +33,40 @@ const handleScrollToHighlight = () => {
                         const elementRect = element.getBoundingClientRect();
                         const elementTop = elementRect.top + window.pageYOffset;
 
-                        window.scrollTo({
-                            top: elementTop - 120,
+                        wikiContainer.scrollTo({
+                            top: elementTop - 60,
                             behavior: "smooth",
                         });
 
                         // Highlight the text temporarily
                         const originalHTML = element.innerHTML;
                         const regex = new RegExp(`(${highlightText})`, "gi");
-                        element.innerHTML = originalHTML.replace(regex, '<mark style="background: yellow; padding: 2px;">$1</mark>');
+                        const newHTML = originalHTML.replace(
+                            regex,
+                            '<mark class="highlight-fade" style="background-color: transparent; transition: background-color 0.5s ease-in-out; padding: 2px;">$1</mark>'
+                        );
+                        element.innerHTML = newHTML;
 
-                        // Remove highlight after 3 seconds
+                        const marks = element.querySelectorAll<HTMLElement>(".highlight-fade");
+
+                        // Fade in
                         setTimeout(() => {
-                            element.innerHTML = originalHTML;
-                        }, 3000);
+                            marks.forEach((mark) => {
+                                mark.style.backgroundColor = "#d6d5d1";
+                            });
+                        }, 100);
+
+                        // Fade out and remove
+                        setTimeout(() => {
+                            marks.forEach((mark) => {
+                                mark.style.backgroundColor = "transparent";
+                            });
+
+                            // Remove the mark after fade out transition ends
+                            setTimeout(() => {
+                                element.innerHTML = originalHTML;
+                            }, 500); // This should match the transition duration
+                        }, 2500);
 
                         break;
                     }
@@ -274,7 +299,7 @@ const createSessionLinks = () => {
 };
 
 export const initContentPage = async () => {
-    // handleScrollToHighlight();
+    handleScrollToHighlight();
     initFavoritesButton();
     // createTableOfContents();
     // createSessionLinks();

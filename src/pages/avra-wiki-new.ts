@@ -72,6 +72,9 @@ const smartSearch = () => {
 
     const contentEmptyEl = getElement("[avra-element='ss-content-empty']");
     const resultsListEl = getElement("[avra-element='ss-list']");
+    if (resultsListEl.parentElement) {
+        resultsListEl.parentElement.style.display = "none";
+    }
 
     const podcastList = getElement("[avra-element='ss-podcast-list']");
     const podcastEls = getElements("[avra-element='ss-podcast']", podcastList);
@@ -202,7 +205,6 @@ const smartSearch = () => {
                 matchEl.style.display = "block";
                 matchEl.removeAttribute("data-avra-hidden");
                 visibleContentCount++;
-                (listEl.parentElement as HTMLElement).style.display = "";
 
                 return; // was shown in main results
             } else {
@@ -227,6 +229,10 @@ const smartSearch = () => {
         // Show/hide content empty state based on visible count
         if (contentEmptyEl) {
             contentEmptyEl.style.display = visibleContentCount === 0 ? "" : "none";
+        }
+
+        if (resultsListEl.parentElement) {
+            resultsListEl.parentElement.style.display = visibleContentCount > 0 ? "block" : "none";
         }
 
         // Update the content count display
@@ -258,6 +264,9 @@ const smartSearch = () => {
             debouncedSearchWithClearSelection(searchValue);
         } else {
             // If search is cleared, hide all results and show all content
+            if (resultsListEl.parentElement) {
+                resultsListEl.parentElement.style.display = "none";
+            }
             for (const el of allContentElements) {
                 el.style.display = "block";
                 el.removeAttribute("data-avra-hidden");
@@ -381,7 +390,9 @@ const updateSidebar = () => {
     const sessionInsightsSection = getElement("[data-title='Session Insights']");
     const sessionLinks = getElements("[avra-element='wiki-session-links'] a");
 
-    if (sessionInsightsSection) {
+    console.log(sessionInsightsSection, sessionLinks);
+
+    if (sessionInsightsSection && sessionLinks.length) {
         // Clear existing session links
         const existingLinks = sessionInsightsSection.querySelectorAll("a");
         existingLinks.forEach((link) => link.remove());
