@@ -279,24 +279,22 @@ const setupDropdownForElements = (textSelector: string, childSelector: string) =
             return;
         }
 
-        // Check if this is the "Wiki Topics" section that should be open by default
+        // default positions
+        // Wiki Topics is open by default
         const isWikiTopicsSection =
             textSelector === "[avra-element='wiki-section-title-text']" && textElement.textContent?.toLowerCase() === "wiki topics";
-
-        // Hide child items by default, except for Wiki Topics section
         if (isWikiTopicsSection) {
             childItems.forEach((item) => {
                 gsap.set(item, { height: "auto", opacity: 1, overflow: "visible", display: "flex", marginTop: "8px" });
             });
-            // Set arrow to expanded state
             gsap.set(dropdownArrow, { rotation: 180 });
         } else {
             childItems.forEach((item) => {
                 gsap.set(item, { height: 0, opacity: 0, overflow: "hidden", display: "none", marginTop: 0 });
             });
+            gsap.set(dropdownArrow, { rotation: 0 });
         }
 
-        // Track expanded state
         let isExpanded = isWikiTopicsSection;
 
         // Add click handler to the dropdown arrow
