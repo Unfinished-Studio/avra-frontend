@@ -1,5 +1,5 @@
 import { getAvraElement, getElements } from "@/utils/dom/elements";
-import { wikiItems, sessionInsightsBatches } from "@/data/sidebar";
+import { wikiItems, sessionInsightsBatches, podcastArticles } from "@/data/sidebar";
 import { gsap } from "gsap";
 
 export const Sidebar = () => {
@@ -198,6 +198,23 @@ export const Sidebar = () => {
                 }
 
                 subItemTemplate.remove();
+            }
+        } else if (title === "Podcast Episodes") {
+            for (const podcastArticle of podcastArticles) {
+                const sectionItem = sectionItemTemplate.cloneNode(true) as HTMLAnchorElement;
+                const sectionItemText = getAvraElement<HTMLAnchorElement>("wiki-section-item-text", sectionItem);
+                sectionItemText.textContent = podcastArticle.name;
+                sectionItemText.href = `/audio-video/${podcastArticle.slug}`;
+                sectionItemsToAdd.push(sectionItem);
+
+                const subItemTemplate = getAvraElement("wiki-insight-item", sectionItem);
+                subItemTemplate.remove();
+
+                // TODO: handle podcastArticle properties (wikiTags and smartSearchKeywords)
+
+                while (sectionItem.children.length > 1) {
+                    sectionItem.removeChild(sectionItem.lastChild!);
+                }
             }
         } else {
             for (const item of items) {

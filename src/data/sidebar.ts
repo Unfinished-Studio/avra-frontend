@@ -27,6 +27,19 @@ export type SessionInsightsBatch = {
     sessionInsights: SessionInsightItem[];
 };
 
+export type PodcastArticle = {
+    title: string;
+    slug: string;
+    subItems: WikiSubItem[];
+};
+
+export type Article = {
+    name: string;
+    slug: string;
+    wikiTag?: string;
+    smartSearchKeywords?: string[];
+};
+
 export const wikiItems: WikiItem[] = [
     {
         title: "Hiring & Managing",
@@ -1103,5 +1116,92 @@ export const sessionInsightsBatches: SessionInsightsBatch[] = [
                 slug: "the-history-state-of-ai",
             },
         ],
+    },
+];
+
+export const podcastArticles: Article[] = [
+    {
+        name: "Carvana",
+        slug: "conversation-with-ernie-garcia-ceo-of-carvana",
+        wikiTag: "Operating Cadence",
+        smartSearchKeywords: [
+            "Operating",
+            "Scaling",
+            "Meetings",
+            "OKRs",
+            "Goals",
+            "Planning",
+            "Metrics",
+            "Business Reviews",
+            "Execution",
+            "Strategic Planning",
+        ],
+    },
+    {
+        name: "Rappi",
+        slug: "episode-2-rappi",
+        wikiTag: "Hiring and Managing Leaders",
+        smartSearchKeywords: [
+            "Hiring Executives",
+            "Leadership",
+            "Recruiting",
+            "Team Building",
+            "Executive Search",
+            "Management",
+            "Onboarding",
+            "Talent",
+            "Promotions",
+            "Firing",
+            "Org Design",
+            "Headcount",
+            "Org Structure",
+            "Scaling Teams",
+            "Hiring",
+            "Managing",
+            "Leveling",
+            "Compensation",
+        ],
+    },
+    {
+        name: "Monzo",
+        slug: "episode-3-monzo",
+        wikiTag: "Operating Cadence, Hiring and Managing Leaders",
+        smartSearchKeywords: [
+            "Operating",
+            "Scaling",
+            "Meetings",
+            "OKRs",
+            "Goals",
+            "Planning",
+            "Metrics",
+            "Business Reviews",
+            "Execution",
+            "Strategic Planning",
+            "Hiring Executives",
+            "Leadership",
+            "Recruiting",
+            "Team Building",
+            "Executive Search",
+            "Management",
+            "Onboarding",
+            "Talent",
+            "Promotions",
+            "Firing",
+            "Org Design",
+            "Headcount",
+            "Talent",
+            "Org Structure",
+            "Scaling Teams",
+            "Hiring",
+            "Managing",
+            "Leveling",
+            "Compensation",
+        ],
+    },
+    {
+        name: "a16z & DST",
+        slug: "episode-4-a16z-dst",
+        wikiTag: "Financial Planning and Fundraising",
+        smartSearchKeywords: ["Fundraising", "VC", "Investors"],
     },
 ];
