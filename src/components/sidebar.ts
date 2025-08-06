@@ -31,7 +31,7 @@ export const Sidebar = () => {
         // TODO: filter for favorited items from user localstorage (see favorites page logic)
         // { title: "Favorited", items: },
         { title: "Wiki Topics", items: wikiItems },
-        { title: "Case Studies", items: caseStudyItems },
+        // { title: "Case Studies", items: caseStudyItems },
         { title: "Session Insights", items: sessionItems },
         { title: "Podcast Episodes", items: podcastItems },
     ];
