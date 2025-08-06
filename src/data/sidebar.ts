@@ -736,13 +736,13 @@ export const sessionInsightsBatches: SessionInsightsBatch[] = [
                 ],
             },
             {
-                name: "Plaid and Replit",
+                name: "Plaid & Replit",
                 slug: "plaid-and-replit-on-scaling-engineering",
                 wikiTag: "Scaling Engineering",
                 smartSearchKeywords: ["CTO", "VP of Engineering", "Technical", "Developers"],
             },
             {
-                name: "Lattice and Faire",
+                name: "Lattice & Faire",
                 slug: "lattice-and-faire-on-scaling-people",
                 wikiTag: "Scaling People",
                 smartSearchKeywords: [
@@ -879,13 +879,13 @@ export const sessionInsightsBatches: SessionInsightsBatch[] = [
                 ],
             },
             {
-                name: "Plaid and Rippling",
+                name: "Plaid & Rippling",
                 slug: "plaid-and-rippling-on-scaling-engineering",
                 wikiTag: "Scaling Engineering",
                 smartSearchKeywords: ["CTO", "VP of Engineering", "Technical", "Developers"],
             },
             {
-                name: "Lattice and Weebly",
+                name: "Lattice & Weebly",
                 slug: "lattice-and-weebly-on-scaling-people",
                 wikiTag: "Scaling People",
                 smartSearchKeywords: [
@@ -918,7 +918,7 @@ export const sessionInsightsBatches: SessionInsightsBatch[] = [
                 ],
             },
             {
-                name: "Checkr and Rubrik",
+                name: "Checkr & Rubrik",
                 slug: "checkr-and-rubrik-on-financial-planning",
                 wikiTag: "Financial Planning and Fundraising",
                 smartSearchKeywords: ["Finance", "CFO", "Fundraising", "Budgeting", "Runway", "Burn", "Forecasting", "Revenue"],
@@ -929,7 +929,7 @@ export const sessionInsightsBatches: SessionInsightsBatch[] = [
         title: "Batch 4",
         sessionInsights: [
             {
-                name: "Webflow and Whatnot",
+                name: "Webflow & Whatnot",
                 slug: "webflow-and-whatnot-on-hiring-managing-leaders",
                 wikiTag: "Hiring and Managing Leaders",
                 smartSearchKeywords: [
