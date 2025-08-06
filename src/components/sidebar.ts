@@ -1,5 +1,6 @@
 import { getAvraElement, getElements } from "@/utils/dom/elements";
 import { wikiTags } from "@/data/sidebar";
+import { gsap } from "gsap";
 
 export const Sidebar = () => {
     const dataContainer = getAvraElement("data-container");
@@ -10,7 +11,7 @@ export const Sidebar = () => {
 
     const wikiItems = getElements<HTMLAnchorElement>("[avra-element='ss-wiki']", wikiList);
     const sessionItems = getElements<HTMLAnchorElement>("[avra-element='ss-session']", sessionList);
-    const caseStudyItems = getElements<HTMLAnchorElement>("[avra-element='ss-case-study']", caseStudyList);
+    // const caseStudyItems = getElements<HTMLAnchorElement>("[avra-element='ss-case-study']", caseStudyList);
     const podcastItems = getElements<HTMLAnchorElement>("[avra-element='ss-podcast']", podcastList);
 
     const sidebar = getAvraElement("wiki-sidebar");
@@ -246,22 +247,109 @@ export const Sidebar = () => {
         sectionList.appendChild(section);
     }
 
-    // Handle search form and results
-    // right side of the page, where the search/wiki content displays
-    // const container = getElement("[avra-element='wiki-container']");
+    setupWikiDropdowns();
+};
 
-    // LOWKEY: remove this
-    // structured list of all items for ease of use in search system
-    // const items = [...wikiItems, ...sessionItems, ...caseStudyItems, ...podcastItems].map((item) => {
-    //     const link = item.querySelector("a");
-    //     return {
-    //         title: item.getAttribute("data-avra-title"),
-    //         slug: item.getAttribute("data-avra-slug"),
-    //         link: link?.getAttribute("href") || null,
-    //         type: item.getAttribute("data-avra-type"),
-    //         element: item,
-    //     };
-    // });
+const setupWikiDropdowns = () => {
+    setupDropdownForElements("[avra-element='wiki-section-title-text']", "[avra-element='wiki-section-item']");
+    setupDropdownForElements("[avra-element='wiki-section-item-text']", "[avra-element='wiki-insight-item']");
+    setupDropdownForElements("[avra-element='wiki-insight-item-text']", "[avra-element='wiki-insight-heading-item']");
+    setupDropdownForElements("[avra-element='wiki-insight-heading-item-text']", "[avra-element='wiki-insight-heading-item-2']");
+};
 
-    // console.log("structured item list:", items);
+const setupDropdownForElements = (textSelector: string, childSelector: string) => {
+    const textElements = getElements<HTMLElement>(textSelector);
+
+    textElements.forEach((textElement) => {
+        const dropdownArrow = textElement.nextElementSibling as HTMLElement;
+        if (!dropdownArrow) return;
+
+        // Find the container that holds the child elements
+        let container = textElement.parentElement!.parentElement!;
+        if (textSelector === "[avra-element='wiki-section-title-text']") {
+            // For section titles, the container is the parent of the title element
+            container = textElement.parentElement!.parentElement!;
+        }
+        if (!container) return;
+
+        const childItems = getElements<HTMLElement>(childSelector, container);
+
+        if (childItems.length === 0) {
+            dropdownArrow.remove();
+            return;
+        }
+
+        // Check if this is the "Wiki Topics" section that should be open by default
+        const isWikiTopicsSection =
+            textSelector === "[avra-element='wiki-section-title-text']" && textElement.textContent?.toLowerCase() === "wiki topics";
+
+        // Hide child items by default, except for Wiki Topics section
+        if (isWikiTopicsSection) {
+            childItems.forEach((item) => {
+                gsap.set(item, { height: "auto", opacity: 1, overflow: "visible", display: "flex", marginTop: "8px" });
+            });
+            // Set arrow to expanded state
+            gsap.set(dropdownArrow, { rotation: 180 });
+        } else {
+            childItems.forEach((item) => {
+                gsap.set(item, { height: 0, opacity: 0, overflow: "hidden", display: "none", marginTop: 0 });
+            });
+        }
+
+        // Track expanded state
+        let isExpanded = isWikiTopicsSection;
+
+        // Add click handler to the dropdown arrow
+        dropdownArrow.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            if (isExpanded) {
+                // Collapse - animate to height 0, opacity 0, and marginTop 0, then hide
+                gsap.to(childItems, {
+                    height: 0,
+                    opacity: 0,
+                    marginTop: 0,
+                    duration: 0.25,
+                    ease: "power2.out",
+                    stagger: 0.05,
+                    onComplete: () => {
+                        childItems.forEach((item) => {
+                            gsap.set(item, { display: "none" });
+                        });
+                    },
+                });
+
+                // Rotate arrow back
+                gsap.to(dropdownArrow, {
+                    rotation: 0,
+                    duration: 0.25,
+                    ease: "power2.out",
+                });
+            } else {
+                // Expand - first show elements, then animate
+                childItems.forEach((item) => {
+                    gsap.set(item, { display: "flex" });
+                });
+
+                gsap.to(childItems, {
+                    height: "auto",
+                    opacity: 1,
+                    marginTop: "8px",
+                    duration: 0.25,
+                    ease: "power2.out",
+                    stagger: 0.05,
+                });
+
+                // Rotate arrow down
+                gsap.to(dropdownArrow, {
+                    rotation: 180,
+                    duration: 0.25,
+                    ease: "power2.out",
+                });
+            }
+
+            isExpanded = !isExpanded;
+        });
+    });
 };

@@ -43,6 +43,7 @@
     "dependencies": {
         "@finsweet/ts-utils": "^0.40.0",
         "@memberstack/dom": "^1.9.40",
+        "gsap": "^3.13.0",
         "swup": "^4.8.2"
     }
 }
