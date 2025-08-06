@@ -1,18 +1,18 @@
 import { getAvraElement, getElements } from "@/utils/dom/elements";
-import { wikiTags } from "@/data/sidebar";
+import { wikiItems, sessionInsightsBatches } from "@/data/sidebar";
 import { gsap } from "gsap";
 
 export const Sidebar = () => {
     const dataContainer = getAvraElement("data-container");
     const wikiList = getAvraElement("ss-wiki-list", dataContainer);
     const sessionList = getAvraElement("ss-session-list", dataContainer);
-    const caseStudyList = getAvraElement("ss-case-study-list", dataContainer);
+    // const caseStudyList = getAvraElement("ss-case-study-list", dataContainer);
     const podcastList = getAvraElement("ss-podcast-list", dataContainer);
 
-    const wikiItems = getElements<HTMLAnchorElement>("[avra-element='ss-wiki']", wikiList);
-    const sessionItems = getElements<HTMLAnchorElement>("[avra-element='ss-session']", sessionList);
+    const wikiElements = getElements<HTMLAnchorElement>("[avra-element='ss-wiki']", wikiList);
+    const sessionInsightElements = getElements<HTMLAnchorElement>("[avra-element='ss-session']", sessionList);
     // const caseStudyItems = getElements<HTMLAnchorElement>("[avra-element='ss-case-study']", caseStudyList);
-    const podcastItems = getElements<HTMLAnchorElement>("[avra-element='ss-podcast']", podcastList);
+    const podcastElements = getElements<HTMLAnchorElement>("[avra-element='ss-podcast']", podcastList);
 
     const sidebar = getAvraElement("wiki-sidebar");
 
@@ -31,10 +31,10 @@ export const Sidebar = () => {
     const sidebarSections = [
         // TODO: filter for favorited items from user localstorage (see favorites page logic)
         // { title: "Favorited", items: },
-        { title: "Wiki Topics", items: wikiItems },
+        { title: "Wiki Topics", items: wikiElements },
         // { title: "Case Studies", items: caseStudyItems },
-        { title: "Session Insights", items: sessionItems },
-        { title: "Podcast Episodes", items: podcastItems },
+        { title: "Session Insights", items: sessionInsightElements },
+        { title: "Podcast Episodes", items: podcastElements },
     ];
     const sectionsToAdd: HTMLElement[] = [];
 
@@ -57,7 +57,7 @@ export const Sidebar = () => {
 
         if (title === "Wiki Topics") {
             // use hardcoded wiki tag data to create the Wiki sidebar section
-            for (const wikiTag of wikiTags) {
+            for (const wikiTag of wikiItems) {
                 const sectionItem = sectionItemTemplate.cloneNode(true) as HTMLAnchorElement;
                 const sectionItemText = getAvraElement<HTMLAnchorElement>("wiki-section-item-text", sectionItem);
                 sectionItemText.textContent = wikiTag.title;
@@ -165,6 +165,39 @@ export const Sidebar = () => {
 
                 insightItemTemplate.remove();
                 // sectionsToAdd.push(section);
+            }
+        } else if (title === "Session Insights") {
+            for (const batch of sessionInsightsBatches) {
+                const sectionItem = sectionItemTemplate.cloneNode(true) as HTMLAnchorElement;
+                const sectionItemText = getAvraElement<HTMLAnchorElement>("wiki-section-item-text", sectionItem);
+                sectionItemText.textContent = batch.title;
+                sectionItemsToAdd.push(sectionItem);
+
+                const subItemTemplate = getAvraElement("wiki-insight-item", sectionItem);
+                const subItemsToAdd: HTMLElement[] = [];
+
+                for (const sessionInsightItem of batch.sessionInsights) {
+                    const subItem = subItemTemplate.cloneNode(true) as HTMLAnchorElement;
+                    const subItemText = getAvraElement<HTMLAnchorElement>("wiki-insight-item-text", subItem);
+                    subItemText.textContent = sessionInsightItem.name;
+                    subItemText.href = `/session-insights/${sessionInsightItem.slug}`;
+                    subItemsToAdd.push(subItem);
+
+                    // TODO: handle sessionInsightItem properties (wikiTags and smartSearchKeywords)
+
+                    // remove template element
+                    const subSubItemTemplateElement = getAvraElement("wiki-insight-heading-item", subItem);
+                    subSubItemTemplateElement.remove();
+                }
+
+                while (sectionItem.children.length > 1) {
+                    sectionItem.removeChild(sectionItem.lastChild!);
+                }
+                for (const subItem of subItemsToAdd) {
+                    sectionItem.appendChild(subItem);
+                }
+
+                subItemTemplate.remove();
             }
         } else {
             for (const item of items) {
