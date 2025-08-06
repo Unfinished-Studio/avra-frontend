@@ -11,65 +11,62 @@ const handleScrollToHighlight = () => {
     console.log("highlightText", highlightText);
 
     if (highlightText) {
-        // Function to find and scroll to matching text
+        // Function to find and scroll to matching text in headings only
         const scrollToHighlightedText = () => {
             const content = document.querySelector("#wiki-content");
             if (!content) return;
 
-            // Create a walker to traverse all text nodes
-            const walker = document.createTreeWalker(content, NodeFilter.SHOW_TEXT, null);
+            // Only search within heading elements (h1, h2, h3, h4, h5, h6)
+            const headings = content.querySelectorAll("h1, h2, h3, h4, h5, h6");
+            const searchText = highlightText.toLowerCase();
 
-            let textNode;
-            while ((textNode = walker.nextNode())) {
-                const text = textNode.textContent?.toLowerCase() || "";
-                const searchText = highlightText.toLowerCase();
+            for (const heading of headings) {
+                const headingText = heading.textContent?.toLowerCase() || "";
 
-                if (text.includes(searchText)) {
-                    // Found matching text, scroll to it
-                    const element = textNode.parentElement;
-                    console.log("element", element);
-                    if (element) {
-                        // Get element position and scroll with 100px offset
-                        const elementRect = element.getBoundingClientRect();
-                        const elementTop = elementRect.top + window.pageYOffset;
+                if (headingText.includes(searchText)) {
+                    // Found matching text in heading, scroll to it
+                    console.log("element", heading);
 
-                        wikiContainer.scrollTo({
-                            top: elementTop - 60,
-                            behavior: "smooth",
+                    // Get element position and scroll with 100px offset
+                    const elementRect = heading.getBoundingClientRect();
+                    const elementTop = elementRect.top + window.pageYOffset;
+
+                    wikiContainer.scrollTo({
+                        top: elementTop - 60,
+                        behavior: "smooth",
+                    });
+
+                    // Highlight the text temporarily
+                    const originalHTML = heading.innerHTML;
+                    const regex = new RegExp(`(${highlightText})`, "gi");
+                    const newHTML = originalHTML.replace(
+                        regex,
+                        '<mark class="highlight-fade" style="background-color: transparent; transition: background-color 0.5s ease-in-out; padding: 2px;">$1</mark>'
+                    );
+                    heading.innerHTML = newHTML;
+
+                    const marks = heading.querySelectorAll<HTMLElement>(".highlight-fade");
+
+                    // Fade in
+                    setTimeout(() => {
+                        marks.forEach((mark) => {
+                            mark.style.backgroundColor = "#d6d5d1";
+                        });
+                    }, 100);
+
+                    // Fade out and remove
+                    setTimeout(() => {
+                        marks.forEach((mark) => {
+                            mark.style.backgroundColor = "transparent";
                         });
 
-                        // Highlight the text temporarily
-                        const originalHTML = element.innerHTML;
-                        const regex = new RegExp(`(${highlightText})`, "gi");
-                        const newHTML = originalHTML.replace(
-                            regex,
-                            '<mark class="highlight-fade" style="background-color: transparent; transition: background-color 0.5s ease-in-out; padding: 2px;">$1</mark>'
-                        );
-                        element.innerHTML = newHTML;
-
-                        const marks = element.querySelectorAll<HTMLElement>(".highlight-fade");
-
-                        // Fade in
+                        // Remove the mark after fade out transition ends
                         setTimeout(() => {
-                            marks.forEach((mark) => {
-                                mark.style.backgroundColor = "#d6d5d1";
-                            });
-                        }, 100);
+                            heading.innerHTML = originalHTML;
+                        }, 500); // This should match the transition duration
+                    }, 2500);
 
-                        // Fade out and remove
-                        setTimeout(() => {
-                            marks.forEach((mark) => {
-                                mark.style.backgroundColor = "transparent";
-                            });
-
-                            // Remove the mark after fade out transition ends
-                            setTimeout(() => {
-                                element.innerHTML = originalHTML;
-                            }, 500); // This should match the transition duration
-                        }, 2500);
-
-                        break;
-                    }
+                    break;
                 }
             }
         };
