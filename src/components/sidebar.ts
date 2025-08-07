@@ -1,8 +1,53 @@
+import { podcastArticles, sessionInsightsBatches, wikiItems } from "@/data/sidebar";
 import { getAvraElement, getElements } from "@/utils/dom/elements";
-import { wikiItems, sessionInsightsBatches, podcastArticles } from "@/data/sidebar";
 import { gsap } from "gsap";
 
-export const Sidebar = () => {
+const activeClass = "is-active";
+let sidebarInitialized = false;
+
+export const getCurrentPageInfo = () => {
+    const dataEl = document.querySelector<HTMLElement>("[avra-element='item-data']");
+    const currentUrl = window.location.pathname;
+
+    let currentSlug = null;
+    let currentType: "wiki" | "session" | "podcast" | "case-study" | null = null;
+
+    if (dataEl) {
+        currentSlug = dataEl.getAttribute("data-avra-slug");
+    }
+
+    // Determine type from URL
+    if (currentUrl.includes("/avra-wiki/")) {
+        currentType = "wiki";
+        if (!currentSlug) {
+            // Extract slug from URL if not in data element
+            const pathParts = currentUrl.split("/");
+            currentSlug = pathParts[pathParts.length - 1] || pathParts[pathParts.length - 2];
+        }
+    } else if (currentUrl.includes("/session-insights/")) {
+        currentType = "session";
+        if (!currentSlug) {
+            const pathParts = currentUrl.split("/");
+            currentSlug = pathParts[pathParts.length - 1] || pathParts[pathParts.length - 2];
+        }
+    } else if (currentUrl.includes("/audio-video/")) {
+        currentType = "podcast";
+        if (!currentSlug) {
+            const pathParts = currentUrl.split("/");
+            currentSlug = pathParts[pathParts.length - 1] || pathParts[pathParts.length - 2];
+        }
+    } else if (currentUrl.includes("/case-studies/")) {
+        currentType = "case-study";
+        if (!currentSlug) {
+            const pathParts = currentUrl.split("/");
+            currentSlug = pathParts[pathParts.length - 1] || pathParts[pathParts.length - 2];
+        }
+    }
+
+    return { currentSlug, currentType, currentUrl };
+};
+
+const initializeSidebar = () => {
     const dataContainer = getAvraElement("data-container");
     const wikiList = getAvraElement("ss-wiki-list", dataContainer);
     const sessionList = getAvraElement("ss-session-list", dataContainer);
@@ -62,6 +107,10 @@ export const Sidebar = () => {
                 const sectionItemText = getAvraElement<HTMLAnchorElement>("wiki-section-item-text", sectionItem);
                 sectionItemText.textContent = wikiTag.title;
                 sectionItemText.href = `/avra-wiki/${wikiTag.slug}`; // TODO: correct slugs in hardcoded data
+
+                // Store slug as data attribute for later highlighting
+                sectionItem.setAttribute("data-wiki-slug", wikiTag.slug);
+
                 sectionItemsToAdd.push(sectionItem);
 
                 const insightItemTemplate = getAvraElement("wiki-insight-item", sectionItem);
@@ -181,6 +230,10 @@ export const Sidebar = () => {
                     const subItemText = getAvraElement<HTMLAnchorElement>("wiki-insight-item-text", subItem);
                     subItemText.textContent = sessionInsightItem.name;
                     subItemText.href = `/session-insights/${sessionInsightItem.slug}`;
+
+                    // Store slug as data attribute for later highlighting
+                    subItem.setAttribute("data-session-slug", sessionInsightItem.slug);
+
                     subItemsToAdd.push(subItem);
 
                     // TODO: handle sessionInsightItem properties (wikiTags and smartSearchKeywords)
@@ -205,6 +258,10 @@ export const Sidebar = () => {
                 const sectionItemText = getAvraElement<HTMLAnchorElement>("wiki-section-item-text", sectionItem);
                 sectionItemText.textContent = podcastArticle.name;
                 sectionItemText.href = `/audio-video/${podcastArticle.slug}`;
+
+                // Store slug as data attribute for later highlighting
+                sectionItem.setAttribute("data-podcast-slug", podcastArticle.slug);
+
                 sectionItemsToAdd.push(sectionItem);
 
                 const subItemTemplate = getAvraElement("wiki-insight-item", sectionItem);
@@ -296,108 +353,287 @@ export const Sidebar = () => {
     for (const section of sectionsToAdd) {
         sectionList.appendChild(section);
     }
-
-    setupWikiDropdowns();
 };
 
-const setupWikiDropdowns = () => {
-    setupDropdownForElements("[avra-element='wiki-section-title-text']", "[avra-element='wiki-section-item']");
-    setupDropdownForElements("[avra-element='wiki-section-item-text']", "[avra-element='wiki-insight-item']");
-    setupDropdownForElements("[avra-element='wiki-insight-item-text']", "[avra-element='wiki-insight-heading-item']");
-    setupDropdownForElements("[avra-element='wiki-insight-heading-item-text']", "[avra-element='wiki-insight-heading-item-2']");
+const updateSidebarHighlighting = (currentSlug: string | null, currentType: string | null) => {
+    const textElementSelector = "[avra-element='wiki-section-item-text'], [avra-element='wiki-insight-item-text']";
+
+    // Clear all existing highlighting
+    const allItems = document.querySelectorAll<HTMLElement>("[data-wiki-slug], [data-session-slug], [data-podcast-slug]");
+
+    allItems.forEach((item) => {
+        const textElement = item.querySelector<HTMLElement>(textElementSelector);
+        if (textElement) {
+            textElement.classList.remove(activeClass);
+        }
+    });
+
+    // Apply highlighting to current page
+    if (currentSlug && currentType) {
+        let selector = "";
+        if (currentType === "wiki") {
+            selector = `[data-wiki-slug="${currentSlug}"]`;
+        } else if (currentType === "session") {
+            selector = `[data-session-slug="${currentSlug}"]`;
+        } else if (currentType === "podcast") {
+            selector = `[data-podcast-slug="${currentSlug}"]`;
+        }
+
+        if (selector) {
+            const currentItem = document.querySelector<HTMLElement>(selector);
+            if (currentItem) {
+                const textElement = currentItem.querySelector<HTMLElement>(textElementSelector);
+                if (textElement) {
+                    textElement.classList.add(activeClass);
+                }
+            }
+        }
+    }
 };
 
-const setupDropdownForElements = (textSelector: string, childSelector: string) => {
+const setupItemDropdown = (textSelector: string, childSelector: string, currentType: string | null, currentSlug: string | null) => {
     const textElements = getElements<HTMLElement>(textSelector);
 
-    textElements.forEach((textElement) => {
-        const dropdownArrow = textElement.nextElementSibling as HTMLElement;
-        if (!dropdownArrow) return;
+    console.log("handling dropdown layer", { textSelector, childSelector, currentType, currentSlug });
 
-        // Find the container that holds the child elements
-        let container = textElement.parentElement!.parentElement!;
+    // the current item for the page, all dropdowns open to reveal this
+    let currentItem: HTMLElement | null = null;
+    let activeTextElements: Record<string, HTMLElement | null> = {
+        one: null,
+        two: null,
+        three: null,
+        four: null,
+    };
+
+    for (const textElement of textElements) {
+        const dropdownBtn = textElement.nextElementSibling as HTMLElement;
+        if (!dropdownBtn) continue;
+
+        let dropdownParent = textElement.parentElement!.parentElement!;
+        if (!dropdownParent) return;
+
+        const childItems = getElements<HTMLElement>(childSelector, dropdownParent);
+
+        for (const child of childItems) {
+            const linkElement = child.querySelector("a");
+            if (linkElement) {
+                linkElement.classList.remove(activeClass);
+            }
+        }
+
+        // set up dropdown if not configured
+        const dropdownConfigured = dropdownParent.getAttribute("data-avra-dropdown-configured") === "true";
+        try {
+            if (!dropdownConfigured) {
+                dropdownParent.setAttribute("data-avra-dropdown-configured", "true");
+
+                if (childItems.length === 0) {
+                    dropdownBtn.remove();
+                    throw new Error("No child elements for dropdown, removing arrow");
+                }
+
+                dropdownBtn.addEventListener("click", (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+
+                    const dropdownExpanded = dropdownBtn.getAttribute("data-avra-dropdown-expanded") === "true";
+                    if (dropdownExpanded) {
+                        dropdownBtn.setAttribute("data-avra-dropdown-expanded", "false");
+
+                        // Collapse - animate to height 0, opacity 0, and marginTop 0, then hide
+                        gsap.to(childItems, {
+                            height: 0,
+                            opacity: 0,
+                            marginTop: 0,
+                            duration: 0.25,
+                            ease: "power2.out",
+                            stagger: 0.05,
+                            onComplete: () => {
+                                childItems.forEach((item) => {
+                                    gsap.set(item, { display: "none" });
+                                });
+                            },
+                        });
+
+                        // Rotate arrow back
+                        gsap.to(dropdownBtn, {
+                            rotation: 0,
+                            duration: 0.25,
+                            ease: "power2.out",
+                        });
+                    } else {
+                        dropdownBtn.setAttribute("data-avra-dropdown-expanded", "true");
+
+                        // Expand - first show elements, then animate
+                        childItems.forEach((item) => {
+                            gsap.set(item, { display: "flex" });
+                        });
+
+                        gsap.to(childItems, {
+                            height: "auto",
+                            opacity: 1,
+                            marginTop: "8px",
+                            duration: 0.25,
+                            ease: "power2.out",
+                            stagger: 0.05,
+                        });
+
+                        // Rotate arrow down
+                        gsap.to(dropdownBtn, {
+                            rotation: 180,
+                            duration: 0.25,
+                            ease: "power2.out",
+                        });
+                    }
+                });
+            }
+        } catch (err) {
+            // console.log("Error configuring dropdown:", err);
+        }
+
+        // toggle open/close state based on current page
+        const isWikiTopic = currentType === "wiki" || currentType === "case-study";
+        let shouldBeExpanded = false;
+
         if (textSelector === "[avra-element='wiki-section-title-text']") {
-            // For section titles, the container is the parent of the title element
-            container = textElement.parentElement!.parentElement!;
+            // Section titles - open the section that contains the current page
+            const matchingChild = childItems.find((child) => {
+                const links = child.querySelectorAll("a");
+                return Array.from(links).some((link) => link.href === location.href);
+            });
+
+            if (matchingChild) {
+                if (!activeTextElements.one) {
+                    activeTextElements.one = matchingChild;
+                    shouldBeExpanded = true;
+                }
+
+                for (const child of childItems) {
+                    const linkElement = child.querySelector("a");
+                    if (linkElement) {
+                        linkElement.classList.remove(activeClass);
+                    }
+                }
+                const matchingChildTextElement = matchingChild.querySelector("a");
+                if (matchingChildTextElement) {
+                    matchingChildTextElement.classList.add(activeClass);
+                }
+            }
+
+            const sectionText = textElement.textContent?.toLowerCase() || "";
+            if (sectionText === "wiki topics" && (currentType === "wiki" || currentType === "case-study")) {
+                shouldBeExpanded = true;
+            } else if (sectionText === "session insights" && currentType === "session") {
+                shouldBeExpanded = true;
+            } else if (sectionText === "podcast episodes" && currentType === "podcast") {
+                shouldBeExpanded = true;
+            } else if (sectionText === "wiki topics") {
+                // Keep Wiki Topics open by default when not on a specific content page
+                shouldBeExpanded = currentType === null;
+            }
+        } else if (textSelector === "[avra-element='wiki-section-item-text']" && isWikiTopic) {
+            // Wiki article dropdowns - open if this is the current wiki article
+            // const linkElement = textElement as HTMLAnchorElement;
+            // shouldBeExpanded =
+            //     linkElement.href.includes(`/avra-wiki/${currentSlug}`) || linkElement.href.includes(`/case-studies/${currentSlug}`);
+
+            const matchingChild = childItems.find((child) => {
+                const links = child.querySelectorAll("a");
+                return Array.from(links).some((link) => link.href === location.href);
+            });
+
+            if (matchingChild) {
+                if (!activeTextElements.two) {
+                    activeTextElements.two = matchingChild;
+                    shouldBeExpanded = true;
+                }
+
+                const matchingChildTextElement = matchingChild.querySelector("a");
+                if (matchingChildTextElement) {
+                    matchingChildTextElement.classList.add(activeClass);
+                }
+            }
+        } else if (textSelector === "[avra-element='wiki-insight-item-text']" && isWikiTopic) {
+            // Sub-item dropdowns - open if parent contains current page
+            const matchingChild = childItems.find((child) => {
+                const links = child.querySelectorAll("a");
+                return Array.from(links).some((link) => link.href === location.href);
+            });
+
+            if (matchingChild) {
+                currentItem = matchingChild;
+                shouldBeExpanded = true;
+
+                const matchingChildTextElement = matchingChild.querySelector("a");
+                if (matchingChildTextElement) {
+                    matchingChildTextElement.classList.add(activeClass);
+                }
+            }
+        } else if (textSelector === "[avra-element='wiki-insight-heading-item-text']" && isWikiTopic) {
+            const matchingChild = childItems.find((child) => {
+                const links = child.querySelectorAll("a");
+                return Array.from(links).some((link) => link.href === location.href);
+                // return Array.from(links).some(
+                //     (link) => link.href.includes(`/avra-wiki/${currentSlug}`) || link.href.includes(`/case-studies/${currentSlug}`)
+                // );
+            });
+
+            if (matchingChild) {
+                if (!activeTextElements.three) {
+                    activeTextElements.three = matchingChild;
+                    shouldBeExpanded = true;
+                }
+
+                const matchingChildTextElement = matchingChild.querySelector("a");
+                if (matchingChildTextElement) {
+                    matchingChildTextElement.classList.add(activeClass);
+                }
+            }
+        } else {
+            // For deeper nested items, keep closed by default unless specifically needed
+            shouldBeExpanded = false;
         }
-        if (!container) return;
 
-        const childItems = getElements<HTMLElement>(childSelector, container);
-
-        if (childItems.length === 0) {
-            dropdownArrow.remove();
-            return;
-        }
-
-        // default positions
-        // Wiki Topics is open by default
-        const isWikiTopicsSection =
-            textSelector === "[avra-element='wiki-section-title-text']" && textElement.textContent?.toLowerCase() === "wiki topics";
-        if (isWikiTopicsSection) {
+        if (shouldBeExpanded) {
             childItems.forEach((item) => {
                 gsap.set(item, { height: "auto", opacity: 1, overflow: "visible", display: "flex", marginTop: "8px" });
             });
-            gsap.set(dropdownArrow, { rotation: 180 });
+            gsap.set(dropdownBtn, { rotation: 180 });
+            dropdownBtn.setAttribute("data-avra-dropdown-expanded", "true");
         } else {
             childItems.forEach((item) => {
                 gsap.set(item, { height: 0, opacity: 0, overflow: "hidden", display: "none", marginTop: 0 });
             });
-            gsap.set(dropdownArrow, { rotation: 0 });
+            dropdownBtn.setAttribute("data-avra-dropdown-expanded", "false");
+            gsap.set(dropdownBtn, { rotation: 0 });
         }
+    }
+};
 
-        let isExpanded = isWikiTopicsSection;
+const setupSidebarDropdowns = (currentType: string | null, currentSlug: string | null) => {
+    setupItemDropdown("[avra-element='wiki-section-title-text']", "[avra-element='wiki-section-item']", currentType, currentSlug);
+    setupItemDropdown("[avra-element='wiki-section-item-text']", "[avra-element='wiki-insight-item']", currentType, currentSlug);
+    setupItemDropdown("[avra-element='wiki-insight-item-text']", "[avra-element='wiki-insight-heading-item']", currentType, currentSlug);
+    setupItemDropdown(
+        "[avra-element='wiki-insight-heading-item-text']",
+        "[avra-element='wiki-insight-heading-item-2']",
+        currentType,
+        currentSlug
+    );
+};
 
-        // Add click handler to the dropdown arrow
-        dropdownArrow.addEventListener("click", (e) => {
-            e.preventDefault();
-            e.stopPropagation();
+export const updateSidebarState = () => {
+    const { currentSlug, currentType, currentUrl } = getCurrentPageInfo();
+    console.log("PAGE INFO:", { currentSlug, currentType, currentUrl });
 
-            if (isExpanded) {
-                // Collapse - animate to height 0, opacity 0, and marginTop 0, then hide
-                gsap.to(childItems, {
-                    height: 0,
-                    opacity: 0,
-                    marginTop: 0,
-                    duration: 0.25,
-                    ease: "power2.out",
-                    stagger: 0.05,
-                    onComplete: () => {
-                        childItems.forEach((item) => {
-                            gsap.set(item, { display: "none" });
-                        });
-                    },
-                });
+    // updateSidebarHighlighting(currentSlug, currentType);
+    setupSidebarDropdowns(currentType, currentSlug);
+};
 
-                // Rotate arrow back
-                gsap.to(dropdownArrow, {
-                    rotation: 0,
-                    duration: 0.25,
-                    ease: "power2.out",
-                });
-            } else {
-                // Expand - first show elements, then animate
-                childItems.forEach((item) => {
-                    gsap.set(item, { display: "flex" });
-                });
-
-                gsap.to(childItems, {
-                    height: "auto",
-                    opacity: 1,
-                    marginTop: "8px",
-                    duration: 0.25,
-                    ease: "power2.out",
-                    stagger: 0.05,
-                });
-
-                // Rotate arrow down
-                gsap.to(dropdownArrow, {
-                    rotation: 180,
-                    duration: 0.25,
-                    ease: "power2.out",
-                });
-            }
-
-            isExpanded = !isExpanded;
-        });
-    });
+export const Sidebar = () => {
+    if (!sidebarInitialized) {
+        initializeSidebar();
+        sidebarInitialized = true;
+    }
+    updateSidebarState();
 };

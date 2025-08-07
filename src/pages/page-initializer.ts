@@ -1,5 +1,5 @@
 import { WIKI_SESSION_MAPPINGS, type WikiSession } from "@/data/wiki-data";
-import { getElement, getAvraElement } from "@/utils/dom/elements";
+import { getAvraElement, getElement } from "@/utils/dom/elements";
 
 // TODO: rewrite to work with new scroll to highlight logic
 const handleScrollToHighlight = () => {

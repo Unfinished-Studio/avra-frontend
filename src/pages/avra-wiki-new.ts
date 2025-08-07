@@ -1,4 +1,4 @@
-import { Sidebar } from "@/components/sidebar";
+import { Sidebar, updateSidebarState } from "@/components/sidebar";
 import { SMART_SEARCH_CONFIG } from "@/constants";
 import { CONTENT_ITEMS } from "@/data/content";
 import { initContentPage } from "@/pages/page-initializer";
@@ -27,7 +27,7 @@ export const updateSwupLinks = (newLinkSelector: string) => {
         console.log("new content available");
     });
     swup.hooks.on("visit:end", (visit) => {
-        Sidebar();
+        updateSidebarState();
         initContentPage();
         updateSidebar();
     });
@@ -422,7 +422,7 @@ window.Webflow.push(async () => {
 
     swup = initSwup();
     swup.hooks.on("content:replace", () => {
-        // remove/change certain elements on the wiki page
+        // remove/change elements pulled in from wiki page
         const elementsToRemove = document.querySelectorAll<HTMLElement>(
             ".wiki-dropdown-wrapper, .sub-nav.smaller, .sub-nav.tall, .confidential"
         );
@@ -437,7 +437,7 @@ window.Webflow.push(async () => {
         }
     });
     swup.hooks.on("visit:end", (visit) => {
-        Sidebar();
+        updateSidebarState();
         initContentPage();
         updateSidebar();
     });
