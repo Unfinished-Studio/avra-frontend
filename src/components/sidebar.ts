@@ -5,6 +5,11 @@ import { gsap } from "gsap";
 const activeClass = "is-active";
 let sidebarInitialized = false;
 
+// Mobile detection utility
+const isMobile = (): boolean => {
+    return window.innerWidth <= 991;
+};
+
 export const getCurrentPageInfo = () => {
     const dataEl = document.querySelector<HTMLElement>("[avra-element='item-data']");
     const currentUrl = window.location.pathname;
@@ -391,29 +396,98 @@ const updateSidebarHighlighting = (currentSlug: string | null, currentType: stri
     }
 };
 
-const setupItemDropdown = (textSelector: string, childSelector: string, currentType: string | null, currentSlug: string | null) => {
-    const textElements = getElements<HTMLElement>(textSelector);
+// Unified dropdown tier configuration
+const DROPDOWN_TIERS = [
+    {
+        tier: 1,
+        textSelector: "[avra-element='wiki-section-title-text']",
+        childSelector: "[avra-element='wiki-section-item']",
+        containerAttribute: "wiki-section-title",
+    },
+    {
+        tier: 2,
+        textSelector: "[avra-element='wiki-section-item-text']",
+        childSelector: "[avra-element='wiki-insight-item']",
+        containerAttribute: "wiki-section-item",
+    },
+    {
+        tier: 3,
+        textSelector: "[avra-element='wiki-insight-item-text']",
+        childSelector: "[avra-element='wiki-insight-heading-item']",
+        containerAttribute: "wiki-insight-item",
+    },
+    {
+        tier: 4,
+        textSelector: "[avra-element='wiki-insight-heading-item-text']",
+        childSelector: "[avra-element='wiki-insight-heading-item-2']",
+        containerAttribute: "wiki-insight-heading-item",
+    },
+];
 
-    console.log("handling dropdown layer", { textSelector, childSelector, currentType, currentSlug });
+const getSiblingDropdowns = (currentDropdownBtn: HTMLElement): HTMLElement[] => {
+    const currentTier = currentDropdownBtn.getAttribute("data-dropdown-tier");
+    if (!currentTier) return [];
 
-    // the current item for the page, all dropdowns open to reveal this
-    let currentItem: HTMLElement | null = null;
-    let activeTextElements: Record<string, HTMLElement | null> = {
-        one: null,
-        two: null,
-        three: null,
-        four: null,
-    };
+    // Find all dropdown buttons at the same tier level
+    return Array.from(document.querySelectorAll(`[data-dropdown-tier="${currentTier}"]`)).filter(
+        (btn): btn is HTMLElement => btn !== currentDropdownBtn && btn instanceof HTMLElement
+    );
+};
+
+const closeDropdown = (dropdownBtn: HTMLElement): void => {
+    const tier = dropdownBtn.getAttribute("data-dropdown-tier");
+    const tierConfig = DROPDOWN_TIERS.find((t) => t.tier.toString() === tier);
+    if (!tierConfig) return;
+
+    const textElement = dropdownBtn.previousElementSibling as HTMLElement;
+    if (!textElement) return;
+
+    const dropdownParent = textElement.parentElement!.parentElement!;
+    if (!dropdownParent) return;
+
+    const childItems = getElements<HTMLElement>(tierConfig.childSelector, dropdownParent);
+
+    dropdownBtn.setAttribute("data-avra-dropdown-expanded", "false");
+
+    // Collapse animation
+    gsap.to(childItems, {
+        height: 0,
+        opacity: 0,
+        marginTop: 0,
+        duration: 0.25,
+        ease: "power2.out",
+        stagger: 0.05,
+        onComplete: () => {
+            childItems.forEach((item) => {
+                gsap.set(item, { display: "none" });
+            });
+        },
+    });
+
+    // Rotate arrow back
+    gsap.to(dropdownBtn, {
+        rotation: 0,
+        duration: 0.25,
+        ease: "power2.out",
+    });
+};
+
+const setupDropdownForTier = (tierConfig: (typeof DROPDOWN_TIERS)[0], currentType: string | null, currentSlug: string | null) => {
+    const textElements = getElements<HTMLElement>(tierConfig.textSelector);
 
     for (const textElement of textElements) {
         const dropdownBtn = textElement.nextElementSibling as HTMLElement;
         if (!dropdownBtn) continue;
 
+        // Add tier attribute to dropdown button for unified sibling detection
+        dropdownBtn.setAttribute("data-dropdown-tier", tierConfig.tier.toString());
+
         let dropdownParent = textElement.parentElement!.parentElement!;
         if (!dropdownParent) return;
 
-        const childItems = getElements<HTMLElement>(childSelector, dropdownParent);
+        const childItems = getElements<HTMLElement>(tierConfig.childSelector, dropdownParent);
 
+        // Clear existing active states
         for (const child of childItems) {
             const linkElement = child.querySelector("a");
             if (linkElement) {
@@ -421,7 +495,7 @@ const setupItemDropdown = (textSelector: string, childSelector: string, currentT
             }
         }
 
-        // set up dropdown if not configured
+        // Set up dropdown if not configured
         const dropdownConfigured = dropdownParent.getAttribute("data-avra-dropdown-configured") === "true";
         try {
             if (!dropdownConfigured) {
@@ -438,30 +512,17 @@ const setupItemDropdown = (textSelector: string, childSelector: string, currentT
 
                     const dropdownExpanded = dropdownBtn.getAttribute("data-avra-dropdown-expanded") === "true";
                     if (dropdownExpanded) {
-                        dropdownBtn.setAttribute("data-avra-dropdown-expanded", "false");
-
-                        // Collapse - animate to height 0, opacity 0, and marginTop 0, then hide
-                        gsap.to(childItems, {
-                            height: 0,
-                            opacity: 0,
-                            marginTop: 0,
-                            duration: 0.25,
-                            ease: "power2.out",
-                            stagger: 0.05,
-                            onComplete: () => {
-                                childItems.forEach((item) => {
-                                    gsap.set(item, { display: "none" });
-                                });
-                            },
-                        });
-
-                        // Rotate arrow back
-                        gsap.to(dropdownBtn, {
-                            rotation: 0,
-                            duration: 0.25,
-                            ease: "power2.out",
-                        });
+                        closeDropdown(dropdownBtn);
                     } else {
+                        // Close all sibling dropdowns at the same tier level
+                        const siblingDropdowns = getSiblingDropdowns(dropdownBtn);
+                        siblingDropdowns.forEach((siblingBtn) => {
+                            if (siblingBtn.getAttribute("data-avra-dropdown-expanded") === "true") {
+                                closeDropdown(siblingBtn);
+                            }
+                        });
+
+                        // Open this dropdown
                         dropdownBtn.setAttribute("data-avra-dropdown-expanded", "true");
 
                         // Expand - first show elements, then animate
@@ -491,108 +552,8 @@ const setupItemDropdown = (textSelector: string, childSelector: string, currentT
             // console.log("Error configuring dropdown:", err);
         }
 
-        // toggle open/close state based on current page
-        const isWikiTopic = currentType === "wiki" || currentType === "case-study";
-        let shouldBeExpanded = false;
-
-        if (textSelector === "[avra-element='wiki-section-title-text']") {
-            // Section titles - open the section that contains the current page
-            const matchingChild = childItems.find((child) => {
-                const links = child.querySelectorAll("a");
-                return Array.from(links).some((link) => link.href === location.href);
-            });
-
-            if (matchingChild) {
-                if (!activeTextElements.one) {
-                    activeTextElements.one = matchingChild;
-                    shouldBeExpanded = true;
-                }
-
-                for (const child of childItems) {
-                    const linkElement = child.querySelector("a");
-                    if (linkElement) {
-                        linkElement.classList.remove(activeClass);
-                    }
-                }
-                const matchingChildTextElement = matchingChild.querySelector("a");
-                if (matchingChildTextElement) {
-                    matchingChildTextElement.classList.add(activeClass);
-                }
-            }
-
-            const sectionText = textElement.textContent?.toLowerCase() || "";
-            if (sectionText === "wiki topics" && (currentType === "wiki" || currentType === "case-study")) {
-                shouldBeExpanded = true;
-            } else if (sectionText === "session insights" && currentType === "session") {
-                shouldBeExpanded = true;
-            } else if (sectionText === "podcast episodes" && currentType === "podcast") {
-                shouldBeExpanded = true;
-            } else if (sectionText === "wiki topics") {
-                // Keep Wiki Topics open by default when not on a specific content page
-                shouldBeExpanded = currentType === null;
-            }
-        } else if (textSelector === "[avra-element='wiki-section-item-text']" && isWikiTopic) {
-            // Wiki article dropdowns - open if this is the current wiki article
-            // const linkElement = textElement as HTMLAnchorElement;
-            // shouldBeExpanded =
-            //     linkElement.href.includes(`/avra-wiki/${currentSlug}`) || linkElement.href.includes(`/case-studies/${currentSlug}`);
-
-            const matchingChild = childItems.find((child) => {
-                const links = child.querySelectorAll("a");
-                return Array.from(links).some((link) => link.href === location.href);
-            });
-
-            if (matchingChild) {
-                if (!activeTextElements.two) {
-                    activeTextElements.two = matchingChild;
-                    shouldBeExpanded = true;
-                }
-
-                const matchingChildTextElement = matchingChild.querySelector("a");
-                if (matchingChildTextElement) {
-                    matchingChildTextElement.classList.add(activeClass);
-                }
-            }
-        } else if (textSelector === "[avra-element='wiki-insight-item-text']" && isWikiTopic) {
-            // Sub-item dropdowns - open if parent contains current page
-            const matchingChild = childItems.find((child) => {
-                const links = child.querySelectorAll("a");
-                return Array.from(links).some((link) => link.href === location.href);
-            });
-
-            if (matchingChild) {
-                currentItem = matchingChild;
-                shouldBeExpanded = true;
-
-                const matchingChildTextElement = matchingChild.querySelector("a");
-                if (matchingChildTextElement) {
-                    matchingChildTextElement.classList.add(activeClass);
-                }
-            }
-        } else if (textSelector === "[avra-element='wiki-insight-heading-item-text']" && isWikiTopic) {
-            const matchingChild = childItems.find((child) => {
-                const links = child.querySelectorAll("a");
-                return Array.from(links).some((link) => link.href === location.href);
-                // return Array.from(links).some(
-                //     (link) => link.href.includes(`/avra-wiki/${currentSlug}`) || link.href.includes(`/case-studies/${currentSlug}`)
-                // );
-            });
-
-            if (matchingChild) {
-                if (!activeTextElements.three) {
-                    activeTextElements.three = matchingChild;
-                    shouldBeExpanded = true;
-                }
-
-                const matchingChildTextElement = matchingChild.querySelector("a");
-                if (matchingChildTextElement) {
-                    matchingChildTextElement.classList.add(activeClass);
-                }
-            }
-        } else {
-            // For deeper nested items, keep closed by default unless specifically needed
-            shouldBeExpanded = false;
-        }
+        // Determine if this dropdown should be expanded based on current page
+        const shouldBeExpanded = shouldDropdownBeExpanded(tierConfig.tier, textElement, childItems, currentType, currentSlug);
 
         if (shouldBeExpanded) {
             childItems.forEach((item) => {
@@ -610,16 +571,59 @@ const setupItemDropdown = (textSelector: string, childSelector: string, currentT
     }
 };
 
+const shouldDropdownBeExpanded = (
+    tier: number,
+    textElement: HTMLElement,
+    childItems: HTMLElement[],
+    currentType: string | null,
+    currentSlug: string | null
+): boolean => {
+    // On mobile (991px or smaller), all dropdowns should be closed by default
+    if (isMobile()) {
+        return false;
+    }
+
+    const isWikiTopic = currentType === "wiki" || currentType === "case-study";
+
+    // Check if any child contains the current page
+    const matchingChild = childItems.find((child) => {
+        const links = child.querySelectorAll("a");
+        return Array.from(links).some((link) => link.href === location.href);
+    });
+
+    if (matchingChild) {
+        // Highlight the matching child
+        const matchingChildTextElement = matchingChild.querySelector("a");
+        if (matchingChildTextElement) {
+            matchingChildTextElement.classList.add(activeClass);
+        }
+        return true;
+    }
+
+    // Tier 1 specific logic (section titles)
+    if (tier === 1) {
+        const sectionText = textElement.textContent?.toLowerCase() || "";
+        if (sectionText === "wiki topics" && (currentType === "wiki" || currentType === "case-study")) {
+            return true;
+        } else if (sectionText === "session insights" && currentType === "session") {
+            return true;
+        } else if (sectionText === "podcast episodes" && currentType === "podcast") {
+            return true;
+        } else if (sectionText === "wiki topics") {
+            // Keep Wiki Topics open by default when not on a specific content page
+            return currentType === null;
+        }
+    }
+
+    // For other tiers, only expand if contains current page
+    return false;
+};
+
 const setupSidebarDropdowns = (currentType: string | null, currentSlug: string | null) => {
-    setupItemDropdown("[avra-element='wiki-section-title-text']", "[avra-element='wiki-section-item']", currentType, currentSlug);
-    setupItemDropdown("[avra-element='wiki-section-item-text']", "[avra-element='wiki-insight-item']", currentType, currentSlug);
-    setupItemDropdown("[avra-element='wiki-insight-item-text']", "[avra-element='wiki-insight-heading-item']", currentType, currentSlug);
-    setupItemDropdown(
-        "[avra-element='wiki-insight-heading-item-text']",
-        "[avra-element='wiki-insight-heading-item-2']",
-        currentType,
-        currentSlug
-    );
+    // Setup all dropdown tiers using the unified configuration
+    DROPDOWN_TIERS.forEach((tierConfig) => {
+        setupDropdownForTier(tierConfig, currentType, currentSlug);
+    });
 };
 
 export const updateSidebarState = () => {
@@ -630,10 +634,38 @@ export const updateSidebarState = () => {
     setupSidebarDropdowns(currentType, currentSlug);
 };
 
+const closeMobileSidebar = () => {
+    if (isMobile()) {
+        const sidebarBtn = getAvraElement("sidebar-btn");
+        if (sidebarBtn) {
+            sidebarBtn.click();
+        }
+    }
+};
+
+const setupMobileLinkHandler = () => {
+    // Add event listener to document to catch all link clicks
+    document.addEventListener("click", (e) => {
+        const target = e.target as HTMLElement;
+        const link = target.closest("a");
+
+        // If a link was clicked and we're on mobile, close the sidebar
+        if (link && link.href && isMobile()) {
+            // Small delay to ensure navigation starts before closing sidebar
+            setTimeout(closeMobileSidebar, 50);
+        }
+    });
+};
+
 export const Sidebar = () => {
     if (!sidebarInitialized) {
         initializeSidebar();
         sidebarInitialized = true;
+        setupMobileLinkHandler();
+
+        // window.addEventListener("resize", () => {
+        //     updateSidebarState();
+        // });
     }
     updateSidebarState();
 };

@@ -108,8 +108,6 @@ const smartSearch = () => {
         resultsListEl.appendChild(el);
     });
 
-    contentEmptyEl.style.display = "none";
-
     // Create debounced search handler
     const debouncedSearch = debounce(async (searchValue: string) => {
         let visibleContentCount = 0;
@@ -228,7 +226,7 @@ const smartSearch = () => {
 
         // Show/hide content empty state based on visible count
         if (contentEmptyEl) {
-            contentEmptyEl.style.display = visibleContentCount === 0 ? "" : "none";
+            contentEmptyEl.style.display = visibleContentCount === 0 ? "block" : "none";
         }
 
         if (resultsListEl.parentElement) {

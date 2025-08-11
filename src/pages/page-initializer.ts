@@ -76,61 +76,6 @@ const handleScrollToHighlight = () => {
     }
 };
 
-const initFavoritesButton = async () => {
-    const dataEl = document.querySelector<HTMLElement>("[avra-element='item-data']");
-    if (!dataEl) throw new Error("No data element for this CMS page");
-
-    const slug = dataEl.getAttribute("data-avra-slug");
-    if (!slug) throw new Error("No slug for this CMS item");
-
-    const ms = window.$memberstackDom;
-    let json: any = await ms.getMemberJSON();
-    console.log(json);
-
-    let favArr: any[] = [];
-    if (json && (json.data || json.favorites)) {
-        favArr = json.favorites || json.data.favorites || json.data.data.favorites;
-    }
-    console.log(favArr);
-
-    let favorited = favArr.some((x: any) => {
-        console.log(x.slug, slug);
-        return x.slug === slug;
-    });
-
-    const favoriteBtns = document.querySelectorAll<HTMLElement>("[avra-element='favorite-btn']");
-    for (const btn of favoriteBtns) {
-        favorited ? (btn.textContent = "Unfavorite Page") : (btn.textContent = "Favorite Page");
-
-        btn.addEventListener("click", async () => {
-            if (favorited) {
-                console.log("removing");
-                favArr = favArr.filter((x: any) => x.slug !== slug);
-                btn.textContent = "Favorite Page";
-            } else {
-                console.log("adding");
-                favArr.push({ page: window.location.href, slug: slug });
-                btn.textContent = "Unfavorite Page";
-            }
-            favorited = favArr.some((x: any) => x.slug === slug);
-
-            if (json.data && json.data.favorites) {
-                json.data.favorites = favArr;
-            } else {
-                json.data = {
-                    favorites: favArr,
-                };
-            }
-
-            const updated = await ms.updateMemberJSON({ json: json });
-            json = updated;
-
-            console.log("new json", json);
-        });
-        btn.classList.remove("hide");
-    }
-};
-
 const createTableOfContents = () => {
     try {
         // create table of contents
@@ -297,7 +242,6 @@ const createSessionLinks = () => {
 
 export const initContentPage = async () => {
     handleScrollToHighlight();
-    initFavoritesButton();
     // createTableOfContents();
     // createSessionLinks();
 };

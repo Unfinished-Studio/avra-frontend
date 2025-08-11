@@ -10,8 +10,8 @@ export const CATEGORIES = ["Session Insights", "Podcasts", "Case Studies", "Wiki
 
 // Slack webhook URL for page navigation notification
 export const SLACK_NOTIFIER = false;
-export const SLACK_WEBHOOK_URL = "https://hooks.slack.com/services/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"; // dev
-// export const SLACK_WEBHOOK_URL = "https://hooks.slack.com/services/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"; // prod
+// export const SLACK_WEBHOOK_URL = "https://hooks.slack.com/services/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"; // dev
+export const SLACK_WEBHOOK_URL = "https://hooks.slack.com/services/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"; // prod
 
 export const COOKIE_NAMES = {
     USER_ID: "ajs_user_id",
