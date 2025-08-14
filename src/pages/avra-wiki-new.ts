@@ -1,15 +1,241 @@
 import { Sidebar, updateSidebarState } from "@/components/sidebar";
 import { SMART_SEARCH_CONFIG } from "@/constants";
 import { CONTENT_ITEMS } from "@/data/content";
+import { wikiItems } from "@/data/sidebar";
 import { initContentPage } from "@/pages/page-initializer";
 import type { SwiftTypeResults } from "@/types/smart-search";
 import { getContentType, sortByContentType } from "@/utils/content-type";
 import { debounce } from "@/utils/debounce";
 import { getElement, getElements } from "@/utils/dom/elements";
+import { isMobile } from "@/utils/mobile";
+import { getCurrentPageInfo } from "@/utils/page-info";
+import { STAGGER_DELAY, ACTIVE_CLASS } from "@/utils/constants";
 import Swup from "swup";
 
 const swupLinkSelector = 'a[href*="/avra-wiki/"], a[href*="/session-insights/"], a[href*="/case-studies/"], a[href*="/audio-video/"]';
 let swup: Swup | null = null;
+
+// Open sidebar and nested dropdowns on mobile
+const handleBreadcrumbClick = (event: Event, title: string) => {
+    if (isMobile()) {
+        event.preventDefault();
+
+        const sidebarBtn = document.querySelector<HTMLElement>("[avra-element='sidebar-btn']");
+        if (sidebarBtn) {
+            sidebarBtn.click();
+        }
+
+        setTimeout(() => {
+            expandDropdownsToRevealLink(title);
+        }, STAGGER_DELAY);
+    }
+};
+
+const expandDropdownsToRevealLink = (title: string) => {
+    // Determine section to expand based on title text content
+    let sectionToExpand = "";
+
+    if (title === "Wiki Topics") {
+        sectionToExpand = "Wiki Topics";
+    } else if (title === "Session Insights") {
+        sectionToExpand = "Session Insights";
+    } else if (title === "Case Studies") {
+        sectionToExpand = "Wiki Topics"; // Case studies are under wiki topics
+    } else if (title === "Podcast Episodes") {
+        sectionToExpand = "Podcast Episodes";
+    } else {
+        // For specific items, find which section they belong to by searching the DOM
+        const wikiTopicElements = document.querySelectorAll<HTMLElement>("[avra-element='wiki-section-item-text']");
+        for (const element of wikiTopicElements) {
+            if (element.textContent === title) {
+                sectionToExpand = "Wiki Topics";
+                break;
+            }
+        }
+
+        // Check session insights if not found in wiki topics
+        if (!sectionToExpand) {
+            const sessionElements = document.querySelectorAll<HTMLElement>("[avra-element='wiki-insight-item-text']");
+            for (const element of sessionElements) {
+                if (element.textContent === title) {
+                    sectionToExpand = "Session Insights";
+                    break;
+                }
+            }
+        }
+
+        // Check podcast episodes if not found elsewhere
+        if (!sectionToExpand) {
+            const podcastElements = document.querySelectorAll<HTMLElement>("[avra-element='wiki-section-item-text']");
+            for (const element of podcastElements) {
+                if (element.textContent === title && element.closest('[data-title="Podcast Episodes"]')) {
+                    sectionToExpand = "Podcast Episodes";
+                    break;
+                }
+            }
+        }
+    }
+
+    if (sectionToExpand) {
+        // Find the section title element
+        const sectionTitleElement = document.querySelector<HTMLElement>(
+            `[data-title="${sectionToExpand}"] [avra-element="wiki-section-title-text"]`
+        );
+        if (sectionTitleElement) {
+            // Find the dropdown button next to it
+            const dropdownBtn = sectionTitleElement.nextElementSibling as HTMLElement;
+            if (dropdownBtn && dropdownBtn.getAttribute("data-avra-dropdown-expanded") !== "true") {
+                dropdownBtn.click();
+            }
+
+            // If this is a specific item within a section, also expand that item's dropdown
+            setTimeout(() => {
+                // Find the specific item by title text content
+                const allItemElements = document.querySelectorAll<HTMLElement>(
+                    "[avra-element='wiki-section-item-text'], [avra-element='wiki-insight-item-text']"
+                );
+                for (const [index, element] of allItemElements.entries()) {
+                    if (element.textContent === title) {
+                        const itemDropdownBtn = element.nextElementSibling as HTMLElement;
+                        if (itemDropdownBtn && itemDropdownBtn.getAttribute("data-avra-dropdown-expanded") !== "true") {
+                            setTimeout(() => {
+                                itemDropdownBtn.click();
+                            }, index * STAGGER_DELAY);
+                        }
+                        break;
+                    }
+                }
+            }, STAGGER_DELAY);
+        }
+    }
+};
+
+const updateBreadcrumbs = () => {
+    const pageInfo = getCurrentPageInfo();
+    const breadcrumb1 = document.querySelector<HTMLElement>("[avra-element='breadcrumb-1']");
+    const breadcrumbArrow = document.querySelector<HTMLElement>("[avra-element='breadcrumb-arrow']");
+    const breadcrumb2 = document.querySelector<HTMLElement>("[avra-element='breadcrumb-2']");
+
+    if (!breadcrumb1 || !breadcrumb2 || !breadcrumbArrow) {
+        console.warn("Breadcrumb elements not found");
+        return;
+    }
+
+    // Hide breadcrumb2 and arrow by default
+    breadcrumb2.style.display = "none";
+    breadcrumbArrow.style.display = "none";
+
+    if (pageInfo.currentType === "wiki" && pageInfo.currentSlug) {
+        // Find the current wiki item and its parent
+        let currentWikiItem = null;
+        let parentWikiTitle = null;
+        let currentSubItem = null;
+
+        // Search through wiki items to find the current page
+        for (const wikiItem of wikiItems) {
+            if (wikiItem.slug === pageInfo.currentSlug) {
+                currentWikiItem = wikiItem;
+                break;
+            }
+
+            // Check if it's a sub-item
+            const findInSubItems = (subItems: any[], parentTitle: string): any => {
+                for (const subItem of subItems) {
+                    if (subItem.type === "item" && subItem.title.includes(pageInfo.currentSlug)) {
+                        return { subItem, parentTitle };
+                    }
+                    if (subItem.subItems) {
+                        const found = findInSubItems(subItem.subItems, parentTitle);
+                        if (found) return found;
+                    }
+                }
+                return null;
+            };
+
+            const found = findInSubItems(wikiItem.subItems, wikiItem.title);
+            if (found) {
+                currentSubItem = found.subItem;
+                parentWikiTitle = found.parentTitle;
+                break;
+            }
+        }
+
+        if (currentWikiItem) {
+            // This is a main wiki page
+            breadcrumb1.textContent = "Wiki Topics";
+            breadcrumb2.textContent = currentWikiItem.title;
+            breadcrumb2.style.display = "block";
+            breadcrumbArrow.style.display = "block";
+        } else if (currentSubItem && parentWikiTitle) {
+            // This is a sub-item page
+            const parentWikiItem = wikiItems.find((item) => item.title === parentWikiTitle);
+            if (parentWikiItem) {
+                breadcrumb1.textContent = parentWikiTitle;
+                breadcrumb2.textContent = currentSubItem.displayTitle;
+                breadcrumb2.style.display = "block";
+                breadcrumbArrow.style.display = "block";
+            }
+        } else {
+            // Fallback
+
+            breadcrumb1.textContent = "Wiki Topics";
+        }
+    } else if (pageInfo.currentType === "session") {
+        // For session insights - get the actual session title
+        const dataEl = document.querySelector<HTMLElement>("[avra-element='item-data']");
+        const pageTitle = dataEl?.getAttribute("data-avra-title") || "Session Insight";
+        breadcrumb1.textContent = "Session Insights";
+        breadcrumb2.textContent = pageTitle;
+        breadcrumb2.style.display = "block";
+        breadcrumbArrow.style.display = "block";
+    } else if (pageInfo.currentType === "case-study") {
+        // For case studies - get the actual page title
+        const dataEl = document.querySelector<HTMLElement>("[avra-element='item-data']");
+        const pageTitle = dataEl?.getAttribute("data-avra-title") || "Case Study";
+        breadcrumb1.textContent = "Case Studies";
+        breadcrumb2.textContent = pageTitle;
+        breadcrumb2.style.display = "block";
+        breadcrumbArrow.style.display = "block";
+    } else if (pageInfo.currentType === "podcast") {
+        // For podcast episodes - get the actual page title
+        const dataEl = document.querySelector<HTMLElement>("[avra-element='item-data']");
+        const pageTitle = dataEl?.getAttribute("data-avra-title") || "Podcast Episode";
+        breadcrumb1.textContent = "Podcast Episodes";
+        breadcrumb2.textContent = pageTitle;
+        breadcrumb2.style.display = "block";
+        breadcrumbArrow.style.display = "block";
+    } else {
+        // Default fallback
+        breadcrumb1.textContent = "Wiki Topics";
+    }
+
+    // Add click handlers to both breadcrumbs for mobile (only if not already set)
+    if (!breadcrumb1.hasAttribute("data-breadcrumb-listener-set")) {
+        breadcrumb1.addEventListener("click", (e) => {
+            const title = breadcrumb1.textContent || "";
+            handleBreadcrumbClick(e, title);
+            console.log("breadcrumb1 clicked");
+        });
+        breadcrumb1.setAttribute("data-breadcrumb-listener-set", "true");
+    }
+
+    if (!breadcrumb2.hasAttribute("data-breadcrumb-listener-set")) {
+        breadcrumb2.addEventListener("click", (e) => {
+            const title = breadcrumb2.textContent || "";
+            handleBreadcrumbClick(e, title);
+            console.log("breadcrumb2 clicked");
+        });
+        breadcrumb2.setAttribute("data-breadcrumb-listener-set", "true");
+    }
+};
+
+const handleMobileNavigation = () => {
+    if (isMobile()) {
+        if (swup) {
+            swup.navigate("/avra-wiki/hiring-and-managing-execs");
+        }
+    }
+};
 
 export const updateSwupLinks = (newLinkSelector: string) => {
     if (swup) {
@@ -30,6 +256,7 @@ export const updateSwupLinks = (newLinkSelector: string) => {
         updateSidebarState();
         initContentPage();
         updateSidebar();
+        updateBreadcrumbs();
     });
 };
 
@@ -68,7 +295,7 @@ const smartSearch = () => {
     const searchForm = getElement("[avra-element='ss-search-form']");
     const searchInput = getElement<HTMLInputElement>("[avra-element='ss-search-input']", searchForm);
     const submitButton = getElement("[avra-element='submit-button']");
-    submitButton.classList.remove("is-active");
+    submitButton.classList.remove(ACTIVE_CLASS);
 
     const contentEmptyEl = getElement("[avra-element='ss-content-empty']");
     const resultsListEl = getElement("[avra-element='ss-list']");
@@ -252,9 +479,9 @@ const smartSearch = () => {
 
         if (submitButton) {
             if (searchValue.length > 0) {
-                submitButton.classList.add("is-active");
+                submitButton.classList.add(ACTIVE_CLASS);
             } else {
-                submitButton.classList.remove("is-active");
+                submitButton.classList.remove(ACTIVE_CLASS);
             }
         }
 
@@ -417,12 +644,16 @@ window.Webflow.push(async () => {
     smartSearch();
     initContentPage();
     updateSidebar();
+    updateBreadcrumbs();
 
     swup = initSwup();
+
+    // Handle mobile navigation after Swup is initialized
+    handleMobileNavigation();
     swup.hooks.on("content:replace", () => {
         // remove/change elements pulled in from wiki page
         const elementsToRemove = document.querySelectorAll<HTMLElement>(
-            ".wiki-dropdown-wrapper, .sub-nav.smaller, .sub-nav.tall, .confidential"
+            ".wiki-dropdown-wrapper, .sub-nav.smaller, .sub-nav.tall, .confidential, .back-button"
         );
         for (const element of elementsToRemove) {
             element.remove();
@@ -438,5 +669,6 @@ window.Webflow.push(async () => {
         updateSidebarState();
         initContentPage();
         updateSidebar();
+        updateBreadcrumbs();
     });
 });

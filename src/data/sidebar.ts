@@ -48,7 +48,7 @@ export const wikiItems: WikiItem[] = [
             {
                 type: "heading",
                 displayTitle: "The CEO's Job",
-                title: "Defining the CEO's Job",
+                title: "Defining the CEO’s Job",
             },
             {
                 type: "heading",
@@ -1203,5 +1203,32 @@ export const podcastArticles: Article[] = [
         slug: "episode-4-a16z-dst",
         wikiTag: "Financial Planning and Fundraising",
         smartSearchKeywords: ["Fundraising", "VC", "Investors"],
+    },
+];
+
+export const DROPDOWN_TIERS = [
+    {
+        tier: 1,
+        textSelector: "[avra-element='wiki-section-title-text']",
+        childSelector: "[avra-element='wiki-section-item']",
+        containerAttribute: "wiki-section-title",
+    },
+    {
+        tier: 2,
+        textSelector: "[avra-element='wiki-section-item-text']",
+        childSelector: "[avra-element='wiki-insight-item']",
+        containerAttribute: "wiki-section-item",
+    },
+    {
+        tier: 3,
+        textSelector: "[avra-element='wiki-insight-item-text']",
+        childSelector: "[avra-element='wiki-insight-heading-item']",
+        containerAttribute: "wiki-insight-item",
+    },
+    {
+        tier: 4,
+        textSelector: "[avra-element='wiki-insight-heading-item-text']",
+        childSelector: "[avra-element='wiki-insight-heading-item-2']",
+        containerAttribute: "wiki-insight-heading-item",
     },
 ];

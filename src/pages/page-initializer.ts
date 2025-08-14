@@ -1,16 +1,20 @@
-import { WIKI_SESSION_MAPPINGS, type WikiSession } from "@/data/wiki-data";
-import { getAvraElement, getElement } from "@/utils/dom/elements";
+import { getAvraElement } from "@/utils/dom/elements";
 
-// TODO: rewrite to work with new scroll to highlight logic
 const handleScrollToHighlight = () => {
     const urlParams = new URLSearchParams(window.location.search);
     const highlightText = urlParams.get("highlight");
 
     const wikiContainer = getAvraElement("wiki-container");
-
-    console.log("highlightText", highlightText);
+    wikiContainer.style.paddingTop = "64px";
 
     if (highlightText) {
+        console.log("scrolling to highlighted text", highlightText);
+
+        const closeBtn = document.querySelector<HTMLElement>(".wiki-section-close");
+        if (closeBtn) {
+            closeBtn.click();
+        }
+
         // Function to find and scroll to matching text in headings only
         const scrollToHighlightedText = () => {
             const content = document.querySelector("#wiki-content");
@@ -32,17 +36,47 @@ const handleScrollToHighlight = () => {
                     const elementTop = elementRect.top + window.pageYOffset;
 
                     wikiContainer.scrollTo({
-                        top: elementTop - 60,
+                        top: elementTop - 120,
                         behavior: "smooth",
                     });
 
                     // Highlight the text temporarily
                     const originalHTML = heading.innerHTML;
-                    const regex = new RegExp(`(${highlightText})`, "gi");
-                    const newHTML = originalHTML.replace(
-                        regex,
-                        '<mark class="highlight-fade" style="background-color: transparent; transition: background-color 0.5s ease-in-out; padding: 2px;">$1</mark>'
-                    );
+
+                    // Create a more robust regex that doesn't interfere with HTML tags
+                    const escapedHighlightText = highlightText.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+                    // Function to highlight text while preserving HTML structure
+                    const highlightTextInHTML = (html: string, searchText: string): string => {
+                        // Create a temporary element to parse the HTML
+                        const tempDiv = document.createElement("div");
+                        tempDiv.innerHTML = html;
+
+                        // Function to recursively highlight text in text nodes
+                        const highlightInNode = (node: Node): void => {
+                            if (node.nodeType === Node.TEXT_NODE) {
+                                const textContent = node.textContent || "";
+                                const regex = new RegExp(`(${escapedHighlightText})`, "gi");
+                                if (regex.test(textContent)) {
+                                    const newHTML = textContent.replace(
+                                        regex,
+                                        '<mark class="highlight-fade" style="background-color: transparent; transition: background-color 0.5s ease-in-out; padding: 2px;">$1</mark>'
+                                    );
+                                    const wrapper = document.createElement("span");
+                                    wrapper.innerHTML = newHTML;
+                                    node.parentNode?.replaceChild(wrapper, node);
+                                }
+                            } else if (node.nodeType === Node.ELEMENT_NODE) {
+                                // Recursively process child nodes
+                                Array.from(node.childNodes).forEach((child) => highlightInNode(child));
+                            }
+                        };
+
+                        highlightInNode(tempDiv);
+                        return tempDiv.innerHTML;
+                    };
+
+                    const newHTML = highlightTextInHTML(originalHTML, highlightText);
                     heading.innerHTML = newHTML;
 
                     const marks = heading.querySelectorAll<HTMLElement>(".highlight-fade");
@@ -71,177 +105,78 @@ const handleScrollToHighlight = () => {
             }
         };
 
-        // Wait for content to load, then scroll
-        setTimeout(scrollToHighlightedText, 500);
-    }
-};
+        // Wait for content to load and stabilize, then scroll with retry mechanism
+        const attemptScroll = (attempt = 1, maxAttempts = 8) => {
+            console.log(`Scroll attempt ${attempt} for "${highlightText}"`);
 
-const createTableOfContents = () => {
-    try {
-        // create table of contents
-        const contentContainer = getElement("[avra-element='wiki-content']");
-        const headingEls = contentContainer.querySelectorAll<HTMLHeadingElement>("h1, h2, h3, h4");
-        const links: HTMLAnchorElement[] = [];
-
-        const wikiNavEl = document.querySelector<HTMLElement>("[avra-element='wiki-nav-links']");
-        if (!wikiNavEl) throw new Error("No wiki nav");
-        wikiNavEl.innerHTML = "";
-
-        for (let i = 0; i < headingEls.length; i++) {
-            const headingEl = headingEls[i];
-            if (!headingEl || !headingEl.textContent) continue;
-
-            const id = headingEl.textContent
-                .trim()
-                .toLowerCase()
-                .replace(/[^a-z0-9]/g, "-");
-            headingEl.id = id;
-
-            const link = document.createElement("a");
-            link.href = "#" + id;
-            link.textContent = headingEl.textContent;
-            link.className = "wiki-nav-link";
-            link.dataset.index = String(i); // Store index for reference
-
-            switch (headingEl.nodeName) {
-                case "H1":
-                case "H2":
-                    break;
-                case "H3":
-                    link.classList.add("is-lv-2");
-                    break;
-                case "H4":
-                    link.classList.add("is-lv-3");
-                    break;
+            const content = document.querySelector("#wiki-content");
+            if (!content) {
+                if (attempt < maxAttempts) {
+                    setTimeout(() => attemptScroll(attempt + 1, maxAttempts), 300);
+                }
+                return;
             }
 
-            wikiNavEl.appendChild(link);
-            links.push(link); // Store link for later use
+            const headings = content.querySelectorAll("h1, h2, h3, h4, h5, h6");
+            const searchText = highlightText.toLowerCase();
+            let foundHeading = null;
 
-            // special for case studies
-            if (headingEl.textContent.includes("Case Studies")) {
-                // get next list elements and add
-                const listEls = headingEl.nextElementSibling?.querySelectorAll<HTMLElement>("ol > li");
-                if (listEls) {
-                    for (let i = 0; i < listEls.length; i++) {
-                        const listHead = listEls[i].querySelector<HTMLElement>("strong");
-                        const listItems = listEls[i].querySelectorAll<HTMLElement>("ul > li");
+            for (const heading of headings) {
+                const headingText = heading.textContent?.toLowerCase() || "";
+                if (headingText.includes(searchText)) {
+                    foundHeading = heading;
+                    break;
+                }
+            }
 
-                        const listDiv = document.createElement("div");
-                        listDiv.classList.add("wiki-nav-list");
+            if (foundHeading) {
+                console.log("Found heading, scrolling to:", foundHeading.textContent);
 
-                        // handle heading
-                        if (!listHead || !listHead.textContent) continue;
-                        const listHeadId = listHead.textContent
-                            .trim()
-                            .toLowerCase()
-                            .replace(/[^a-z0-9]/g, "-");
-                        listHead.id = listHeadId;
+                // Wait for layout to stabilize before scrolling
+                requestAnimationFrame(() => {
+                    requestAnimationFrame(() => {
+                        scrollToHighlightedText();
 
-                        const listHeadLink = document.createElement("a");
-                        listHeadLink.href = "#" + listHeadId;
-                        listHeadLink.textContent = `${i + 1}. ${listHead.textContent}`;
-                        listHeadLink.className = "wiki-nav-link";
-                        listHeadLink.classList.add("is-lv-2");
+                        // Verify scroll position after a short delay and adjust if needed
+                        setTimeout(() => {
+                            const rect = foundHeading.getBoundingClientRect();
+                            const currentViewportTop = rect.top;
 
-                        listDiv.appendChild(listHeadLink);
-                        links.push(listHeadLink);
-
-                        // handle items
-                        for (let index = 0; index < listItems.length; index++) {
-                            const item = listItems[index];
-                            if (!item) continue;
-
-                            let itemEl: HTMLElement | HTMLAnchorElement = item;
-                            if (item.querySelector<HTMLAnchorElement>("a")) {
-                                itemEl = item.querySelector<HTMLAnchorElement>("a")!;
+                            // If element is still too close to bottom of screen, scroll more
+                            if (currentViewportTop > window.innerHeight * 0.7) {
+                                console.log("Adjusting scroll position - element too low");
+                                const elementTop = rect.top + window.pageYOffset;
+                                wikiContainer.scrollTo({
+                                    top: elementTop - 150,
+                                    behavior: "smooth",
+                                });
                             }
-
-                            if (!itemEl || !itemEl.textContent) continue;
-                            const itemId = itemEl.textContent
-                                .trim()
-                                .toLowerCase()
-                                .replace(/[^a-z0-9]/g, "-");
-                            itemEl.id = itemId;
-
-                            const listItemLink = document.createElement("a");
-                            listItemLink.href = "#" + itemId;
-                            listItemLink.textContent = `${index + 1}. ${itemEl.textContent}`;
-                            listItemLink.className = "wiki-nav-link";
-                            listItemLink.classList.add("is-lv-3");
-
-                            listDiv.appendChild(listItemLink);
-                            links.push(listItemLink);
-                        }
-
-                        wikiNavEl.appendChild(listDiv);
-                    }
-                }
+                        }, 500);
+                    });
+                });
+            } else if (attempt < maxAttempts) {
+                console.log(`Heading not found on attempt ${attempt}, retrying...`);
+                setTimeout(() => attemptScroll(attempt + 1, maxAttempts), 300);
+            } else {
+                console.warn(`Could not find heading with text "${highlightText}" after ${maxAttempts} attempts`);
             }
-        }
-    } catch (err) {
-        console.log("Error running wiki logic:", err);
-    }
-};
+        };
 
-const createSessionLinks = () => {
-    const dataEl = document.querySelector<HTMLElement>("[avra-element='item-data']");
-    if (!dataEl) return;
-    const slug = dataEl.getAttribute("data-avra-slug");
-    if (!slug) return;
-
-    try {
-        const wikiSessions: WikiSession[] = [];
-        const batches: number[] = [];
-
-        for (const [wikiSlug, sessions] of Object.entries(WIKI_SESSION_MAPPINGS)) {
-            if (wikiSlug !== slug) {
-                continue;
+        // Use longer initial delay and check for document readiness
+        const startScrolling = () => {
+            if (document.readyState === "complete") {
+                setTimeout(() => attemptScroll(), 1000);
+            } else {
+                window.addEventListener("load", () => {
+                    setTimeout(() => attemptScroll(), 1000);
+                });
             }
+        };
 
-            for (const session of sessions) {
-                wikiSessions.push(session);
-
-                if (!batches.includes(session.batch)) {
-                    batches.push(session.batch);
-                }
-            }
-        }
-
-        if (!wikiSessions.length) {
-            throw new Error("No wiki sessions found for slug: " + slug);
-        }
-        if (!batches.length) {
-            throw new Error("No batches found for slug: " + slug);
-        }
-
-        batches.sort((a, b) => a - b);
-
-        const wikiSessionContainer = getElement("[avra-element='wiki-session-links']");
-        wikiSessionContainer.innerHTML = "";
-
-        for (const batch of batches) {
-            const batchElement = document.createElement("div");
-            batchElement.className = "wiki-nav-link";
-            batchElement.textContent = `Batch ${batch}`;
-            wikiSessionContainer.appendChild(batchElement);
-
-            const batchSessions = wikiSessions.filter((session) => session.batch === batch);
-            for (const session of batchSessions) {
-                const linkElement = document.createElement("a");
-                linkElement.className = "wiki-nav-link-sml";
-                linkElement.href = `/session-insights/${session.slug}`;
-                linkElement.textContent = session.name;
-                wikiSessionContainer.appendChild(linkElement);
-            }
-        }
-    } catch (error) {
-        console.error("Error creating dynamic elements:", error);
+        startScrolling();
     }
 };
 
 export const initContentPage = async () => {
     handleScrollToHighlight();
-    // createTableOfContents();
-    // createSessionLinks();
 };

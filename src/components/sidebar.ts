@@ -1,56 +1,11 @@
-import { podcastArticles, sessionInsightsBatches, wikiItems } from "@/data/sidebar";
+import { DROPDOWN_TIERS, podcastArticles, sessionInsightsBatches, wikiItems } from "@/data/sidebar";
 import { getAvraElement, getElements } from "@/utils/dom/elements";
+import { ACTIVE_CLASS } from "@/utils/constants";
+import { isMobile } from "@/utils/mobile";
+import { getCurrentPageInfo } from "@/utils/page-info";
 import { gsap } from "gsap";
 
-const activeClass = "is-active";
 let sidebarInitialized = false;
-
-// Mobile detection utility
-const isMobile = (): boolean => {
-    return window.innerWidth <= 991;
-};
-
-export const getCurrentPageInfo = () => {
-    const dataEl = document.querySelector<HTMLElement>("[avra-element='item-data']");
-    const currentUrl = window.location.pathname;
-
-    let currentSlug = null;
-    let currentType: "wiki" | "session" | "podcast" | "case-study" | null = null;
-
-    if (dataEl) {
-        currentSlug = dataEl.getAttribute("data-avra-slug");
-    }
-
-    // Determine type from URL
-    if (currentUrl.includes("/avra-wiki/")) {
-        currentType = "wiki";
-        if (!currentSlug) {
-            // Extract slug from URL if not in data element
-            const pathParts = currentUrl.split("/");
-            currentSlug = pathParts[pathParts.length - 1] || pathParts[pathParts.length - 2];
-        }
-    } else if (currentUrl.includes("/session-insights/")) {
-        currentType = "session";
-        if (!currentSlug) {
-            const pathParts = currentUrl.split("/");
-            currentSlug = pathParts[pathParts.length - 1] || pathParts[pathParts.length - 2];
-        }
-    } else if (currentUrl.includes("/audio-video/")) {
-        currentType = "podcast";
-        if (!currentSlug) {
-            const pathParts = currentUrl.split("/");
-            currentSlug = pathParts[pathParts.length - 1] || pathParts[pathParts.length - 2];
-        }
-    } else if (currentUrl.includes("/case-studies/")) {
-        currentType = "case-study";
-        if (!currentSlug) {
-            const pathParts = currentUrl.split("/");
-            currentSlug = pathParts[pathParts.length - 1] || pathParts[pathParts.length - 2];
-        }
-    }
-
-    return { currentSlug, currentType, currentUrl };
-};
 
 const initializeSidebar = () => {
     const dataContainer = getAvraElement("data-container");
@@ -354,7 +309,10 @@ const initializeSidebar = () => {
         sectionsToAdd.push(section);
     }
 
+    // Remove all elements except those with class 'wiki-section-close'
+    const elementsToKeep = sectionList.querySelectorAll(".wiki-section-close");
     sectionList.innerHTML = "";
+    elementsToKeep.forEach((element) => sectionList.appendChild(element));
     for (const section of sectionsToAdd) {
         sectionList.appendChild(section);
     }
@@ -369,7 +327,7 @@ const updateSidebarHighlighting = (currentSlug: string | null, currentType: stri
     allItems.forEach((item) => {
         const textElement = item.querySelector<HTMLElement>(textElementSelector);
         if (textElement) {
-            textElement.classList.remove(activeClass);
+            textElement.classList.remove(ACTIVE_CLASS);
         }
     });
 
@@ -389,40 +347,12 @@ const updateSidebarHighlighting = (currentSlug: string | null, currentType: stri
             if (currentItem) {
                 const textElement = currentItem.querySelector<HTMLElement>(textElementSelector);
                 if (textElement) {
-                    textElement.classList.add(activeClass);
+                    textElement.classList.add(ACTIVE_CLASS);
                 }
             }
         }
     }
 };
-
-// Unified dropdown tier configuration
-const DROPDOWN_TIERS = [
-    {
-        tier: 1,
-        textSelector: "[avra-element='wiki-section-title-text']",
-        childSelector: "[avra-element='wiki-section-item']",
-        containerAttribute: "wiki-section-title",
-    },
-    {
-        tier: 2,
-        textSelector: "[avra-element='wiki-section-item-text']",
-        childSelector: "[avra-element='wiki-insight-item']",
-        containerAttribute: "wiki-section-item",
-    },
-    {
-        tier: 3,
-        textSelector: "[avra-element='wiki-insight-item-text']",
-        childSelector: "[avra-element='wiki-insight-heading-item']",
-        containerAttribute: "wiki-insight-item",
-    },
-    {
-        tier: 4,
-        textSelector: "[avra-element='wiki-insight-heading-item-text']",
-        childSelector: "[avra-element='wiki-insight-heading-item-2']",
-        containerAttribute: "wiki-insight-heading-item",
-    },
-];
 
 const getSiblingDropdowns = (currentDropdownBtn: HTMLElement): HTMLElement[] => {
     const currentTier = currentDropdownBtn.getAttribute("data-dropdown-tier");
@@ -491,7 +421,7 @@ const setupDropdownForTier = (tierConfig: (typeof DROPDOWN_TIERS)[0], currentTyp
         for (const child of childItems) {
             const linkElement = child.querySelector("a");
             if (linkElement) {
-                linkElement.classList.remove(activeClass);
+                linkElement.classList.remove(ACTIVE_CLASS);
             }
         }
 
@@ -595,7 +525,7 @@ const shouldDropdownBeExpanded = (
         // Highlight the matching child
         const matchingChildTextElement = matchingChild.querySelector("a");
         if (matchingChildTextElement) {
-            matchingChildTextElement.classList.add(activeClass);
+            matchingChildTextElement.classList.add(ACTIVE_CLASS);
         }
         return true;
     }
@@ -643,15 +573,13 @@ const closeMobileSidebar = () => {
     }
 };
 
+// toggle mobile sidebar on any link clicks
 const setupMobileLinkHandler = () => {
-    // Add event listener to document to catch all link clicks
     document.addEventListener("click", (e) => {
         const target = e.target as HTMLElement;
         const link = target.closest("a");
-
-        // If a link was clicked and we're on mobile, close the sidebar
         if (link && link.href && isMobile()) {
-            // Small delay to ensure navigation starts before closing sidebar
+            // delay to ensure navigation starts before closing sidebar
             setTimeout(closeMobileSidebar, 50);
         }
     });
@@ -662,10 +590,6 @@ export const Sidebar = () => {
         initializeSidebar();
         sidebarInitialized = true;
         setupMobileLinkHandler();
-
-        // window.addEventListener("resize", () => {
-        //     updateSidebarState();
-        // });
     }
     updateSidebarState();
 };
