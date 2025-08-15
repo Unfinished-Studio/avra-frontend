@@ -20,8 +20,8 @@ let swup: Swup | null = null;
 let persistentContentElements: HTMLElement[] = [];
 let persistentArticleElements: HTMLElement[] = [];
 
-// Open sidebar and nested dropdowns on mobile
 const handleBreadcrumbClick = (event: Event, title: string) => {
+    // Open sidebar and nested dropdowns on mobile
     if (isMobile()) {
         event.preventDefault();
 
@@ -362,7 +362,7 @@ const setupMobileSearchPopup = () => {
         // Fade in backdrop
         tl.to(mobileSearchBackdrop, {
             opacity: 1,
-            duration: 0.3,
+            duration: 0.25,
             ease: "power2.out",
         });
 
@@ -371,7 +371,7 @@ const setupMobileSearchPopup = () => {
             mobileSearchContent,
             {
                 opacity: 1,
-                duration: 0.4,
+                duration: 0.25,
                 ease: "power2.out",
             },
             "-=0.1"
@@ -389,7 +389,7 @@ const setupMobileSearchPopup = () => {
         // Slide out and fade out content
         tl.to(mobileSearchContent, {
             opacity: 0,
-            duration: 0.3,
+            duration: 0.25,
             ease: "power2.in",
         });
 
