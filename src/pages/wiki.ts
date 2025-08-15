@@ -1,5 +1,6 @@
 import { updateBreadcrumbs } from "@/modules/wiki/breadcrumb";
 import { initializePersistentContentElements, setupMobileSearchPopup } from "@/modules/wiki/mobile-search";
+import { initializeNavPersistentContentElements, setupNavSearchDropdown } from "@/modules/wiki/nav-search";
 import { smartSearch } from "@/modules/wiki/search";
 import { Sidebar } from "@/modules/wiki/sidebar";
 import { initSwup, swupManager } from "@/modules/wiki/swup-manager";
@@ -35,8 +36,14 @@ window.Webflow ||= [];
 window.Webflow.push(async () => {
     Sidebar();
     smartSearch();
+
+    // Initialize persistent content elements for both mobile and nav search
     initializePersistentContentElements(); // Initialize before mobile search setup
+    initializeNavPersistentContentElements(); // Initialize before nav search setup
+
     setupMobileSearchPopup();
+    setupNavSearchDropdown();
+
     initContentPage();
     updateSidebar();
     updateBreadcrumbs();
