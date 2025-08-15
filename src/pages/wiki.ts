@@ -1,0 +1,48 @@
+import { updateBreadcrumbs } from "@/modules/wiki/breadcrumb";
+import { initializePersistentContentElements, setupMobileSearchPopup } from "@/modules/wiki/mobile-search";
+import { smartSearch } from "@/modules/wiki/search";
+import { Sidebar } from "@/modules/wiki/sidebar";
+import { initSwup, swupManager } from "@/modules/wiki/swup-manager";
+import { initContentPage } from "@/pages/page-initializer";
+import { getElement, getElements } from "@/utils/dom/elements";
+import { isMobile } from "@/utils/mobile";
+
+export const handleMobileNavigation = () => {
+    if (isMobile()) {
+        swupManager.navigate("/avra-wiki/hiring-and-managing-execs");
+    }
+};
+
+export const updateSidebar = () => {
+    const sessionInsightsSection = getElement("[data-title='Session Insights']");
+    const sessionLinks = getElements("[avra-element='wiki-session-links'] a");
+
+    console.log(sessionInsightsSection, sessionLinks);
+
+    if (sessionInsightsSection && sessionLinks.length) {
+        // Clear existing session links
+        const existingLinks = sessionInsightsSection.querySelectorAll("a");
+        existingLinks.forEach((link) => link.remove());
+
+        // Add new session links
+        sessionLinks.forEach((link) => {
+            sessionInsightsSection.appendChild(link);
+        });
+    }
+};
+
+window.Webflow ||= [];
+window.Webflow.push(async () => {
+    Sidebar();
+    smartSearch();
+    initializePersistentContentElements(); // Initialize before mobile search setup
+    setupMobileSearchPopup();
+    initContentPage();
+    updateSidebar();
+    updateBreadcrumbs();
+
+    initSwup();
+
+    // Handle mobile navigation after Swup is initialized
+    handleMobileNavigation();
+});

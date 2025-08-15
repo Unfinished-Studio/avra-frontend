@@ -9,7 +9,7 @@ const MINIFY = process.env.MINIFY === "true";
 
 // Config entrypoint files
 const ENTRY_POINTS = [
-    "src/pages/avra-wiki-new.ts",
+    "src/pages/wiki.ts",
     "src/pages/avra-wiki-template.ts",
     "src/pages/avra-wiki.ts",
     "src/pages/batch-template.ts",

@@ -1,6 +1,6 @@
 import { DROPDOWN_TIERS, podcastArticles, sessionInsightsBatches, wikiItems } from "@/data/sidebar";
-import { getAvraElement, getElements } from "@/utils/dom/elements";
 import { ACTIVE_CLASS } from "@/utils/constants";
+import { getAvraElement, getElements } from "@/utils/dom/elements";
 import { isMobile } from "@/utils/mobile";
 import { getCurrentPageInfo } from "@/utils/page-info";
 import { gsap } from "gsap";
@@ -559,17 +559,91 @@ const setupSidebarDropdowns = (currentType: string | null, currentSlug: string |
 export const updateSidebarState = () => {
     const { currentSlug, currentType, currentUrl } = getCurrentPageInfo();
     console.log("PAGE INFO:", { currentSlug, currentType, currentUrl });
+    console.log("updateSidebarState called - checking if should close sidebar");
 
     // updateSidebarHighlighting(currentSlug, currentType);
     setupSidebarDropdowns(currentType, currentSlug);
+
+    // Close mobile sidebar after navigation (only if it's currently open)
+    closeMobileSidebarIfOpen();
+};
+
+const isSidebarOpen = (): boolean => {
+    console.log("Checking if sidebar is open...");
+
+    if (!isMobile()) {
+        console.log("Not mobile, sidebar not relevant");
+        return false;
+    }
+
+    // Check the sidebar transform value (most reliable method)
+    try {
+        const sidebar = getAvraElement("wiki-sidebar");
+        if (!sidebar) {
+            console.log("Sidebar element not found");
+            return false;
+        }
+
+        // Get the computed transform style
+        const computedStyle = window.getComputedStyle(sidebar);
+        const transform = computedStyle.transform;
+
+        console.log("Sidebar transform:", transform);
+
+        // Check if transform contains translateX(288px) or similar indicating open state
+        if (transform && transform !== "none") {
+            // Parse the transform matrix or translateX value
+            const translateXMatch = transform.match(/translateX\(([^)]+)\)/);
+            if (translateXMatch) {
+                const translateX = parseFloat(translateXMatch[1]);
+                console.log("Transform translateX value:", translateX);
+                // Sidebar is open if translateX is 288px (or close to it)
+                const isOpen = Math.abs(translateX - 288) < 10; // Allow small variance
+                console.log("Sidebar is open (based on transform):", isOpen);
+                return isOpen;
+            }
+
+            // Handle matrix transform format
+            const matrixMatch = transform.match(/matrix\(([^)]+)\)/);
+            if (matrixMatch) {
+                const values = matrixMatch[1].split(",").map((v) => parseFloat(v.trim()));
+                if (values.length >= 6) {
+                    const translateX = values[4]; // translateX is the 5th value in matrix
+                    console.log("Matrix translateX value:", translateX);
+                    const isOpen = Math.abs(translateX - 288) < 10;
+                    console.log("Sidebar is open (based on matrix):", isOpen);
+                    return isOpen;
+                }
+            }
+        }
+
+        console.log("No transform detected, assuming sidebar is closed");
+        return false;
+    } catch (error) {
+        console.log("Error checking sidebar transform:", error);
+        return false;
+    }
 };
 
 const closeMobileSidebar = () => {
     if (isMobile()) {
-        const sidebarBtn = getAvraElement("sidebar-btn");
+        const sidebarBtn = getAvraElement("sidebar-btn-close");
         if (sidebarBtn) {
             sidebarBtn.click();
         }
+    }
+};
+
+const closeMobileSidebarIfOpen = () => {
+    console.log("closeMobileSidebarIfOpen called");
+    const isOpen = isSidebarOpen();
+    console.log("Sidebar is open:", isOpen);
+
+    if (isOpen) {
+        console.log("Closing sidebar...");
+        closeMobileSidebar();
+    } else {
+        console.log("Sidebar not open, no action needed");
     }
 };
 
@@ -580,7 +654,7 @@ const setupMobileLinkHandler = () => {
         const link = target.closest("a");
         if (link && link.href && isMobile()) {
             // delay to ensure navigation starts before closing sidebar
-            setTimeout(closeMobileSidebar, 50);
+            setTimeout(closeMobileSidebarIfOpen, 50);
         }
     });
 };

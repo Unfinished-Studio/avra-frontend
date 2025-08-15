@@ -1,15 +1,24 @@
-// Page: Avra Wiki
-
 import { SMART_SEARCH_CONFIG } from "@/constants";
+import { CONTENT_ITEMS } from "@/data/content";
+import type { SwiftTypeResults } from "@/types/smart-search";
+import { ACTIVE_CLASS } from "@/utils/constants";
 import { getContentType, sortByContentType } from "@/utils/content-type";
 import { debounce } from "@/utils/debounce";
 import { getElement, getElements } from "@/utils/dom/elements";
-import type { SwiftTypeResults } from "@/types/smart-search";
-import Swup from "swup";
-import { Sidebar } from "@/modules/wiki/sidebar";
-import { CONTENT_ITEMS } from "@/data/content";
+import { swupLinkSelector, updateSwupLinks } from "./swup-manager";
 
-const handleSearch = async (query: string) => {
+export const extractCleanHighlightText = (highlightBody: string): string => {
+    const tempDiv = document.createElement("div");
+    tempDiv.innerHTML = highlightBody;
+    const emElements = tempDiv.querySelectorAll("em");
+
+    if (emElements.length > 0) {
+        return emElements[0].textContent?.trim() || "";
+    }
+    return tempDiv.textContent?.trim().split(" ").slice(0, 5).join(" ") || "";
+};
+
+export const handleSearch = async (query: string) => {
     const params = new URLSearchParams([["query", query]]);
     const response = await fetch(`${SMART_SEARCH_CONFIG.api}/api/site-search?${String(params)}`, {
         method: "GET",
@@ -27,27 +36,19 @@ const handleSearch = async (query: string) => {
     return data.results;
 };
 
-const extractCleanHighlightText = (highlightBody: string): string => {
-    const tempDiv = document.createElement("div");
-    tempDiv.innerHTML = highlightBody;
-    const emElements = tempDiv.querySelectorAll("em");
-
-    if (emElements.length > 0) {
-        return emElements[0].textContent?.trim() || "";
-    }
-    return tempDiv.textContent?.trim().split(" ").slice(0, 5).join(" ") || "";
-};
-
 export const smartSearch = () => {
     console.log("using api", SMART_SEARCH_CONFIG.api);
 
     const searchForm = getElement("[avra-element='ss-search-form']");
     const searchInput = getElement<HTMLInputElement>("[avra-element='ss-search-input']", searchForm);
     const submitButton = getElement("[avra-element='submit-button']");
-    submitButton.classList.remove("is-active");
+    submitButton.classList.remove(ACTIVE_CLASS);
 
     const contentEmptyEl = getElement("[avra-element='ss-content-empty']");
     const resultsListEl = getElement("[avra-element='ss-list']");
+    if (resultsListEl.parentElement) {
+        resultsListEl.parentElement.style.display = "none";
+    }
 
     const podcastList = getElement("[avra-element='ss-podcast-list']");
     const podcastEls = getElements("[avra-element='ss-podcast']", podcastList);
@@ -80,8 +81,6 @@ export const smartSearch = () => {
 
         resultsListEl.appendChild(el);
     });
-
-    contentEmptyEl.style.display = "none";
 
     // Create debounced search handler
     const debouncedSearch = debounce(async (searchValue: string) => {
@@ -178,7 +177,6 @@ export const smartSearch = () => {
                 matchEl.style.display = "block";
                 matchEl.removeAttribute("data-avra-hidden");
                 visibleContentCount++;
-                (listEl.parentElement as HTMLElement).style.display = "";
 
                 return; // was shown in main results
             } else {
@@ -202,7 +200,11 @@ export const smartSearch = () => {
 
         // Show/hide content empty state based on visible count
         if (contentEmptyEl) {
-            contentEmptyEl.style.display = visibleContentCount === 0 ? "" : "none";
+            contentEmptyEl.style.display = visibleContentCount === 0 ? "block" : "none";
+        }
+
+        if (resultsListEl.parentElement) {
+            resultsListEl.parentElement.style.display = visibleContentCount > 0 ? "block" : "none";
         }
 
         // Update the content count display
@@ -224,9 +226,9 @@ export const smartSearch = () => {
 
         if (submitButton) {
             if (searchValue.length > 0) {
-                submitButton.classList.add("is-active");
+                submitButton.classList.add(ACTIVE_CLASS);
             } else {
-                submitButton.classList.remove("is-active");
+                submitButton.classList.remove(ACTIVE_CLASS);
             }
         }
 
@@ -234,6 +236,9 @@ export const smartSearch = () => {
             debouncedSearchWithClearSelection(searchValue);
         } else {
             // If search is cleared, hide all results and show all content
+            if (resultsListEl.parentElement) {
+                resultsListEl.parentElement.style.display = "none";
+            }
             for (const el of allContentElements) {
                 el.style.display = "block";
                 el.removeAttribute("data-avra-hidden");
@@ -257,6 +262,7 @@ export const smartSearch = () => {
         e.preventDefault();
         e.stopPropagation();
         await triggerImmediateSearch();
+        updateSwupLinks(swupLinkSelector);
     });
 
     // Keyboard navigation for search results
@@ -351,9 +357,3 @@ export const smartSearch = () => {
         (e.target as HTMLInputElement).value = value.replace(/\r?\n/gi, "");
     });
 };
-
-window.Webflow ||= [];
-window.Webflow.push(async () => {
-    Sidebar();
-    smartSearch();
-});
