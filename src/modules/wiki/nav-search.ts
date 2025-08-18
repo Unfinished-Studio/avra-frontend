@@ -12,10 +12,10 @@ let persistentArticleElements: HTMLElement[] = [];
 
 export const createNavSearchDropdown = () => {
     const dropdownHTML = `
-        <div avra-element="nav-search-dropdown" style="display: none; position: absolute; top: 100%; left: 0; width: 400px; max-height: 800px; z-index: 999999; background: white; border: 1px solid #e0e0e0; border-radius: 8px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15); overflow: hidden; box-sizing: border-box; isolation: isolate;">
-            <div avra-element="nav-search-state-container" style="position: relative; min-height: 100px; max-height: 800px;">
-                <div avra-element="nav-search-loading" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; text-align: center; padding: 20px; color: #666; opacity: 0; transition: opacity 0.3s ease-in-out; pointer-events: none; display: flex; flex-direction: column; justify-content: flex-start; align-items: center;">
-                    <div style="display: inline-block; width: 20px; height: 20px; border: 2px solid #f3f3f3; border-top: 2px solid #666; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 12px; margin-top: 20px;"></div>
+        <div avra-element="nav-search-dropdown" style="display: none; position: absolute; top: 100%; left: 0; width: 400px; z-index: 999999; background: white; border: 1px solid #e0e0e0; border-radius: 8px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15); overflow: hidden; box-sizing: border-box; isolation: isolate;">
+            <div avra-element="nav-search-state-container" style="position: relative; min-height: 100px;">
+                <div avra-element="nav-search-loading" style="position: absolute; top: 0; left: 0; right: 0; text-align: center; padding: 20px; color: #666; opacity: 0; transition: opacity 0.3s ease-in-out; pointer-events: none; z-index: 2;">
+                    <div style="display: inline-block; width: 20px; height: 20px; border: 2px solid #f3f3f3; border-top: 2px solid #666; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 12px;"></div>
                     <p>Searching...</p>
                     <style>
                         @keyframes spin {
@@ -24,7 +24,7 @@ export const createNavSearchDropdown = () => {
                         }
                     </style>
                 </div>
-                <div avra-element="nav-search-results" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; max-height: 800px; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; box-sizing: border-box; width: 100%; opacity: 1; transition: opacity 0.3s ease-in-out;">
+                <div avra-element="nav-search-results" style="max-height: 800px; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; box-sizing: border-box; width: 100%; opacity: 1; transition: opacity 0.3s ease-in-out; position: relative; z-index: 1;">
                     <div avra-element="nav-search-empty" style="text-align: center; padding: 40px 20px; color: #666; display: none;">
                         <p>No results found. Try a different search term.</p>
                     </div>
