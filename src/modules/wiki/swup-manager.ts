@@ -90,6 +90,19 @@ class SwupManager {
     }
 
     /**
+     * Scroll to top of wiki container
+     */
+    private scrollToTopOfWikiContainer(): void {
+        const wikiContainer = document.querySelector<HTMLElement>("[avra-element='wiki-content']");
+        if (wikiContainer) {
+            wikiContainer.scrollIntoView({
+                behavior: "smooth",
+                block: "start",
+            });
+        }
+    }
+
+    /**
      * Register default hooks that should always be present
      */
     private registerDefaultHooks(): void {
@@ -115,6 +128,9 @@ class SwupManager {
 
             // Re-initialize persistent content elements after content replacement
             setTimeout(() => initializePersistentContentElements(), 100);
+
+            // Scroll to top of wiki container after content loads
+            setTimeout(() => this.scrollToTopOfWikiContainer(), 150);
         });
 
         // Visit end hook
