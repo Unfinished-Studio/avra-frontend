@@ -50,6 +50,31 @@ export const smartSearch = () => {
         resultsListEl.parentElement.style.display = "none";
     }
 
+    // Create loading indicator and place it after the search form
+    const loadingIndicator = document.createElement("div");
+    loadingIndicator.setAttribute("avra-element", "ss-loading");
+    loadingIndicator.style.cssText = `
+        display: none;
+        text-align: center;
+        padding: 20px;
+        color: #666;
+        opacity: 0;
+        transition: opacity 0.2s ease-in-out;
+    `;
+    loadingIndicator.innerHTML = `
+        <div style="display: inline-block; width: 20px; height: 20px; border: 2px solid #f3f3f3; border-top: 2px solid #666; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 12px;"></div>
+        <p>Searching...</p>
+        <style>
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+        </style>
+    `;
+
+    // Insert loading indicator after the search form
+    searchForm.insertAdjacentElement("afterend", loadingIndicator);
+
     const podcastList = getElement("[avra-element='ss-podcast-list']");
     const podcastEls = getElements("[avra-element='ss-podcast']", podcastList);
 
@@ -90,125 +115,147 @@ export const smartSearch = () => {
         const listEl = getElement("[avra-element='ss-list']");
         const listEls = getElements("[avra-element]", listEl);
 
-        // sort results by result type -> a-z
-        const results = (await handleSearch(searchValue)).map((result) => {
-            return {
-                ...result,
-                type: getContentType(result.url),
-            };
-        });
+        // Loading state is already shown immediately on input
 
-        // Check for keyword matches in content items
-        const searchTerms = searchValue.toLowerCase().split(/\s+/);
-        const keywordMatches = CONTENT_ITEMS.filter((item) => {
-            // Check if any search term matches any keyword (case insensitive)
-            return item.keywords.some((keyword) =>
-                searchTerms.some((term) => keyword.toLowerCase().includes(term) || term.includes(keyword.toLowerCase()))
-            );
-        });
-
-        console.log("Keyword matches found:", keywordMatches);
-
-        // Get slugs from API results to avoid duplicates
-        const apiResultSlugs = new Set(
-            results.map((result) => {
-                const urlParts = result.url.split("/");
-                return urlParts[urlParts.length - 1];
-            })
-        );
-
-        // Filter out keyword matches that are already in API results
-        const newKeywordMatches = keywordMatches.filter((item) => !apiResultSlugs.has(item.slug));
-
-        console.log("New keyword matches (not in API results):", newKeywordMatches);
-
-        // hide all content elements
-        for (const el of allContentElements) {
-            el.style.display = "none";
-            el.setAttribute("data-avra-hidden", "search");
-        }
-
-        // Helper function to process a result (API or keyword match) (modifies the html card)
-        const processResult = (result: any, isKeywordMatch = false) => {
-            const slug = isKeywordMatch ? result.slug : result.url.split("/").pop();
-            const matchEl = listEls.find((el) => {
-                return el.getAttribute("data-avra-slug") === slug;
+        try {
+            // sort results by result type -> a-z
+            const results = (await handleSearch(searchValue)).map((result) => {
+                return {
+                    ...result,
+                    type: getContentType(result.url),
+                };
             });
 
-            if (matchEl) {
-                // inject highlight text
-                const resultText = getElement("[avra-element='ss-card-text']", matchEl);
-                if (resultText) {
-                    if (isKeywordMatch) {
-                        // For keyword matches, show matched keywords
-                        const matchedKeywords = result.keywords.filter((keyword: string) =>
-                            searchTerms.some((term: string) => keyword.toLowerCase().includes(term) || term.includes(keyword.toLowerCase()))
-                        );
-                        resultText.innerHTML = `Keyword match: <strong>${matchedKeywords.join(", ")}</strong>`;
-                    } else {
-                        // For API results, use highlight from search
-                        resultText.innerHTML = result.highlight.body.replace(/<em>/g, "<strong>").replace(/<\/em>/g, "</strong>");
-                    }
-                    resultText.classList.remove("w-dyn-bind-empty");
-                }
+            // Check for keyword matches in content items
+            const searchTerms = searchValue.toLowerCase().split(/\s+/);
+            const keywordMatches = CONTENT_ITEMS.filter((item) => {
+                // Check if any search term matches any keyword (case insensitive)
+                return item.keywords.some((keyword) =>
+                    searchTerms.some((term) => keyword.toLowerCase().includes(term) || term.includes(keyword.toLowerCase()))
+                );
+            });
 
-                // Add highlighted text as query parameter to anchor links
-                const highlightText = isKeywordMatch ? searchValue : extractCleanHighlightText(result.highlight?.body || "");
-                if (!isKeywordMatch) {
-                    console.log("highlightText", highlightText);
-                }
-                const links = matchEl.querySelectorAll<HTMLAnchorElement>("a");
-                links.forEach((link) => {
-                    if (highlightText && link.href) {
-                        const url = new URL(link.href);
-                        url.searchParams.set("highlight", highlightText);
-                        link.href = url.toString();
-                    }
+            console.log("Keyword matches found:", keywordMatches);
+
+            // Get slugs from API results to avoid duplicates
+            const apiResultSlugs = new Set(
+                results.map((result) => {
+                    const urlParts = result.url.split("/");
+                    return urlParts[urlParts.length - 1];
+                })
+            );
+
+            // Filter out keyword matches that are already in API results
+            const newKeywordMatches = keywordMatches.filter((item) => !apiResultSlugs.has(item.slug));
+
+            console.log("New keyword matches (not in API results):", newKeywordMatches);
+
+            // hide all content elements
+            for (const el of allContentElements) {
+                el.style.display = "none";
+                el.setAttribute("data-avra-hidden", "search");
+            }
+
+            // Helper function to process a result (API or keyword match) (modifies the html card)
+            const processResult = (result: any, isKeywordMatch = false) => {
+                const slug = isKeywordMatch ? result.slug : result.url.split("/").pop();
+                const matchEl = listEls.find((el) => {
+                    return el.getAttribute("data-avra-slug") === slug;
                 });
 
-                // maximum
-                if (visibleContentCount >= SMART_SEARCH_CONFIG.searchResults) {
-                    // console.log("max results reached, not showing in search results");
+                if (matchEl) {
+                    // inject highlight text
+                    const resultText = getElement("[avra-element='ss-card-text']", matchEl);
+                    if (resultText) {
+                        if (isKeywordMatch) {
+                            // For keyword matches, show matched keywords
+                            const matchedKeywords = result.keywords.filter((keyword: string) =>
+                                searchTerms.some(
+                                    (term: string) => keyword.toLowerCase().includes(term) || term.includes(keyword.toLowerCase())
+                                )
+                            );
+                            resultText.innerHTML = `Keyword match: <strong>${matchedKeywords.join(", ")}</strong>`;
+                        } else {
+                            // For API results, use highlight from search
+                            resultText.innerHTML = result.highlight.body.replace(/<em>/g, "<strong>").replace(/<\/em>/g, "</strong>");
+                        }
+                        resultText.classList.remove("w-dyn-bind-empty");
+                    }
+
+                    // Add highlighted text as query parameter to anchor links
+                    const highlightText = isKeywordMatch ? searchValue : extractCleanHighlightText(result.highlight?.body || "");
+                    if (!isKeywordMatch) {
+                        console.log("highlightText", highlightText);
+                    }
+                    const links = matchEl.querySelectorAll<HTMLAnchorElement>("a");
+                    links.forEach((link) => {
+                        if (highlightText && link.href) {
+                            const url = new URL(link.href);
+                            url.searchParams.set("highlight", highlightText);
+                            link.href = url.toString();
+                        }
+                    });
+
+                    // maximum
+                    if (visibleContentCount >= SMART_SEARCH_CONFIG.searchResults) {
+                        // console.log("max results reached, not showing in search results");
+                        hiddenContentCount++;
+                        return; // don't show in main results
+                    }
+
+                    // make visible
+                    matchEl.style.display = "block";
+                    matchEl.removeAttribute("data-avra-hidden");
+                    visibleContentCount++;
+
+                    return; // was shown in main results
+                } else {
+                    const resultType = isKeywordMatch ? result.type : result.type;
+                    const resultSlug = isKeywordMatch ? result.slug : result.url;
+                    console.warn(`No matching element found for ${resultType} with slug: ${resultSlug}`);
                     hiddenContentCount++;
-                    return; // don't show in main results
+                    return;
                 }
+            };
 
-                // make visible
-                matchEl.style.display = "block";
-                matchEl.removeAttribute("data-avra-hidden");
-                visibleContentCount++;
-
-                return; // was shown in main results
-            } else {
-                const resultType = isKeywordMatch ? result.type : result.type;
-                const resultSlug = isKeywordMatch ? result.slug : result.url;
-                console.warn(`No matching element found for ${resultType} with slug: ${resultSlug}`);
-                hiddenContentCount++;
-                return;
+            // Process API results first
+            for (const result of results) {
+                processResult(result, false);
             }
-        };
 
-        // Process API results first
-        for (const result of results) {
-            processResult(result, false);
-        }
+            // Process keyword matches that weren't in API results
+            for (const keywordMatch of newKeywordMatches) {
+                processResult(keywordMatch, true);
+            }
 
-        // Process keyword matches that weren't in API results
-        for (const keywordMatch of newKeywordMatches) {
-            processResult(keywordMatch, true);
-        }
+            // Show/hide content empty state based on visible count
+            if (contentEmptyEl) {
+                contentEmptyEl.style.display = visibleContentCount === 0 ? "block" : "none";
+            }
 
-        // Show/hide content empty state based on visible count
-        if (contentEmptyEl) {
-            contentEmptyEl.style.display = visibleContentCount === 0 ? "block" : "none";
-        }
+            if (resultsListEl.parentElement) {
+                resultsListEl.parentElement.style.display = visibleContentCount > 0 ? "block" : "none";
+            }
 
-        if (resultsListEl.parentElement) {
-            resultsListEl.parentElement.style.display = visibleContentCount > 0 ? "block" : "none";
-        }
+            // Update the content count display
+            if (visibleContentCount === 0) {
+            }
+        } catch (error) {
+            console.error("Search error:", error);
+        } finally {
+            // Hide loading state
+            if (loadingIndicator) {
+                loadingIndicator.style.opacity = "0";
+                setTimeout(() => {
+                    loadingIndicator.style.display = "none";
+                }, 200);
+            }
 
-        // Update the content count display
-        if (visibleContentCount === 0) {
+            // Show results with fade-in animation if there are results
+            if (resultsListEl.parentElement && resultsListEl.parentElement.style.display !== "none") {
+                resultsListEl.parentElement.style.transition = "opacity 0.3s ease-in-out";
+                resultsListEl.parentElement.style.opacity = "1";
+            }
         }
     }, SMART_SEARCH_CONFIG.searchDebounce);
 
@@ -233,9 +280,34 @@ export const smartSearch = () => {
         }
 
         if (searchValue.length > 0) {
+            // Show loading state immediately
+            if (loadingIndicator) {
+                loadingIndicator.style.display = "block";
+                setTimeout(() => {
+                    loadingIndicator.style.opacity = "1";
+                }, 10);
+            }
+
+            // Hide all content immediately
+            for (const el of allContentElements) {
+                el.style.display = "none";
+            }
+            if (resultsListEl.parentElement) {
+                resultsListEl.parentElement.style.display = "none";
+            }
+            if (contentEmptyEl) {
+                contentEmptyEl.style.display = "none";
+            }
+
             debouncedSearchWithClearSelection(searchValue);
         } else {
-            // If search is cleared, hide all results and show all content
+            // If search is cleared, hide loading and results, show all content
+            if (loadingIndicator) {
+                loadingIndicator.style.opacity = "0";
+                setTimeout(() => {
+                    loadingIndicator.style.display = "none";
+                }, 200);
+            }
             if (resultsListEl.parentElement) {
                 resultsListEl.parentElement.style.display = "none";
             }

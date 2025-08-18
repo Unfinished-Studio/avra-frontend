@@ -28,6 +28,16 @@ export const createMobileSearchPopup = () => {
                         />
                     </form>
                 </div>
+                <div avra-element="mobile-search-loading" style="text-align: center; padding: 20px; color: #666; display: none; opacity: 0; transition: opacity 0.2s ease-in-out;">
+                    <div style="display: inline-block; width: 20px; height: 20px; border: 2px solid #f3f3f3; border-top: 2px solid #666; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 12px;"></div>
+                    <p>Searching...</p>
+                    <style>
+                        @keyframes spin {
+                            0% { transform: rotate(0deg); }
+                            100% { transform: rotate(360deg); }
+                        }
+                    </style>
+                </div>
                 <div avra-element="mobile-search-results" style="flex: 1; overflow-y: auto; padding: 20px 20px 40px 20px; display: flex; flex-direction: column; gap: 12px;">
                     <div avra-element="mobile-search-empty" style="text-align: center; padding: 40px 20px; color: #666; display: none;">
                         <p>No results found. Try a different search term.</p>
@@ -56,6 +66,7 @@ export const setupMobileSearchPopup = () => {
     const mobileSearchInput = avraQuery<HTMLInputElement>("mobile-search-input", mobileSearchPopup)!;
     const mobileSearchForm = avraQuery<HTMLFormElement>("mobile-search-form", mobileSearchPopup)!;
     const mobileSearchResults = avraQuery<HTMLElement>("mobile-search-results", mobileSearchPopup)!;
+    const mobileSearchLoading = avraQuery<HTMLElement>("mobile-search-loading", mobileSearchPopup)!;
     const mobileSearchEmpty = avraQuery<HTMLElement>("mobile-search-empty", mobileSearchPopup)!;
     const mobileSearchClose = avraQuery<HTMLElement>("mobile-search-close", mobileSearchPopup)!;
     const mobileSearchBackdrop = avraQuery<HTMLElement>("mobile-search-backdrop", mobileSearchPopup)!;
@@ -146,7 +157,14 @@ export const setupMobileSearchPopup = () => {
     });
 
     // Setup mobile search functionality (reusing existing smart search logic)
-    setupMobileSearch(mobileSearchInput, mobileSearchForm, mobileSearchResults, mobileSearchEmpty, hideMobileSearchPopup);
+    setupMobileSearch(
+        mobileSearchInput,
+        mobileSearchForm,
+        mobileSearchResults,
+        mobileSearchLoading,
+        mobileSearchEmpty,
+        hideMobileSearchPopup
+    );
 };
 
 export const initializePersistentContentElements = () => {
@@ -180,6 +198,7 @@ export const setupMobileSearch = (
     searchInput: HTMLInputElement,
     searchForm: HTMLFormElement,
     resultsContainer: HTMLElement,
+    loadingElement: HTMLElement,
     emptyStateElement: HTMLElement,
     hidePopupCallback: () => void
 ) => {
@@ -192,115 +211,137 @@ export const setupMobileSearch = (
     const debouncedMobileSearch = debounce(async (searchValue: string) => {
         let visibleContentCount = 0;
 
-        // Clear previous results
-        resultsContainer.innerHTML = "";
+        // Loading state is already shown immediately on input
+        // Clear previous results (already done in input handler)
 
-        // Get search results from API
-        const results = (await handleSearch(searchValue)).map((result) => {
-            return {
-                ...result,
-                type: getContentType(result.url),
-            };
-        });
-
-        console.log({ results });
-
-        // Check for keyword matches in content items
-        const searchTerms = searchValue.toLowerCase().split(/\s+/);
-        const keywordMatches = CONTENT_ITEMS.filter((item) => {
-            return item.keywords.some((keyword) =>
-                searchTerms.some((term) => keyword.toLowerCase().includes(term) || term.includes(keyword.toLowerCase()))
-            );
-        });
-
-        // Get slugs from API results to avoid duplicates
-        const apiResultSlugs = new Set(
-            results.map((result) => {
-                const urlParts = result.url.split("/");
-                return urlParts[urlParts.length - 1];
-            })
-        );
-
-        // Filter out keyword matches that are already in API results
-        const newKeywordMatches = keywordMatches.filter((item) => !apiResultSlugs.has(item.slug));
-
-        // Helper function to create a mobile result card
-        const createMobileResultCard = (result: any, isKeywordMatch = false) => {
-            const slug = isKeywordMatch ? result.slug : result.url.split("/").pop();
-            const matchEl = persistentContentElements.find((el) => {
-                return el.getAttribute("data-avra-slug") === slug;
+        try {
+            // Get search results from API
+            const results = (await handleSearch(searchValue)).map((result) => {
+                return {
+                    ...result,
+                    type: getContentType(result.url),
+                };
             });
 
-            if (matchEl) {
-                const articleEl = persistentArticleElements.find((el) => {
-                    return el.querySelector("a")?.href.split("/").pop() === slug;
-                });
-                const clonedEl = articleEl?.cloneNode(true) as HTMLElement;
+            console.log({ results });
 
-                // Update the result text
-                const resultText = clonedEl.querySelector<HTMLElement>("[avra-element='ss-card-text']");
-                if (resultText) {
-                    if (isKeywordMatch) {
-                        const matchedKeywords = result.keywords.filter((keyword: string) =>
-                            searchTerms.some((term: string) => keyword.toLowerCase().includes(term) || term.includes(keyword.toLowerCase()))
-                        );
-                        resultText.innerHTML = `Keyword match: <strong>${matchedKeywords.join(", ")}</strong>`;
-                    } else {
-                        resultText.innerHTML = result.highlight.body.replace(/<em>/g, "<strong>").replace(/<\/em>/g, "</strong>");
+            // Check for keyword matches in content items
+            const searchTerms = searchValue.toLowerCase().split(/\s+/);
+            const keywordMatches = CONTENT_ITEMS.filter((item) => {
+                return item.keywords.some((keyword) =>
+                    searchTerms.some((term) => keyword.toLowerCase().includes(term) || term.includes(keyword.toLowerCase()))
+                );
+            });
+
+            // Get slugs from API results to avoid duplicates
+            const apiResultSlugs = new Set(
+                results.map((result) => {
+                    const urlParts = result.url.split("/");
+                    return urlParts[urlParts.length - 1];
+                })
+            );
+
+            // Filter out keyword matches that are already in API results
+            const newKeywordMatches = keywordMatches.filter((item) => !apiResultSlugs.has(item.slug));
+
+            // Helper function to create a mobile result card
+            const createMobileResultCard = (result: any, isKeywordMatch = false) => {
+                const slug = isKeywordMatch ? result.slug : result.url.split("/").pop();
+                const matchEl = persistentContentElements.find((el) => {
+                    return el.getAttribute("data-avra-slug") === slug;
+                });
+
+                if (matchEl) {
+                    const articleEl = persistentArticleElements.find((el) => {
+                        return el.querySelector("a")?.href.split("/").pop() === slug;
+                    });
+                    const clonedEl = articleEl?.cloneNode(true) as HTMLElement;
+
+                    // Update the result text
+                    const resultText = clonedEl.querySelector<HTMLElement>("[avra-element='ss-card-text']");
+                    if (resultText) {
+                        if (isKeywordMatch) {
+                            const matchedKeywords = result.keywords.filter((keyword: string) =>
+                                searchTerms.some(
+                                    (term: string) => keyword.toLowerCase().includes(term) || term.includes(keyword.toLowerCase())
+                                )
+                            );
+                            resultText.innerHTML = `Keyword match: <strong>${matchedKeywords.join(", ")}</strong>`;
+                        } else {
+                            resultText.innerHTML = result.highlight.body.replace(/<em>/g, "<strong>").replace(/<\/em>/g, "</strong>");
+                        }
+                        resultText.classList.remove("w-dyn-bind-empty");
                     }
-                    resultText.classList.remove("w-dyn-bind-empty");
+
+                    // Add highlighted text as query parameter to anchor links
+                    const highlightText = isKeywordMatch ? searchValue : extractCleanHighlightText(result.highlight?.body || "");
+                    const links = clonedEl.querySelectorAll<HTMLAnchorElement>("a");
+                    links.forEach((link) => {
+                        if (highlightText && link.href) {
+                            const url = new URL(link.href);
+                            url.searchParams.set("highlight", highlightText);
+                            link.href = url.toString();
+
+                            // Add click handler to close mobile popup with animation
+                            link.addEventListener("click", () => {
+                                hidePopupCallback();
+                            });
+                        }
+                    });
+
+                    // Style the card for mobile
+                    clonedEl.removeAttribute("data-avra-hidden");
+
+                    return clonedEl;
                 }
+                return null;
+            };
 
-                // Add highlighted text as query parameter to anchor links
-                const highlightText = isKeywordMatch ? searchValue : extractCleanHighlightText(result.highlight?.body || "");
-                const links = clonedEl.querySelectorAll<HTMLAnchorElement>("a");
-                links.forEach((link) => {
-                    if (highlightText && link.href) {
-                        const url = new URL(link.href);
-                        url.searchParams.set("highlight", highlightText);
-                        link.href = url.toString();
-
-                        // Add click handler to close mobile popup with animation
-                        link.addEventListener("click", () => {
-                            hidePopupCallback();
-                        });
-                    }
-                });
-
-                // Style the card for mobile
-                clonedEl.removeAttribute("data-avra-hidden");
-
-                return clonedEl;
+            // Process API results first
+            for (const result of results) {
+                if (visibleContentCount >= SMART_SEARCH_CONFIG.searchResults) break;
+                const card = createMobileResultCard(result, false);
+                if (card) {
+                    resultsContainer.appendChild(card);
+                    visibleContentCount++;
+                }
             }
-            return null;
-        };
 
-        // Process API results first
-        for (const result of results) {
-            if (visibleContentCount >= SMART_SEARCH_CONFIG.searchResults) break;
-            const card = createMobileResultCard(result, false);
-            if (card) {
-                resultsContainer.appendChild(card);
-                visibleContentCount++;
+            // Process keyword matches that weren't in API results
+            for (const keywordMatch of newKeywordMatches) {
+                if (visibleContentCount >= SMART_SEARCH_CONFIG.searchResults) break;
+                const card = createMobileResultCard(keywordMatch, true);
+                if (card) {
+                    resultsContainer.appendChild(card);
+                    visibleContentCount++;
+                }
             }
-        }
 
-        // Process keyword matches that weren't in API results
-        for (const keywordMatch of newKeywordMatches) {
-            if (visibleContentCount >= SMART_SEARCH_CONFIG.searchResults) break;
-            const card = createMobileResultCard(keywordMatch, true);
-            if (card) {
-                resultsContainer.appendChild(card);
-                visibleContentCount++;
+            // Show/hide empty state
+            if (visibleContentCount === 0) {
+                emptyStateElement.style.display = "block";
+                resultsContainer.appendChild(emptyStateElement);
+            } else {
+                emptyStateElement.style.display = "none";
             }
-        }
+        } catch (error) {
+            console.error("Mobile search error:", error);
+        } finally {
+            // Hide loading state
+            if (loadingElement) {
+                loadingElement.style.opacity = "0";
+                setTimeout(() => {
+                    loadingElement.style.display = "none";
+                }, 200);
+            }
 
-        // Show/hide empty state
-        if (visibleContentCount === 0) {
-            emptyStateElement.style.display = "block";
-            resultsContainer.appendChild(emptyStateElement);
-        } else {
-            emptyStateElement.style.display = "none";
+            // Show results with fade-in animation
+            resultsContainer.style.display = "flex";
+            resultsContainer.style.opacity = "0";
+            resultsContainer.style.transition = "opacity 0.3s ease-in-out";
+            setTimeout(() => {
+                resultsContainer.style.opacity = "1";
+            }, 50);
         }
     }, SMART_SEARCH_CONFIG.searchDebounce);
 
@@ -309,9 +350,29 @@ export const setupMobileSearch = (
 
         if (searchValue.length > 0) {
             console.log("searching with value:", searchValue);
+
+            // Show loading state immediately
+            if (loadingElement) {
+                loadingElement.style.display = "block";
+                setTimeout(() => {
+                    loadingElement.style.opacity = "1";
+                }, 10);
+            }
+
+            // Hide results immediately
+            resultsContainer.style.display = "none";
+            resultsContainer.innerHTML = "";
+
             await debouncedMobileSearch(searchValue);
         } else {
             console.log("search empty, clearing results...");
+            if (loadingElement) {
+                loadingElement.style.opacity = "0";
+                setTimeout(() => {
+                    loadingElement.style.display = "none";
+                }, 200);
+            }
+            resultsContainer.style.display = "none";
             resultsContainer.innerHTML = `<div avra-element="mobile-search-empty" style="text-align: center; padding: 40px 20px; color: #666; display: none;"><p>No results found. Try a different search term.</p></div>`;
         }
     });
