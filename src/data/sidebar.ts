@@ -71,14 +71,14 @@ export const wikiItems: WikiItem[] = [
                         title: "Head of Engineering",
                         subItems: [
                             {
-                                type: "item",
+                                type: "heading",
                                 displayTitle: "Benchling",
-                                title: "/case-studies/benchling-vp-of-engineering",
+                                title: "Benchling: VP of Engineering",
                             },
                             {
-                                type: "item",
+                                type: "heading",
                                 displayTitle: "Faire",
-                                title: "/case-studies/faire-vp-of-engineering",
+                                title: "Faire: VP of Engineering",
                             },
                         ],
                     },
@@ -88,9 +88,9 @@ export const wikiItems: WikiItem[] = [
                         title: "Head of Sales",
                         subItems: [
                             {
-                                type: "item",
+                                type: "heading",
                                 displayTitle: "Ironclad",
-                                title: "/case-studies/ironclad-vp-of-sales",
+                                title: "Ironclad: VP of Sales",
                             },
                         ],
                     },
@@ -100,14 +100,14 @@ export const wikiItems: WikiItem[] = [
                         title: "Head of Product",
                         subItems: [
                             {
-                                type: "item",
+                                type: "heading",
                                 displayTitle: "Brex",
-                                title: "/case-studies/brexs-cpo",
+                                title: "Brex: Chief Product Officer",
                             },
                             {
-                                type: "item",
+                                type: "heading",
                                 displayTitle: "Webflow",
-                                title: "/case-studies/webflows-cpo",
+                                title: "Webflow: Chief Product Officer",
                             },
                         ],
                     },
@@ -117,14 +117,14 @@ export const wikiItems: WikiItem[] = [
                         title: "Head of Finance",
                         subItems: [
                             {
-                                type: "item",
+                                type: "heading",
                                 displayTitle: "First Head of Finance",
-                                title: "/case-studies/first-head-of-finance",
+                                title: "What to look for in your first Head of Finance hire?",
                             },
                             {
-                                type: "item",
+                                type: "heading",
                                 displayTitle: "Scale AI",
-                                title: "/case-studies/scale-ai-head-of-finance",
+                                title: "Scale AI",
                             },
                         ],
                     },
@@ -134,31 +134,31 @@ export const wikiItems: WikiItem[] = [
                         title: "Leadership Hires",
                         subItems: [
                             {
-                                type: "item",
+                                type: "heading",
                                 displayTitle: "Scale",
-                                title: "/case-studies/scale-executives",
+                                title: "‍‍Scale's Executive Hiring Criteria",
                             },
                             {
-                                type: "item",
+                                type: "heading",
                                 displayTitle: "DoorDash",
-                                title: "/case-studies/what-does-tony-xu-ceo-of-doordash-look-for-when-hiring-leaders",
+                                title: "Tony Xu's Criteria for A+ Executives",
                             },
                             {
-                                type: "item",
+                                type: "heading",
                                 displayTitle: "Gusto",
-                                title: "/case-studies/joshua-reevess-criteria-for-hiring-leaders",
+                                title: "What does Joshua Reeves (CEO of Gusto) look for when hiring leaders?",
                             },
                             {
-                                type: "item",
+                                type: "heading",
                                 displayTitle: "Generic",
-                                title: "/case-studies/generic-executive-interview-question-bank",
+                                title: "Generic Executive Interview",
                             },
                         ],
                     },
                     {
-                        type: "item",
+                        type: "heading",
                         displayTitle: "Chief of Staff",
-                        title: "/case-studies/chief-of-staff",
+                        title: "Considering a Chief of Staff?",
                     },
                 ],
             },
@@ -216,24 +216,24 @@ export const wikiItems: WikiItem[] = [
                 title: "6. Case Studies",
                 subItems: [
                     {
-                        type: "item",
+                        type: "heading",
                         displayTitle: "Gusto",
-                        title: "/case-studies/alignment-metrics",
+                        title: "Gusto: Driving Alignment",
                     },
                     {
-                        type: "item",
+                        type: "heading",
                         displayTitle: "Twitch",
-                        title: "/case-studies/twitch-monthly-business-review",
+                        title: "Twitch: How to Write a Monthly Report",
                     },
                     {
-                        type: "item",
+                        type: "heading",
                         displayTitle: "Brex",
-                        title: "/case-studies/brex-monthly-email-to-the-board",
+                        title: "Brex: Monthly Email to the Board",
                     },
                     {
-                        type: "item",
+                        type: "heading",
                         displayTitle: "Whatnot",
-                        title: "/case-studies/whatnot-mission-outcomes-competencies",
+                        title: "Whatnot: Mission, Outcomes, Competencies",
                     },
                 ],
             },
@@ -298,9 +298,9 @@ export const wikiItems: WikiItem[] = [
                 title: "Case Studies",
                 subItems: [
                     {
-                        type: "item",
+                        type: "heading",
                         displayTitle: "Gusto",
-                        title: "/case-studies/building-high-performing-teams",
+                        title: "Gusto",
                     },
                 ],
             },
@@ -423,14 +423,14 @@ export const wikiItems: WikiItem[] = [
                 title: "Case Studies",
                 subItems: [
                     {
-                        type: "item",
+                        type: "heading",
                         displayTitle: "Faire: VP of Engineering",
-                        title: "/case-studies/faire-vp-of-engineering",
+                        title: "Faire: VP of Engineering",
                     },
                     {
-                        type: "item",
+                        type: "heading",
                         displayTitle: "Benchling: VP of Engineering",
-                        title: "/case-studies/benchling-vp-of-engineering",
+                        title: "Benchling: VP of Engineering",
                     },
                 ],
             },
@@ -446,9 +446,9 @@ export const wikiItems: WikiItem[] = [
                 title: "1. Develop an effective team of people managers.",
                 subItems: [
                     {
-                        type: "item",
+                        type: "heading",
                         displayTitle: "Expectation Setting",
-                        title: "/case-studies/manager-expectation-setting-and-training",
+                        title: "Example Documents: Training and Expectation Setting",
                     },
                 ],
             },
@@ -458,9 +458,9 @@ export const wikiItems: WikiItem[] = [
                 title: "2. Clearly communicate expectations and assess performance.",
                 subItems: [
                     {
-                        type: "item",
+                        type: "heading",
                         displayTitle: "Performance Reviews",
-                        title: "/case-studies/performance-management-examples",
+                        title: "Examples: Performance and Feedback",
                     },
                 ],
             },
@@ -470,14 +470,14 @@ export const wikiItems: WikiItem[] = [
                 title: "3. Establish a framework for promotions and career development",
                 subItems: [
                     {
-                        type: "item",
+                        type: "heading",
                         displayTitle: "Levels & Career Development",
-                        title: "/case-studies/levels-and-career-development",
+                        title: "Levels, Ladders, and Compensation",
                     },
                     {
-                        type: "item",
+                        type: "heading",
                         displayTitle: "Promotions",
-                        title: "/case-studies/promotions-and-planning",
+                        title: "Promotions and Workforce Planning",
                     },
                 ],
             },
@@ -492,14 +492,14 @@ export const wikiItems: WikiItem[] = [
                         title: "General Compensation Principles",
                     },
                     {
-                        type: "item",
+                        type: "heading",
                         displayTitle: "Compensation Philosophies",
-                        title: "/case-studies/compensation-philosophy",
+                        title: "Compensation Philosophies",
                     },
                     {
-                        type: "item",
+                        type: "heading",
                         displayTitle: "Communicating Equity Value",
-                        title: "/case-studies/communicating-the-value-of-equity",
+                        title: "Communicating Equity Value",
                     },
                 ],
             },
@@ -514,9 +514,9 @@ export const wikiItems: WikiItem[] = [
                         title: "When selecting a Head of People, look for:",
                     },
                     {
-                        type: "item",
+                        type: "heading",
                         displayTitle: "Job Descriptions",
-                        title: "/case-studies/sample-job-descriptions",
+                        title: "HR and People Job Descriptions",
                     },
                 ],
             },
@@ -620,9 +620,9 @@ export const wikiItems: WikiItem[] = [
                 title: "Case Studies",
                 subItems: [
                     {
-                        type: "item",
+                        type: "heading",
                         displayTitle: "Checkr",
-                        title: "/case-studies/checkrs-financial-planning-process",
+                        title: "Checkr‍",
                     },
                 ],
             },

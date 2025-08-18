@@ -102,6 +102,115 @@ class SwupManager {
         }
     }
 
+    private scrollToHighlightedText(highlightedText: string): void {
+        const wikiContainer = document.querySelector<HTMLElement>("[avra-element='wiki-content']");
+        if (wikiContainer) {
+            const closeBtn = document.querySelector<HTMLElement>(".wiki-section-close");
+            if (closeBtn) {
+                closeBtn.click();
+            }
+
+            // Function to find and scroll to matching text in headings only
+            const scrollToHighlightedText = () => {
+                const content = document.querySelector("#wiki-content");
+                if (!content) return;
+
+                // Only search within heading elements (h1, h2, h3, h4, h5, h6)
+                const headings = wikiContainer.querySelectorAll("h1, h2, h3, h4, h5, h6");
+
+                // Normalize text to handle special characters like apostrophes
+                const normalizeText = (text: string): string => {
+                    return text
+                        .toLowerCase()
+                        .replace(/['''''''‛‚´`\u2019]/g, "'") // Normalize all apostrophe variations to straight apostrophe
+                        .replace(/[""„‟]/g, '"') // Normalize smart quotes to straight quotes
+                        .replace(/[–—]/g, "-") // Normalize em/en dashes to hyphen
+                        .replace(/\u200D/g, "") // Remove Zero Width Joiner characters
+                        .replace(/\s+/g, " ") // Normalize whitespace
+                        .trim();
+                };
+
+                const searchText = normalizeText(highlightedText);
+
+                for (const heading of headings) {
+                    const headingText = normalizeText(heading.textContent || "");
+
+                    if (headingText.includes(searchText)) {
+                        heading.scrollIntoView({
+                            behavior: "smooth",
+                            block: "start",
+                            inline: "nearest",
+                        });
+
+                        // Highlight the text temporarily
+                        const originalHTML = heading.innerHTML;
+
+                        // Create a more robust regex that doesn't interfere with HTML tags
+                        const escapedHighlightText = highlightedText.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
+                        // Function to highlight text while preserving HTML structure
+                        const highlightTextInHTML = (html: string, searchText: string): string => {
+                            // Create a temporary element to parse the HTML
+                            const tempDiv = document.createElement("div");
+                            tempDiv.innerHTML = html;
+
+                            // Function to recursively highlight text in text nodes
+                            const highlightInNode = (node: Node): void => {
+                                if (node.nodeType === Node.TEXT_NODE) {
+                                    const textContent = node.textContent || "";
+                                    const regex = new RegExp(`(${escapedHighlightText})`, "gi");
+                                    if (regex.test(textContent)) {
+                                        const newHTML = textContent.replace(
+                                            regex,
+                                            '<mark class="highlight-fade" style="background-color: transparent; transition: background-color 0.5s ease-in-out; padding: 2px;">$1</mark>'
+                                        );
+                                        const wrapper = document.createElement("span");
+                                        wrapper.innerHTML = newHTML;
+                                        node.parentNode?.replaceChild(wrapper, node);
+                                    }
+                                } else if (node.nodeType === Node.ELEMENT_NODE) {
+                                    // Recursively process child nodes
+                                    Array.from(node.childNodes).forEach((child) => highlightInNode(child));
+                                }
+                            };
+
+                            highlightInNode(tempDiv);
+                            return tempDiv.innerHTML;
+                        };
+
+                        const newHTML = highlightTextInHTML(originalHTML, highlightedText);
+                        heading.innerHTML = newHTML;
+
+                        const marks = heading.querySelectorAll<HTMLElement>(".highlight-fade");
+
+                        // Fade in
+                        setTimeout(() => {
+                            marks.forEach((mark) => {
+                                mark.style.backgroundColor = "#d6d5d1";
+                            });
+                        }, 100);
+
+                        // Fade out and remove
+                        setTimeout(() => {
+                            marks.forEach((mark) => {
+                                mark.style.backgroundColor = "transparent";
+                            });
+
+                            // Remove the mark after fade out transition ends
+                            setTimeout(() => {
+                                heading.innerHTML = originalHTML;
+                            }, 500); // This should match the transition duration
+                        }, 2500);
+
+                        break;
+                    }
+                }
+            };
+
+            scrollToHighlightedText();
+        }
+    }
+
     /**
      * Register default hooks that should always be present
      */
@@ -129,8 +238,16 @@ class SwupManager {
             // Re-initialize persistent content elements after content replacement
             setTimeout(() => initializePersistentContentElements(), 100);
 
-            // Scroll to top of wiki container after content loads
-            setTimeout(() => this.scrollToTopOfWikiContainer(), 150);
+            // Scroll to highlighted text or top of page
+            const urlParams = new URLSearchParams(window.location.search);
+            const highlightText = urlParams.get("highlight");
+            if (highlightText) {
+                setTimeout(() => {
+                    this.scrollToHighlightedText(highlightText);
+                }, 300);
+            } else {
+                setTimeout(() => this.scrollToTopOfWikiContainer(), 150);
+            }
         });
 
         // Visit end hook

@@ -81,7 +81,7 @@ const initializeSidebar = () => {
                     const insightItemText = getAvraElement<HTMLAnchorElement>("wiki-insight-item-text", insightItem);
                     insightItemText.textContent = subItem.displayTitle;
                     if (subItem.type === "heading") {
-                        insightItemText.href = sectionItemText.href + `?highlight=${subItem.title}`;
+                        insightItemText.href = sectionItemText.href + `?highlight=${encodeURIComponent(subItem.title)}`;
                     } else if (subItem.type === "item") {
                         insightItemText.href = subItem.title;
                     }
@@ -103,7 +103,8 @@ const initializeSidebar = () => {
                                 );
                                 insightHeadingItemText.textContent = subSubItem.displayTitle;
                                 if (subSubItem.type === "heading") {
-                                    insightHeadingItemText.href = sectionItemText.href + `?highlight=${subSubItem.title}`;
+                                    insightHeadingItemText.href =
+                                        sectionItemText.href + `?highlight=${encodeURIComponent(subSubItem.title)}`;
                                 } else if (subSubItem.type === "item") {
                                     insightHeadingItemText.href = subSubItem.title;
                                 }
@@ -130,7 +131,8 @@ const initializeSidebar = () => {
                                             );
                                             subInsightHeadingItemText.textContent = subSubSubItem.displayTitle;
                                             if (subSubSubItem.type === "heading") {
-                                                subInsightHeadingItemText.href = sectionItemText.href + `?highlight=${subSubSubItem.title}`;
+                                                subInsightHeadingItemText.href =
+                                                    sectionItemText.href + `?highlight=${encodeURIComponent(subSubSubItem.title)}`;
                                             } else if (subSubSubItem.type === "item") {
                                                 subInsightHeadingItemText.href = subSubSubItem.title;
                                             }
