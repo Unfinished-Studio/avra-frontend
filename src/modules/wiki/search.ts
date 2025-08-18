@@ -50,16 +50,28 @@ export const smartSearch = () => {
         resultsListEl.parentElement.style.display = "none";
     }
 
-    // Create loading indicator and place it after the search form
+    // Create a container for search states (loading + results) to prevent content shifting
+    const searchStateContainer = document.createElement("div");
+    searchStateContainer.setAttribute("avra-element", "ss-state-container");
+    searchStateContainer.style.cssText = `
+        position: relative;
+        min-height: 60px;
+    `;
+
+    // Create loading indicator with absolute positioning
     const loadingIndicator = document.createElement("div");
     loadingIndicator.setAttribute("avra-element", "ss-loading");
     loadingIndicator.style.cssText = `
-        display: none;
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
         text-align: center;
         padding: 20px;
         color: #666;
         opacity: 0;
-        transition: opacity 0.2s ease-in-out;
+        transition: opacity 0.3s ease-in-out;
+        pointer-events: none;
     `;
     loadingIndicator.innerHTML = `
         <div style="display: inline-block; width: 20px; height: 20px; border: 2px solid #f3f3f3; border-top: 2px solid #666; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 12px;"></div>
@@ -72,8 +84,9 @@ export const smartSearch = () => {
         </style>
     `;
 
-    // Insert loading indicator after the search form
-    searchForm.insertAdjacentElement("afterend", loadingIndicator);
+    // Insert search state container after the search form and add loading indicator
+    searchForm.insertAdjacentElement("afterend", searchStateContainer);
+    searchStateContainer.appendChild(loadingIndicator);
 
     const podcastList = getElement("[avra-element='ss-podcast-list']");
     const podcastEls = getElements("[avra-element='ss-podcast']", podcastList);
@@ -150,11 +163,7 @@ export const smartSearch = () => {
 
             console.log("New keyword matches (not in API results):", newKeywordMatches);
 
-            // hide all content elements
-            for (const el of allContentElements) {
-                el.style.display = "none";
-                el.setAttribute("data-avra-hidden", "search");
-            }
+            // Content elements are already hidden from input handler
 
             // Helper function to process a result (API or keyword match) (modifies the html card)
             const processResult = (result: any, isKeywordMatch = false) => {
@@ -203,8 +212,10 @@ export const smartSearch = () => {
                         return; // don't show in main results
                     }
 
-                    // make visible
+                    // make visible and reset opacity
                     matchEl.style.display = "block";
+                    matchEl.style.opacity = "1";
+                    matchEl.style.transition = ""; // Remove any transition that might interfere
                     matchEl.removeAttribute("data-avra-hidden");
                     visibleContentCount++;
 
@@ -235,6 +246,10 @@ export const smartSearch = () => {
 
             if (resultsListEl.parentElement) {
                 resultsListEl.parentElement.style.display = visibleContentCount > 0 ? "block" : "none";
+                // Reset opacity for crossfade animation
+                if (visibleContentCount > 0) {
+                    resultsListEl.parentElement.style.opacity = "0";
+                }
             }
 
             // Update the content count display
@@ -243,18 +258,20 @@ export const smartSearch = () => {
         } catch (error) {
             console.error("Search error:", error);
         } finally {
-            // Hide loading state
+            // Crossfade from loading to results
             if (loadingIndicator) {
                 loadingIndicator.style.opacity = "0";
-                setTimeout(() => {
-                    loadingIndicator.style.display = "none";
-                }, 200);
+                loadingIndicator.style.pointerEvents = "none";
             }
 
-            // Show results with fade-in animation if there are results
-            if (resultsListEl.parentElement && resultsListEl.parentElement.style.display !== "none") {
-                resultsListEl.parentElement.style.transition = "opacity 0.3s ease-in-out";
-                resultsListEl.parentElement.style.opacity = "1";
+            // Show results with crossfade animation if there are results
+            if (resultsListEl.parentElement && resultsListEl.parentElement.style.display === "block") {
+                const parentEl = resultsListEl.parentElement;
+                parentEl.style.opacity = "0";
+                parentEl.style.transition = "opacity 0.3s ease-in-out";
+                setTimeout(() => {
+                    parentEl.style.opacity = "1";
+                }, 100);
             }
         }
     }, SMART_SEARCH_CONFIG.searchDebounce);
@@ -280,20 +297,27 @@ export const smartSearch = () => {
         }
 
         if (searchValue.length > 0) {
-            // Show loading state immediately
+            // Show loading state immediately with crossfade
             if (loadingIndicator) {
-                loadingIndicator.style.display = "block";
-                setTimeout(() => {
-                    loadingIndicator.style.opacity = "1";
-                }, 10);
+                loadingIndicator.style.opacity = "1";
+                loadingIndicator.style.pointerEvents = "auto";
             }
 
-            // Hide all content immediately
+            // Hide all content with fade
             for (const el of allContentElements) {
-                el.style.display = "none";
+                el.style.transition = "opacity 0.2s ease-in-out";
+                el.style.opacity = "0";
+                setTimeout(() => {
+                    el.style.display = "none";
+                }, 200);
             }
             if (resultsListEl.parentElement) {
-                resultsListEl.parentElement.style.display = "none";
+                const parentEl = resultsListEl.parentElement;
+                parentEl.style.transition = "opacity 0.2s ease-in-out";
+                parentEl.style.opacity = "0";
+                setTimeout(() => {
+                    parentEl.style.display = "none";
+                }, 200);
             }
             if (contentEmptyEl) {
                 contentEmptyEl.style.display = "none";
@@ -301,19 +325,23 @@ export const smartSearch = () => {
 
             debouncedSearchWithClearSelection(searchValue);
         } else {
-            // If search is cleared, hide loading and results, show all content
+            // If search is cleared, crossfade from loading to content
             if (loadingIndicator) {
                 loadingIndicator.style.opacity = "0";
-                setTimeout(() => {
-                    loadingIndicator.style.display = "none";
-                }, 200);
+                loadingIndicator.style.pointerEvents = "none";
             }
             if (resultsListEl.parentElement) {
                 resultsListEl.parentElement.style.display = "none";
+                resultsListEl.parentElement.style.opacity = "1";
             }
             for (const el of allContentElements) {
                 el.style.display = "block";
+                el.style.opacity = "0";
+                el.style.transition = "opacity 0.3s ease-in-out";
                 el.removeAttribute("data-avra-hidden");
+                setTimeout(() => {
+                    el.style.opacity = "1";
+                }, 50);
             }
             if (contentEmptyEl) {
                 contentEmptyEl.style.display = "none";

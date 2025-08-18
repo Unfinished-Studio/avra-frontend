@@ -28,19 +28,21 @@ export const createMobileSearchPopup = () => {
                         />
                     </form>
                 </div>
-                <div avra-element="mobile-search-loading" style="text-align: center; padding: 20px; color: #666; display: none; opacity: 0; transition: opacity 0.2s ease-in-out;">
-                    <div style="display: inline-block; width: 20px; height: 20px; border: 2px solid #f3f3f3; border-top: 2px solid #666; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 12px;"></div>
-                    <p>Searching...</p>
-                    <style>
-                        @keyframes spin {
-                            0% { transform: rotate(0deg); }
-                            100% { transform: rotate(360deg); }
-                        }
-                    </style>
-                </div>
-                <div avra-element="mobile-search-results" style="flex: 1; overflow-y: auto; padding: 20px 20px 40px 20px; display: flex; flex-direction: column; gap: 12px;">
-                    <div avra-element="mobile-search-empty" style="text-align: center; padding: 40px 20px; color: #666; display: none;">
-                        <p>No results found. Try a different search term.</p>
+                <div avra-element="mobile-search-state-container" style="flex: 1; position: relative; overflow: hidden;">
+                    <div avra-element="mobile-search-loading" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; text-align: center; padding: 20px; color: #666; opacity: 0; transition: opacity 0.3s ease-in-out; pointer-events: none; display: flex; flex-direction: column; justify-content: flex-start; align-items: center;">
+                        <div style="display: inline-block; width: 20px; height: 20px; border: 2px solid #f3f3f3; border-top: 2px solid #666; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 12px; margin-top: 40px;"></div>
+                        <p>Searching...</p>
+                        <style>
+                            @keyframes spin {
+                                0% { transform: rotate(0deg); }
+                                100% { transform: rotate(360deg); }
+                            }
+                        </style>
+                    </div>
+                    <div avra-element="mobile-search-results" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; overflow-y: auto; padding: 20px 20px 40px 20px; display: flex; flex-direction: column; gap: 12px; opacity: 1; transition: opacity 0.3s ease-in-out;">
+                        <div avra-element="mobile-search-empty" style="text-align: center; padding: 40px 20px; color: #666; display: none;">
+                            <p>No results found. Try a different search term.</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -327,21 +329,16 @@ export const setupMobileSearch = (
         } catch (error) {
             console.error("Mobile search error:", error);
         } finally {
-            // Hide loading state
+            // Crossfade from loading to results
             if (loadingElement) {
                 loadingElement.style.opacity = "0";
-                setTimeout(() => {
-                    loadingElement.style.display = "none";
-                }, 200);
+                loadingElement.style.pointerEvents = "none";
             }
 
-            // Show results with fade-in animation
-            resultsContainer.style.display = "flex";
-            resultsContainer.style.opacity = "0";
-            resultsContainer.style.transition = "opacity 0.3s ease-in-out";
+            // Show results with crossfade animation
             setTimeout(() => {
                 resultsContainer.style.opacity = "1";
-            }, 50);
+            }, 100);
         }
     }, SMART_SEARCH_CONFIG.searchDebounce);
 
@@ -351,28 +348,26 @@ export const setupMobileSearch = (
         if (searchValue.length > 0) {
             console.log("searching with value:", searchValue);
 
-            // Show loading state immediately
+            // Show loading state with crossfade
             if (loadingElement) {
-                loadingElement.style.display = "block";
-                setTimeout(() => {
-                    loadingElement.style.opacity = "1";
-                }, 10);
+                loadingElement.style.opacity = "1";
+                loadingElement.style.pointerEvents = "auto";
             }
 
-            // Hide results immediately
-            resultsContainer.style.display = "none";
-            resultsContainer.innerHTML = "";
+            // Hide results with crossfade
+            resultsContainer.style.opacity = "0";
+            setTimeout(() => {
+                resultsContainer.innerHTML = "";
+            }, 150);
 
             await debouncedMobileSearch(searchValue);
         } else {
             console.log("search empty, clearing results...");
             if (loadingElement) {
                 loadingElement.style.opacity = "0";
-                setTimeout(() => {
-                    loadingElement.style.display = "none";
-                }, 200);
+                loadingElement.style.pointerEvents = "none";
             }
-            resultsContainer.style.display = "none";
+            resultsContainer.style.opacity = "1";
             resultsContainer.innerHTML = `<div avra-element="mobile-search-empty" style="text-align: center; padding: 40px 20px; color: #666; display: none;"><p>No results found. Try a different search term.</p></div>`;
         }
     });
