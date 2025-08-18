@@ -330,12 +330,12 @@ export const wikiItems: WikiItem[] = [
                     {
                         type: "heading",
                         displayTitle: "Identifying Bottlenecks",
-                        title: "identifying-bottlenecks",
+                        title: "Identifying bottlenecks and making sure the company is set up to deal with them.",
                     },
                     {
                         type: "heading",
                         displayTitle: "Building Your Team",
-                        title: "Identifying bottlenecks and making sure the company is set up to deal with them.",
+                        title: "Building the right team.",
                     },
                     {
                         type: "heading",
