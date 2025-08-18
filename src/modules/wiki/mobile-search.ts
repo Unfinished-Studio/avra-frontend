@@ -379,7 +379,18 @@ export const setupMobileSearch = (
 
     // Prevent enter key from causing issues
     searchInput.addEventListener("keyup", (e) => {
-        const value = (e.target as HTMLInputElement).value;
-        (e.target as HTMLInputElement).value = value.replace(/\r?\n/gi, "");
+        const input = e.target as HTMLInputElement;
+        const value = input.value;
+        const cleanValue = value.replace(/\r?\n/gi, "");
+
+        // Only update if there were actually newlines to remove
+        if (value !== cleanValue) {
+            const cursorPosition = input.selectionStart;
+            input.value = cleanValue;
+            // Restore cursor position
+            if (cursorPosition !== null) {
+                input.setSelectionRange(cursorPosition, cursorPosition);
+            }
+        }
     });
 };
