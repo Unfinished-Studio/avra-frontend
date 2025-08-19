@@ -1,7 +1,8 @@
 import { updateBreadcrumbs } from "@/modules/wiki/breadcrumb";
 import { initializePersistentContentElements } from "@/modules/wiki/mobile-search";
-import { updateSidebar } from "@/pages/wiki";
 import { initContentPage } from "@/pages/page-initializer";
+import { updateSidebar } from "@/pages/wiki";
+import SwupPreloadPlugin from "@swup/preload-plugin";
 import Swup from "swup";
 import { updateSidebarState } from "./sidebar";
 
@@ -37,7 +38,8 @@ class SwupManager {
             animationSelector: '[class*="transition-"]',
             containers: ["[avra-element='wiki-content']"],
             linkSelector: swupLinkSelector,
-            cache: false,
+            // cache: false,
+            plugins: [new SwupPreloadPlugin()],
         });
 
         this.registerDefaultHooks();
@@ -63,7 +65,8 @@ class SwupManager {
             animationSelector: '[class*="transition-"]',
             containers: ["[avra-element='wiki-content']"],
             linkSelector: newLinkSelector,
-            cache: false,
+            // cache: false,
+            plugins: [new SwupPreloadPlugin()],
         });
 
         this.registerDefaultHooks();
@@ -259,6 +262,8 @@ class SwupManager {
             // Re-initialize persistent content elements after navigation
             initializePersistentContentElements();
         });
+
+        this.swup.hooks.on("page:preload", (_visit, { page }) => console.log("PRELOADED:", page));
     }
 
     /**

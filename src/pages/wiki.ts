@@ -2,23 +2,17 @@ import { updateBreadcrumbs } from "@/modules/wiki/breadcrumb";
 import { initializePersistentContentElements, setupMobileSearchPopup } from "@/modules/wiki/mobile-search";
 import { initializeNavPersistentContentElements, setupNavSearchDropdown } from "@/modules/wiki/nav-search";
 import { smartSearch } from "@/modules/wiki/search";
-import { Sidebar } from "@/modules/wiki/sidebar";
+import { sidebar } from "@/modules/wiki/sidebar";
 import { initSwup, swupManager } from "@/modules/wiki/swup-manager";
 import { initContentPage } from "@/pages/page-initializer";
 import { getElement, getElements } from "@/utils/dom/elements";
 import { isMobile } from "@/utils/mobile";
 
-export const handleMobileNavigation = () => {
-    if (isMobile()) {
-        swupManager.navigate("/avra-wiki/hiring-and-managing-execs");
-    }
-};
-
 export const updateSidebar = () => {
     const sessionInsightsSection = getElement("[data-title='Session Insights']");
     const sessionLinks = getElements("[avra-element='wiki-session-links'] a");
 
-    console.log(sessionInsightsSection, sessionLinks);
+    console.log("[wiki] updating sidebar with session links");
 
     if (sessionInsightsSection && sessionLinks.length) {
         // Clear existing session links
@@ -34,13 +28,12 @@ export const updateSidebar = () => {
 
 window.Webflow ||= [];
 window.Webflow.push(async () => {
-    Sidebar();
+    sidebar();
     smartSearch();
 
-    // Initialize persistent content elements for both mobile and nav search
-    initializePersistentContentElements(); // Initialize before mobile search setup
-    initializeNavPersistentContentElements(); // Initialize before nav search setup
-
+    // Initialize mobile and nav search (both use persistent content elements)
+    initializePersistentContentElements();
+    initializeNavPersistentContentElements();
     setupMobileSearchPopup();
     setupNavSearchDropdown();
 
@@ -50,6 +43,8 @@ window.Webflow.push(async () => {
 
     initSwup();
 
-    // Handle mobile navigation after Swup is initialized
-    handleMobileNavigation();
+    // Take mobile users to default page after Swup is initialized
+    if (isMobile()) {
+        swupManager.navigate("/avra-wiki/hiring-and-managing-execs");
+    }
 });

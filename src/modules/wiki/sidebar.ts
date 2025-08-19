@@ -67,6 +67,7 @@ const initializeSidebar = () => {
                 const sectionItemText = getAvraElement<HTMLAnchorElement>("wiki-section-item-text", sectionItem);
                 sectionItemText.textContent = wikiTag.title;
                 sectionItemText.href = `/avra-wiki/${wikiTag.slug}`; // TODO: correct slugs in hardcoded data
+                sectionItemText.setAttribute("data-swup-preload", "");
 
                 // Store slug as data attribute for later highlighting
                 sectionItem.setAttribute("data-wiki-slug", wikiTag.slug);
@@ -320,42 +321,6 @@ const initializeSidebar = () => {
     }
 };
 
-const updateSidebarHighlighting = (currentSlug: string | null, currentType: string | null) => {
-    const textElementSelector = "[avra-element='wiki-section-item-text'], [avra-element='wiki-insight-item-text']";
-
-    // Clear all existing highlighting
-    const allItems = document.querySelectorAll<HTMLElement>("[data-wiki-slug], [data-session-slug], [data-podcast-slug]");
-
-    allItems.forEach((item) => {
-        const textElement = item.querySelector<HTMLElement>(textElementSelector);
-        if (textElement) {
-            textElement.classList.remove(ACTIVE_CLASS);
-        }
-    });
-
-    // Apply highlighting to current page
-    if (currentSlug && currentType) {
-        let selector = "";
-        if (currentType === "wiki") {
-            selector = `[data-wiki-slug="${currentSlug}"]`;
-        } else if (currentType === "session") {
-            selector = `[data-session-slug="${currentSlug}"]`;
-        } else if (currentType === "podcast") {
-            selector = `[data-podcast-slug="${currentSlug}"]`;
-        }
-
-        if (selector) {
-            const currentItem = document.querySelector<HTMLElement>(selector);
-            if (currentItem) {
-                const textElement = currentItem.querySelector<HTMLElement>(textElementSelector);
-                if (textElement) {
-                    textElement.classList.add(ACTIVE_CLASS);
-                }
-            }
-        }
-    }
-};
-
 const getSiblingDropdowns = (currentDropdownBtn: HTMLElement): HTMLElement[] => {
     const currentTier = currentDropdownBtn.getAttribute("data-dropdown-tier");
     if (!currentTier) return [];
@@ -364,6 +329,99 @@ const getSiblingDropdowns = (currentDropdownBtn: HTMLElement): HTMLElement[] => 
     return Array.from(document.querySelectorAll(`[data-dropdown-tier="${currentTier}"]`)).filter(
         (btn): btn is HTMLElement => btn !== currentDropdownBtn && btn instanceof HTMLElement
     );
+};
+
+const getDescendantDropdowns = (currentDropdownBtn: HTMLElement): HTMLElement[] => {
+    const currentTier = parseInt(currentDropdownBtn.getAttribute("data-dropdown-tier") || "0");
+    if (!currentTier) return [];
+
+    const textElement = currentDropdownBtn.previousElementSibling as HTMLElement;
+    if (!textElement) return [];
+
+    const dropdownParent = textElement.parentElement!.parentElement!;
+    if (!dropdownParent) return [];
+
+    const tierConfig = DROPDOWN_TIERS.find((t) => t.tier === currentTier);
+    if (!tierConfig) return [];
+
+    const childItems = getElements<HTMLElement>(tierConfig.childSelector, dropdownParent);
+    const descendantDropdowns: HTMLElement[] = [];
+
+    // Find all dropdown buttons in child items and their descendants recursively
+    const findDropdownsInChildren = (items: HTMLElement[], tier: number) => {
+        items.forEach((item) => {
+            // Find dropdown buttons in this item
+            const dropdownBtns = item.querySelectorAll(`[data-dropdown-tier="${tier + 1}"]`);
+            dropdownBtns.forEach((btn) => {
+                if (btn instanceof HTMLElement) {
+                    descendantDropdowns.push(btn);
+
+                    // Recursively find dropdowns in this item's children
+                    const btnTierConfig = DROPDOWN_TIERS.find((t) => t.tier === tier + 1);
+                    if (btnTierConfig) {
+                        const btnTextElement = btn.previousElementSibling as HTMLElement;
+                        if (btnTextElement) {
+                            const btnDropdownParent = btnTextElement.parentElement!.parentElement!;
+                            if (btnDropdownParent) {
+                                const btnChildItems = getElements<HTMLElement>(btnTierConfig.childSelector, btnDropdownParent);
+                                findDropdownsInChildren(btnChildItems, tier + 1);
+                            }
+                        }
+                    }
+                }
+            });
+        });
+    };
+
+    findDropdownsInChildren(childItems, currentTier);
+    return descendantDropdowns;
+};
+
+const openDropdown = (dropdownBtn: HTMLElement, instant: boolean = false): void => {
+    const tier = dropdownBtn.getAttribute("data-dropdown-tier");
+    const tierConfig = DROPDOWN_TIERS.find((t) => t.tier.toString() === tier);
+    if (!tierConfig) return;
+
+    const textElement = dropdownBtn.previousElementSibling as HTMLElement;
+    if (!textElement) return;
+
+    const dropdownParent = textElement.parentElement!.parentElement!;
+    if (!dropdownParent) return;
+
+    const childItems = getElements<HTMLElement>(tierConfig.childSelector, dropdownParent);
+
+    // Open this dropdown
+    dropdownBtn.setAttribute("data-avra-dropdown-expanded", "true");
+
+    // Expand - first show elements, then animate
+    childItems.forEach((item) => {
+        gsap.set(item, { display: "flex" });
+    });
+
+    if (instant) {
+        gsap.set(childItems, {
+            height: "auto",
+            opacity: 1,
+            marginTop: "8px",
+        });
+        gsap.to(dropdownBtn, {
+            rotation: 180,
+        });
+    } else {
+        gsap.to(childItems, {
+            height: "auto",
+            opacity: 1,
+            marginTop: "8px",
+            duration: 0.25,
+            ease: "power2.out",
+            stagger: 0.05,
+        });
+        gsap.to(dropdownBtn, {
+            rotation: 180,
+            duration: 0.25,
+            ease: "power2.out",
+        });
+    }
 };
 
 const closeDropdown = (dropdownBtn: HTMLElement): void => {
@@ -455,27 +513,15 @@ const setupDropdownForTier = (tierConfig: (typeof DROPDOWN_TIERS)[0], currentTyp
                         });
 
                         // Open this dropdown
-                        dropdownBtn.setAttribute("data-avra-dropdown-expanded", "true");
+                        openDropdown(dropdownBtn);
 
-                        // Expand - first show elements, then animate
-                        childItems.forEach((item) => {
-                            gsap.set(item, { display: "flex" });
-                        });
+                        // Open all descendant dropdowns
 
-                        gsap.to(childItems, {
-                            height: "auto",
-                            opacity: 1,
-                            marginTop: "8px",
-                            duration: 0.25,
-                            ease: "power2.out",
-                            stagger: 0.05,
-                        });
-
-                        // Rotate arrow down
-                        gsap.to(dropdownBtn, {
-                            rotation: 180,
-                            duration: 0.25,
-                            ease: "power2.out",
+                        const descendantDropdowns = getDescendantDropdowns(dropdownBtn);
+                        descendantDropdowns.forEach((descendantBtn) => {
+                            if (descendantBtn.getAttribute("data-avra-dropdown-expanded") !== "true") {
+                                openDropdown(descendantBtn, true);
+                            }
                         });
                     }
                 });
@@ -552,7 +598,6 @@ const shouldDropdownBeExpanded = (
 };
 
 const setupSidebarDropdowns = (currentType: string | null, currentSlug: string | null) => {
-    // Setup all dropdown tiers using the unified configuration
     DROPDOWN_TIERS.forEach((tierConfig) => {
         setupDropdownForTier(tierConfig, currentType, currentSlug);
     });
@@ -561,24 +606,18 @@ const setupSidebarDropdowns = (currentType: string | null, currentSlug: string |
 export const updateSidebarState = () => {
     const { currentSlug, currentType, currentUrl } = getCurrentPageInfo();
     console.log("PAGE INFO:", { currentSlug, currentType, currentUrl });
-    console.log("updateSidebarState called - checking if should close sidebar");
 
-    // updateSidebarHighlighting(currentSlug, currentType);
     setupSidebarDropdowns(currentType, currentSlug);
-
-    // Close mobile sidebar after navigation (only if it's currently open)
     closeMobileSidebarIfOpen();
 };
 
 const isSidebarOpen = (): boolean => {
-    console.log("Checking if sidebar is open...");
-
+    // not mobile, sidebar is always open
     if (!isMobile()) {
-        console.log("Not mobile, sidebar not relevant");
         return false;
     }
 
-    // Check the sidebar transform value (most reliable method)
+    // Check the sidebar transform value
     try {
         const sidebar = getAvraElement("wiki-sidebar");
         if (!sidebar) {
@@ -586,22 +625,21 @@ const isSidebarOpen = (): boolean => {
             return false;
         }
 
-        // Get the computed transform style
         const computedStyle = window.getComputedStyle(sidebar);
         const transform = computedStyle.transform;
 
-        console.log("Sidebar transform:", transform);
-
         // Check if transform contains translateX(288px) or similar indicating open state
+        // Sidebar is open if translateX is 288px (or close to it)
         if (transform && transform !== "none") {
             // Parse the transform matrix or translateX value
             const translateXMatch = transform.match(/translateX\(([^)]+)\)/);
             if (translateXMatch) {
                 const translateX = parseFloat(translateXMatch[1]);
                 console.log("Transform translateX value:", translateX);
-                // Sidebar is open if translateX is 288px (or close to it)
+
                 const isOpen = Math.abs(translateX - 288) < 10; // Allow small variance
                 console.log("Sidebar is open (based on transform):", isOpen);
+
                 return isOpen;
             }
 
@@ -627,44 +665,36 @@ const isSidebarOpen = (): boolean => {
     }
 };
 
-const closeMobileSidebar = () => {
-    if (isMobile()) {
-        const sidebarBtn = getAvraElement("sidebar-btn-close");
-        if (sidebarBtn) {
-            sidebarBtn.click();
-        }
-    }
-};
-
 const closeMobileSidebarIfOpen = () => {
-    console.log("closeMobileSidebarIfOpen called");
-    const isOpen = isSidebarOpen();
-    console.log("Sidebar is open:", isOpen);
-
-    if (isOpen) {
-        console.log("Closing sidebar...");
-        closeMobileSidebar();
-    } else {
-        console.log("Sidebar not open, no action needed");
+    if (!isMobile() || !isSidebarOpen()) {
+        return;
     }
+
+    const sidebarCloseBtn = getAvraElement("sidebar-btn-close");
+    if (!sidebarCloseBtn) {
+        return;
+    }
+
+    sidebarCloseBtn.click();
 };
 
-// toggle mobile sidebar on any link clicks
+// close mobile sidebar after clicking on a link
 const setupMobileLinkHandler = () => {
     document.addEventListener("click", (e) => {
         const target = e.target as HTMLElement;
         const link = target.closest("a");
-        if (link && link.href && isMobile()) {
-            // delay to ensure navigation starts before closing sidebar
-            setTimeout(closeMobileSidebarIfOpen, 50);
+        if (!link || !link.href) {
+            return;
         }
+
+        closeMobileSidebarIfOpen();
     });
 };
 
-export const Sidebar = () => {
+export const sidebar = () => {
     if (!sidebarInitialized) {
-        initializeSidebar();
         sidebarInitialized = true;
+        initializeSidebar();
         setupMobileLinkHandler();
     }
     updateSidebarState();

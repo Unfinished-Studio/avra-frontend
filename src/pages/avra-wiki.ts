@@ -6,7 +6,7 @@ import { debounce } from "@/utils/debounce";
 import { getElement, getElements } from "@/utils/dom/elements";
 import type { SwiftTypeResults } from "@/types/smart-search";
 import Swup from "swup";
-import { Sidebar } from "@/modules/wiki/sidebar";
+import { sidebar } from "@/modules/wiki/sidebar";
 import { CONTENT_ITEMS } from "@/data/content";
 
 const handleSearch = async (query: string) => {
@@ -354,6 +354,6 @@ export const smartSearch = () => {
 
 window.Webflow ||= [];
 window.Webflow.push(async () => {
-    Sidebar();
+    sidebar();
     smartSearch();
 });

@@ -28,7 +28,7 @@
         "paths": {
             "@/*": ["./src/*"]
         },
-        "types": ["@finsweet/ts-utils", "@types/jquery"]
+        "types": ["@finsweet/ts-utils", "@types/jquery", "@types/node"]
     },
     "include": ["src/**/*.ts", "src/types.d.ts"],
     "exclude": ["node_modules"]
