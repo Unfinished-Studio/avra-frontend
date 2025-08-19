@@ -160,6 +160,11 @@ export const wikiItems: WikiItem[] = [
                         displayTitle: "Chief of Staff",
                         title: "Considering a Chief of Staff?",
                     },
+                    {
+                        type: "heading",
+                        displayTitle: "EA",
+                        title: "How to get the most out of your EA?",
+                    },
                 ],
             },
             {
