@@ -72,13 +72,13 @@ export const wikiItems: WikiItem[] = [
                         subItems: [
                             {
                                 type: "heading",
-                                displayTitle: "Benchling",
-                                title: "Benchling: VP of Engineering",
+                                displayTitle: "Faire",
+                                title: "Faire: VP of Engineering",
                             },
                             {
                                 type: "heading",
-                                displayTitle: "Faire",
-                                title: "Faire: VP of Engineering",
+                                displayTitle: "Benchling",
+                                title: "Benchling: VP of Engineering",
                             },
                         ],
                     },
