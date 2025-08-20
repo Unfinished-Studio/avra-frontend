@@ -226,7 +226,7 @@ class SwupManager {
 
             // Remove/change elements pulled in from wiki page
             const elementsToRemove = document.querySelectorAll<HTMLElement>(
-                ".wiki-dropdown-wrapper, .sub-nav.smaller, .sub-nav.tall, .confidential, .back-button"
+                ".wiki-dropdown-wrapper, .sub-nav.smaller, .sub-nav.tall, .confidential, .back-button, #transcripts, #benchmarks, #all-comments"
             );
             for (const element of elementsToRemove) {
                 element.remove();
