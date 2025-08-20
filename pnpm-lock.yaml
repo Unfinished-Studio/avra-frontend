@@ -17,6 +17,9 @@ importers:
       '@swup/preload-plugin':
         specifier: ^3.2.11
         version: 3.2.11(swup@4.8.2)
+      '@vimeo/player':
+        specifier: ^2.29.3
+        version: 2.29.3
       gsap:
         specifier: ^3.13.0
         version: 3.13.0
@@ -30,6 +33,9 @@ importers:
       '@types/node':
         specifier: ^24.3.0
         version: 24.3.0
+      '@types/vimeo__player':
+        specifier: ^2.18.3
+        version: 2.18.3
       cross-env:
         specifier: ^10.0.0
         version: 10.0.0
@@ -561,6 +567,12 @@ packages:
   '@types/sizzle@2.3.9':
     resolution: {integrity: sha512-xzLEyKB50yqCUPUJkIsrVvoWNfFUbIZI+RspLWt8u+tIW/BetMBZtgV2LY/2o+tYH8dRvQ+eoPf3NdhQCcLE2w==}
 
+  '@types/vimeo__player@2.18.3':
+    resolution: {integrity: sha512-IzSzb6doT4I4uAnBHa+mBCiNtK7iAllEJjtpkX0sKY6/s1Vi+aX1134IAiPgiyFlMvFab/oZQpSeccK4r0/T2A==}
+
+  '@vimeo/player@2.29.3':
+    resolution: {integrity: sha512-pS2LsZbcbuQmV9BatpxdjcsFsjuas1jslCzY48o1qsXJ/sQuPiWIuk5B/dSaLbY3AcnS4M1IPphPgA7PRSMdxA==}
+
   acorn-walk@8.3.2:
     resolution: {integrity: sha512-cjkyv4OtNCIeqhHrfS81QWXoCBPExR/J62oyEqepVw8WaQeSqpW2uhuLPh1m9eWhDuOo/jUXVTlifvesOWp/4A==}
     engines: {node: '>=0.4.0'}
@@ -758,6 +770,9 @@ packages:
     engines: {node: '>=18.0.0'}
     hasBin: true
 
+  native-promise-only@0.8.1:
+    resolution: {integrity: sha512-zkVhZUA3y8mbz652WrL5x0fB0ehrBkulWT3TomAQ9iDtyXZvzKeEA6GPxAItBYeNYl5yngKRX612qHOhvMkDeg==}
+
   ohash@2.0.11:
     resolution: {integrity: sha512-RdR9FQrFwNBNXAr4GixM8YaRZRJ5PUWbKYbE5eOsrwAjJW0q2REGcf79oYPsLyskQCZG1PLN+S/K1V00joZAoQ==}
 
@@ -837,6 +852,10 @@ packages:
 
   unenv@2.0.0-rc.19:
     resolution: {integrity: sha512-t/OMHBNAkknVCI7bVB9OWjUUAwhVv9vsPIAGnNUxnu3FxPQN11rjh0sksLMzc3g7IlTgvHmOTl4JM7JHpcv5wA==}
+
+  weakmap-polyfill@2.0.4:
+    resolution: {integrity: sha512-ZzxBf288iALJseijWelmECm/1x7ZwQn3sMYIkDr2VvZp7r6SEKuT8D0O9Wiq6L9Nl5mazrOMcmiZE/2NCenaxw==}
+    engines: {node: '>=8.10.0'}
 
   which@2.0.2:
     resolution: {integrity: sha512-BLI3Tl1TW3Pvl70l3yq3Y64i+awpwXqsGBYWkkqMtnbXgrMD+yj7rhW0kuEDxzJaYXGjEW5ogapKNMEKNMjibA==}
@@ -1199,6 +1218,13 @@ snapshots:
 
   '@types/sizzle@2.3.9': {}
 
+  '@types/vimeo__player@2.18.3': {}
+
+  '@vimeo/player@2.29.3':
+    dependencies:
+      native-promise-only: 0.8.1
+      weakmap-polyfill: 2.0.4
+
   acorn-walk@8.3.2: {}
 
   acorn@8.14.0: {}
@@ -1434,6 +1460,8 @@ snapshots:
       - bufferutil
       - utf-8-validate
 
+  native-promise-only@0.8.1: {}
+
   ohash@2.0.11: {}
 
   opencollective-postinstall@2.0.3: {}
@@ -1516,6 +1544,8 @@ snapshots:
       ohash: 2.0.11
       pathe: 2.0.3
       ufo: 1.6.1
+
+  weakmap-polyfill@2.0.4: {}
 
   which@2.0.2:
     dependencies:

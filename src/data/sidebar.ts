@@ -1237,3 +1237,47 @@ export const DROPDOWN_TIERS = [
         containerAttribute: "wiki-insight-heading-item",
     },
 ];
+
+export const PODCAST_CHAPTER_MAPPINGS = {
+    "conversation-with-ernie-garcia-ceo-of-carvana": [
+        { title: "Carvana's Journey", time: "00:09" },
+        { title: "Losing 99% of Market Cap in 2022", time: "02:49" },
+        { title: "First 90 Days Post Stock Crash", time: "27:49" },
+        { title: "WSJ Said We Were Evil", time: "30:36" },
+        { title: "Fighting our Own Errors", time: "32:24" },
+        { title: "Building Back from $0.8B to $22B in 12 Months", time: "35:13" },
+        { title: "Ernie's Decision Framework", time: "40:02" },
+        { title: "Balancing the Long-Term and the Short-Term", time: "42:24" },
+    ],
+    "episode-2-rappi": [
+        { title: "Rappi Overview", time: "00:10" },
+        { title: "Only 1 in 10 of Our Execs Worked Out", time: "03:17" },
+        { title: "Turning Point: Building a Cohesive Team", time: "08:54" },
+        { title: "Reaccelerating: Operating the Amazon Way", time: "14:42" },
+        { title: "We Had 5 Weeks of Runway", time: "26:58" },
+        { title: "We Were Throwing Money at Problems", time: "34:43" },
+        { title: "Competition is Good for Rappi", time: "39:48" },
+        { title: "Simon Thinks about Competition Everyday", time: "42:36" },
+        { title: "Rappi: AI Concierge", time: "44:30" },
+    ],
+    "episode-3-monzo": [
+        { title: "From Launch To $1B In Revenue Run-Rate", time: "00:10" },
+        { title: "We Were A Few Weeks From Dying", time: "03:59" },
+        { title: "TS's First 100 Days", time: "13:15" },
+        { title: "Getting The Engine Started Again", time: "19:06" },
+        { title: "Turning Regulations from Existential Risk to Moat", time: "30:07" },
+        { title: "TS Replaced 8/10 Leaders in 18 Months", time: "34:45" },
+        { title: "Maintaining Customer Centricity at 10M Customers", time: "36:40" },
+        { title: "Leading Through Adversity", time: "52:24" },
+    ],
+    "episode-4-a16z-dst": [
+        { title: "DST’s Investment Strategy (Rahul):", time: "1:00" },
+        { title: "Andreessen Horowitz Growth Fund (David George):", time: "03:30" },
+        { title: "Investment in Glean (Rahul) ", time: "8:47" },
+        { title: "Investment in Waymo (David)", time: "20:53" },
+        { title: "Investment in Roblox (David)", time: "26:20" },
+        { title: "Lessons from crucible moments", time: "33:49" },
+        { title: "Key investments criteria for AI companies", time: "51:50" },
+        { title: "Outlook for Growth-Stage Fundraising", time: "1:06:40" },
+    ],
+};
