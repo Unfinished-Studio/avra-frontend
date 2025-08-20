@@ -4,8 +4,14 @@ import { getAvraElement, getElements } from "@/utils/dom/elements";
 import { isMobile } from "@/utils/mobile";
 import { getCurrentPageInfo } from "@/utils/page-info";
 import { gsap } from "gsap";
+import { type ContentType } from "@/data/content";
+import { CONTENT_TYPE_SLUG_MAPPINGS } from "@/constants";
 
 let sidebarInitialized = false;
+
+const buildContentPageLink = (type: ContentType, slug: string) => {
+    return `/${CONTENT_TYPE_SLUG_MAPPINGS[type]}/${slug}`;
+};
 
 const initializeSidebar = () => {
     const dataContainer = getAvraElement("data-container");
@@ -66,7 +72,7 @@ const initializeSidebar = () => {
                 const sectionItem = sectionItemTemplate.cloneNode(true) as HTMLAnchorElement;
                 const sectionItemText = getAvraElement<HTMLAnchorElement>("wiki-section-item-text", sectionItem);
                 sectionItemText.textContent = wikiTag.title;
-                sectionItemText.href = `/avra-wiki/${wikiTag.slug}`; // TODO: correct slugs in hardcoded data
+                sectionItemText.href = buildContentPageLink("Wiki", wikiTag.slug);
                 sectionItemText.setAttribute("data-swup-preload", "");
 
                 // Store slug as data attribute for later highlighting
@@ -183,6 +189,7 @@ const initializeSidebar = () => {
                 const sectionItem = sectionItemTemplate.cloneNode(true) as HTMLAnchorElement;
                 const sectionItemText = getAvraElement<HTMLAnchorElement>("wiki-section-item-text", sectionItem);
                 sectionItemText.textContent = batch.title;
+                sectionItemText.href = buildContentPageLink("Session Insights", batch.sessionInsights[0].slug);
                 sectionItemsToAdd.push(sectionItem);
 
                 const subItemTemplate = getAvraElement("wiki-insight-item", sectionItem);
@@ -192,7 +199,7 @@ const initializeSidebar = () => {
                     const subItem = subItemTemplate.cloneNode(true) as HTMLAnchorElement;
                     const subItemText = getAvraElement<HTMLAnchorElement>("wiki-insight-item-text", subItem);
                     subItemText.textContent = sessionInsightItem.name;
-                    subItemText.href = `/session-insights/${sessionInsightItem.slug}`;
+                    subItemText.href = buildContentPageLink("Session Insights", sessionInsightItem.slug);
 
                     // Store slug as data attribute for later highlighting
                     subItem.setAttribute("data-session-slug", sessionInsightItem.slug);
@@ -220,7 +227,7 @@ const initializeSidebar = () => {
                 const sectionItem = sectionItemTemplate.cloneNode(true) as HTMLAnchorElement;
                 const sectionItemText = getAvraElement<HTMLAnchorElement>("wiki-section-item-text", sectionItem);
                 sectionItemText.textContent = podcastArticle.name;
-                sectionItemText.href = `/audio-video/${podcastArticle.slug}`;
+                sectionItemText.href = buildContentPageLink("Podcasts", podcastArticle.slug);
 
                 // Store slug as data attribute for later highlighting
                 sectionItem.setAttribute("data-podcast-slug", podcastArticle.slug);
@@ -238,7 +245,6 @@ const initializeSidebar = () => {
             }
         } else {
             for (const item of items) {
-                // build item
                 const itemTitle = item.getAttribute("data-avra-title") || "#";
                 const sectionItem = sectionItemTemplate.cloneNode(true) as HTMLAnchorElement;
                 const sectionItemText = getAvraElement<HTMLAnchorElement>("wiki-section-item-text", sectionItem);
@@ -249,55 +255,6 @@ const initializeSidebar = () => {
 
                 const insightItemTemplate = getAvraElement("wiki-insight-item", sectionItem);
                 insightItemTemplate.remove();
-
-                // if this is a valid wiki article, build the subitems (session insights)
-                // const wikiTagData = wikiTags.find((tag) => tag.title === itemTitle);
-                // if (wikiTagData) {
-                //     const insightItemTemplate = getAvraElement("wiki-insight-item", sectionItem);
-                //     const insightItemsToAdd: HTMLElement[] = [];
-
-                //     for (const insight of wikiTagData.insights) {
-                //         const insightItem = insightItemTemplate.cloneNode(true) as HTMLAnchorElement;
-                //         const insightItemText = getAvraElement<HTMLAnchorElement>("wiki-insight-item-text", insightItem);
-                //         insightItemText.textContent = insight.title;
-                //         insightItemText.href = `/session-insights/${insight.slug}`;
-                //         insightItemsToAdd.push(insightItem);
-
-                //         // build sub-subitems (session insight headings)
-                //         const insightHeadingItemTemplate = getAvraElement("wiki-insight-heading-item", insightItem);
-                //         const insightHeadingItemsToAdd: HTMLElement[] = [];
-
-                //         for (const heading of insight.headings) {
-                //             const insightHeadingItem = insightHeadingItemTemplate.cloneNode(true) as HTMLAnchorElement;
-                //             const insightHeadingItemText = getAvraElement<HTMLAnchorElement>(
-                //                 "wiki-insight-heading-item-text",
-                //                 insightHeadingItem
-                //             );
-                //             insightHeadingItemText.textContent = heading.title;
-                //             insightHeadingItemText.href = `/session-insights/${heading.slug}`;
-                //             insightHeadingItemsToAdd.push(insightHeadingItem);
-                //         }
-
-                //         while (insightItem.children.length > 1) {
-                //             insightItem.removeChild(insightItem.lastChild!);
-                //         }
-                //         for (const insightHeadingItem of insightHeadingItemsToAdd) {
-                //             insightItem.appendChild(insightHeadingItem);
-                //         }
-
-                //         insightHeadingItemTemplate.remove();
-                //     }
-
-                //     while (sectionItem.children.length > 1) {
-                //         sectionItem.removeChild(sectionItem.lastChild!);
-                //     }
-                //     for (const insightItem of insightItemsToAdd) {
-                //         sectionItem.appendChild(insightItem);
-                //     }
-
-                //     insightItemTemplate.remove();
-                //     // sectionsToAdd.push(section);
-                // }
             }
         }
 

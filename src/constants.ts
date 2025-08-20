@@ -1,5 +1,5 @@
 import { getStaging } from "@/utils/admin/get-staging";
-import { WikiTagEnum, type WikiTag } from "@/data/content";
+import { WikiTagEnum, type WikiTag, type ContentType } from "@/data/content";
 
 export const TEST_MODE = window.location.search.includes("test");
 
@@ -29,3 +29,10 @@ export const SMART_SEARCH_CONFIG = {
     resultsElement: "[avra-element='ss-results']",
     resultsCounterElement: "[avra-element='ss-results-counter']",
 } as const;
+
+export const CONTENT_TYPE_SLUG_MAPPINGS: Record<ContentType, string> = {
+    Wiki: "avra-wiki",
+    "Session Insights": "session-insights",
+    Podcasts: "audio-video",
+    "Case Studies": "case-studies",
+};
