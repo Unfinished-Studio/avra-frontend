@@ -515,14 +515,15 @@ const setupDropdownForTier = (tierConfig: (typeof DROPDOWN_TIERS)[0], currentTyp
                         // Open this dropdown
                         openDropdown(dropdownBtn);
 
-                        // Open all descendant dropdowns
-
-                        const descendantDropdowns = getDescendantDropdowns(dropdownBtn);
-                        descendantDropdowns.forEach((descendantBtn) => {
-                            if (descendantBtn.getAttribute("data-avra-dropdown-expanded") !== "true") {
-                                openDropdown(descendantBtn, true);
-                            }
-                        });
+                        // Open all descendant dropdowns for non-title tiers
+                        if (tierConfig.tier > 1) {
+                            const descendantDropdowns = getDescendantDropdowns(dropdownBtn);
+                            descendantDropdowns.forEach((descendantBtn) => {
+                                if (descendantBtn.getAttribute("data-avra-dropdown-expanded") !== "true") {
+                                    openDropdown(descendantBtn, true);
+                                }
+                            });
+                        }
                     }
                 });
             }
