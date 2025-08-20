@@ -1,5 +1,6 @@
 import { updateBreadcrumbs } from "@/modules/wiki/breadcrumb";
 import { initializePersistentContentElements } from "@/modules/wiki/mobile-search";
+import { refreshScrollToc } from "@/modules/wiki/scroll-toc";
 import { initContentPage } from "@/pages/page-initializer";
 import { updateSidebar } from "@/pages/wiki";
 import SwupPreloadPlugin from "@swup/preload-plugin";
@@ -261,9 +262,13 @@ class SwupManager {
             updateBreadcrumbs();
             // Re-initialize persistent content elements after navigation
             initializePersistentContentElements();
+            // Refresh scroll-based table of contents after content change
+            refreshScrollToc();
         });
 
-        this.swup.hooks.on("page:preload", (_visit, { page }) => console.log("PRELOADED:", page));
+        this.swup.hooks.on("page:preload", (_visit, { page }) => {
+            console.log("[swup-manager] PRELOADED PAGE:", page);
+        });
     }
 
     /**

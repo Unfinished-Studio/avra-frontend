@@ -420,7 +420,7 @@ const closeDropdown = (dropdownBtn: HTMLElement): void => {
 };
 
 const setupDropdownForTier = (tierConfig: (typeof DROPDOWN_TIERS)[0], currentType: string | null, currentSlug: string | null) => {
-    const textElements = getElements<HTMLElement>(tierConfig.textSelector);
+    const textElements = getElements<HTMLAnchorElement>(tierConfig.textSelector);
 
     for (const textElement of textElements) {
         const dropdownBtn = textElement.nextElementSibling as HTMLElement;
@@ -471,16 +471,6 @@ const setupDropdownForTier = (tierConfig: (typeof DROPDOWN_TIERS)[0], currentTyp
 
                         // Open this dropdown
                         openDropdown(dropdownBtn);
-
-                        // Open all descendant dropdowns for non-title tiers
-                        if (tierConfig.tier > 1) {
-                            const descendantDropdowns = getDescendantDropdowns(dropdownBtn);
-                            descendantDropdowns.forEach((descendantBtn) => {
-                                if (descendantBtn.getAttribute("data-avra-dropdown-expanded") !== "true") {
-                                    openDropdown(descendantBtn, true);
-                                }
-                            });
-                        }
                     }
                 });
             }
@@ -509,7 +499,7 @@ const setupDropdownForTier = (tierConfig: (typeof DROPDOWN_TIERS)[0], currentTyp
 
 const shouldDropdownBeExpanded = (
     tier: number,
-    textElement: HTMLElement,
+    textElement: HTMLAnchorElement,
     childItems: HTMLElement[],
     currentType: string | null,
     currentSlug: string | null
@@ -518,8 +508,6 @@ const shouldDropdownBeExpanded = (
     if (isMobile()) {
         return false;
     }
-
-    const isWikiTopic = currentType === "wiki" || currentType === "case-study";
 
     // Check if any child contains the current page
     const matchingChild = childItems.find((child) => {
@@ -551,6 +539,10 @@ const shouldDropdownBeExpanded = (
         }
     }
 
+    if (tier === 2 && currentSlug && location.href === textElement.href) {
+        return true;
+    }
+
     // For other tiers, only expand if contains current page
     return false;
 };
@@ -563,7 +555,7 @@ const setupSidebarDropdowns = (currentType: string | null, currentSlug: string |
 
 export const updateSidebarState = () => {
     const { currentSlug, currentType, currentUrl } = getCurrentPageInfo();
-    console.log("PAGE INFO:", { currentSlug, currentType, currentUrl });
+    console.log("[sidebar] PAGE INFO:", { currentSlug, currentType, currentUrl });
 
     setupSidebarDropdowns(currentType, currentSlug);
     closeMobileSidebarIfOpen();

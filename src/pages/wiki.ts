@@ -1,6 +1,7 @@
 import { updateBreadcrumbs } from "@/modules/wiki/breadcrumb";
 import { initializePersistentContentElements, setupMobileSearchPopup } from "@/modules/wiki/mobile-search";
 import { initializeNavPersistentContentElements, setupNavSearchDropdown } from "@/modules/wiki/nav-search";
+import { initScrollToc, refreshScrollToc } from "@/modules/wiki/scroll-toc";
 import { smartSearch } from "@/modules/wiki/search";
 import { sidebar } from "@/modules/wiki/sidebar";
 import { initSwup, swupManager } from "@/modules/wiki/swup-manager";
@@ -41,6 +42,7 @@ window.Webflow.push(async () => {
     updateSidebar();
     updateBreadcrumbs();
 
+    initScrollToc();
     initSwup();
 
     // Take mobile users to default page after Swup is initialized
