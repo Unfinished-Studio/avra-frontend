@@ -115,14 +115,14 @@ const updateActiveLink = (newActiveLink: HTMLAnchorElement | null): void => {
     // Remove active class from current active link and parents that won't be active anymore
     if (currentActiveLink) {
         currentActiveLink.classList.remove(ACTIVE_CLASS);
-        console.log(`[ScrollTOC] Removed active class from: "${currentActiveLink.textContent}"`);
+        // console.log(`[ScrollTOC] Removed active class from: "${currentActiveLink.textContent}"`);
     }
 
     // Remove active class from old parents that aren't in the new parent chain
     for (const oldParent of currentActiveParents) {
         if (!newActiveParents.includes(oldParent)) {
             oldParent.classList.remove(ACTIVE_CLASS);
-            console.log(`[ScrollTOC] Removed active class from old parent: "${oldParent.textContent}"`);
+            // console.log(`[ScrollTOC] Removed active class from old parent: "${oldParent.textContent}"`);
         }
     }
 
@@ -133,12 +133,12 @@ const updateActiveLink = (newActiveLink: HTMLAnchorElement | null): void => {
     // Add active class to new active link and its parents
     if (currentActiveLink) {
         currentActiveLink.classList.add(ACTIVE_CLASS);
-        console.log(`[ScrollTOC] Added active class to: "${currentActiveLink.textContent}"`);
+        // console.log(`[ScrollTOC] Added active class to: "${currentActiveLink.textContent}"`);
     }
 
     for (const parent of currentActiveParents) {
         parent.classList.add(ACTIVE_CLASS);
-        console.log(`[ScrollTOC] Added active class to parent: "${parent.textContent}"`);
+        // console.log(`[ScrollTOC] Added active class to parent: "${parent.textContent}"`);
     }
 };
 
@@ -157,7 +157,7 @@ const handleScroll = (): void => {
 
     // For fast scrolling, use immediate update to avoid missing headings
     if (timeSinceLastScroll < fastScrollThreshold) {
-        console.log("Fast scrolling detected - immediate update");
+        // console.log("Fast scrolling detected - immediate update");
         updateActiveHeading();
         return;
     }
@@ -180,7 +180,7 @@ const determineActiveHeading = (): HTMLHeadingElement | null => {
     const containerRect = wikiContainer.getBoundingClientRect();
     const offset = 200; // Offset from top of container to trigger heading change
 
-    console.log("containerScrollTop", containerScrollTop);
+    // console.log("containerScrollTop", containerScrollTop);
 
     // Find the heading that should be active
     let activeHeading: HTMLHeadingElement | null = null;
@@ -191,17 +191,17 @@ const determineActiveHeading = (): HTMLHeadingElement | null => {
         // Calculate heading position relative to the scrollable container
         const headingTopRelativeToContainer = headingRect.top - containerRect.top + containerScrollTop;
 
-        console.log(
-            `Heading "${heading.textContent}" - position: ${headingTopRelativeToContainer}, trigger point: ${containerScrollTop + offset}`
-        );
+        // console.log(
+        //     `Heading "${heading.textContent}" - position: ${headingTopRelativeToContainer}, trigger point: ${containerScrollTop + offset}`
+        // );
 
         // If this heading is at or above our trigger point, it could be the active one
         if (headingTopRelativeToContainer <= containerScrollTop + offset) {
             activeHeading = heading;
-            console.log(`Setting active: "${heading.textContent}"`);
+            // console.log(`Setting active: "${heading.textContent}"`);
         } else {
             // This heading is below our trigger point, so the previous one should stay active
-            console.log(`Breaking at: "${heading.textContent}"`);
+            // console.log(`Breaking at: "${heading.textContent}"`);
             break;
         }
     }
@@ -218,17 +218,17 @@ const updateActiveHeading = (): void => {
     if (activeHeading) {
         const correspondingLink = findCorrespondingSidebarLink(activeHeading);
         if (correspondingLink && correspondingLink !== currentActiveLink) {
-            console.log(`[ScrollTOC] Activating heading: "${activeHeading.textContent}"`);
+            // console.log(`[ScrollTOC] Activating heading: "${activeHeading.textContent}"`);
             const parents = getParentElements(correspondingLink);
-            console.log(
-                `[ScrollTOC] Found ${parents.length} parent elements:`,
-                parents.map((p) => p.textContent)
-            );
+            // console.log(
+            //     `[ScrollTOC] Found ${parents.length} parent elements:`,
+            //     parents.map((p) => p.textContent)
+            // );
             updateActiveLink(correspondingLink);
         }
     } else if (currentActiveLink) {
         // Clear active state if no heading should be active (at top of page)
-        console.log(`[ScrollTOC] Clearing active state - at top of page`);
+        // console.log(`[ScrollTOC] Clearing active state - at top of page`);
         updateActiveLink(null);
     }
 };
