@@ -97,7 +97,7 @@ class SwupManager {
      * Scroll to top of wiki container
      */
     private scrollToTopOfWikiContainer(): void {
-        const wikiContainer = document.querySelector<HTMLElement>("[avra-element='wiki-content']");
+        const wikiContainer = document.querySelector<HTMLElement>("[avra-element='wiki-container']");
         if (wikiContainer) {
             wikiContainer.scrollIntoView({
                 behavior: "smooth",
