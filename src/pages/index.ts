@@ -4,12 +4,21 @@ import { avraSetCookie } from "@/utils/avra-set-cookie";
 import { getUser } from "@/utils/memberstack/user";
 import { initNavigationTracking } from "@/utils/slack-notifier";
 
-async function trackLogin() {
-    const user = await getUser();
+let loginTracked = false;
 
-    // console.log("user:", user);
+async function trackLogin() {
+    console.log("[index] tracking login...");
+
+    const user = await getUser();
+    if (!user) {
+        throw new Error("No logged in user");
+    }
+
+    console.log("[index] user:", user);
 
     const loginCookie = avraGetCookie(COOKIE_NAMES.USER_ID);
+
+    console.log("[index] loginCookie:", loginCookie);
 
     // if no login cookie, create one and send login event
     // cookie expires in 1 day to reset tracking
@@ -24,10 +33,16 @@ async function trackLogin() {
     }
 }
 
-window.addEventListener("load", async () => {
+window.Webflow ||= [];
+window.Webflow.push(async () => {
+    if (loginTracked) {
+        return;
+    }
+
     try {
         await trackLogin();
+        loginTracked = true;
     } catch (err) {
-        console.log("Error tracking login:", err);
+        console.log("[index] Error tracking login:", err);
     }
 });

@@ -20,7 +20,8 @@ export async function getUser() {
     const user = await memberstack.getCurrentMember();
 
     if (!user || !user.data) {
-        throw new Error("No logged in user.");
+        console.log("[getUser] No logged in user.");
+        return null;
     }
 
     return {
