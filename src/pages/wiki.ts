@@ -8,6 +8,7 @@ import { initSwup, swupManager } from "@/modules/wiki/swup-manager";
 import { initContentPage } from "@/pages/page-initializer";
 import { getElement, getElements } from "@/utils/dom/elements";
 import { isMobile } from "@/utils/mobile";
+import { initPageNavigation } from "@/modules/wiki/page-navigation";
 
 export const updateSidebar = () => {
     const sessionInsightsSection = getElement("[data-title='Session Insights']");
@@ -44,6 +45,11 @@ window.Webflow.push(async () => {
 
     initScrollToc();
     initSwup();
+
+    // Initialize page navigation on initial load
+    setTimeout(() => {
+        initPageNavigation();
+    }, 200);
 
     // Take mobile users to default page after Swup is initialized
     if (isMobile()) {

@@ -1,6 +1,7 @@
 import { getCurrentPageInfo } from "@/utils/page-info";
 import Player from "@vimeo/player";
 import { PODCAST_CHAPTER_MAPPINGS } from "@/data/sidebar";
+import { initPageNavigation } from "@/modules/wiki/page-navigation";
 
 const fixListSpacing = () => {
     // Add CSS rule for nested unordered lists to have margin-bottom: 0px
@@ -78,6 +79,11 @@ export const initContentPage = async () => {
     if (currentType === "podcast" && currentSlug) {
         initPodcastPage(currentSlug);
     }
+
+    // Initialize page navigation for all content pages
+    setTimeout(() => {
+        initPageNavigation();
+    }, 100);
 
     console.log("[page-initializer] initialized page");
 };

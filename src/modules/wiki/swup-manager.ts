@@ -6,6 +6,7 @@ import { updateSidebar } from "@/pages/wiki";
 import SwupPreloadPlugin from "@swup/preload-plugin";
 import Swup from "swup";
 import { updateSidebarState } from "./sidebar";
+import { initPageNavigation } from "@/modules/wiki/page-navigation";
 
 export const swupLinkSelector =
     'a[href*="/avra-wiki/"], a[href*="/session-insights/"], a[href*="/case-studies/"], a[href*="/audio-video/"]';
@@ -97,12 +98,9 @@ class SwupManager {
      * Scroll to top of wiki container
      */
     private scrollToTopOfWikiContainer(): void {
-        const wikiContainer = document.querySelector<HTMLElement>("[avra-element='wiki-container']");
-        if (wikiContainer) {
-            wikiContainer.scrollIntoView({
-                behavior: "smooth",
-                block: "start",
-            });
+        const wikiContent = document.querySelector<HTMLElement>("[avra-element='wiki-container']");
+        if (wikiContent) {
+            wikiContent.scrollTop = 0;
         }
     }
 
@@ -242,6 +240,8 @@ class SwupManager {
             // Re-initialize persistent content elements after content replacement
             setTimeout(() => initializePersistentContentElements(), 100);
 
+            console.log("scrolling to highlighted text or top of page");
+
             // Scroll to highlighted text or top of page
             const urlParams = new URLSearchParams(window.location.search);
             const highlightText = urlParams.get("highlight");
@@ -264,6 +264,10 @@ class SwupManager {
             initializePersistentContentElements();
             // Refresh scroll-based table of contents after content change
             refreshScrollToc();
+            // Initialize page navigation
+            setTimeout(() => {
+                initPageNavigation();
+            }, 100);
         });
 
         this.swup.hooks.on("page:preload", (_visit, { page }) => {
