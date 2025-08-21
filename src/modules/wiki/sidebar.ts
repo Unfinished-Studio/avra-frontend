@@ -504,11 +504,6 @@ const shouldDropdownBeExpanded = (
     currentType: string | null,
     currentSlug: string | null
 ): boolean => {
-    // On mobile (991px or smaller), all dropdowns should be closed by default
-    if (isMobile()) {
-        return false;
-    }
-
     // Check if any child contains the current page
     const matchingChild = childItems.find((child) => {
         const links = child.querySelectorAll("a");
