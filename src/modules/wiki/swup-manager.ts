@@ -197,7 +197,7 @@ class SwupManager {
         wikiContainer: HTMLElement | null,
         highlightedText: string,
         attempt: number = 1,
-        maxAttempts: number = 5
+        maxAttempts: number = 50
     ): void {
         console.warn(`[SWUP-SCROLL] Scroll attempt ${attempt}/${maxAttempts}`);
 
@@ -212,14 +212,14 @@ class SwupManager {
                 console.warn("[SWUP-SCROLL] ✅ Scroll successful on attempt", attempt);
                 this.highlightHeadingText(heading, highlightedText);
             } else if (attempt < maxAttempts) {
-                // Progressive retry delays: 50ms, 100ms, then 500ms for subsequent retries
+                // Ultra-fast progressive retry delays: 10ms, 25ms, then 50ms for subsequent retries
                 let retryDelay: number;
                 if (attempt === 1) {
-                    retryDelay = 50;
+                    retryDelay = 10;
                 } else if (attempt === 2) {
-                    retryDelay = 100;
+                    retryDelay = 25;
                 } else {
-                    retryDelay = 500;
+                    retryDelay = 50;
                 }
                 console.warn(`[SWUP-SCROLL] ❌ Scroll attempt ${attempt} failed, retrying in ${retryDelay}ms...`);
                 setTimeout(() => {
