@@ -88,7 +88,9 @@ const initializeSidebar = () => {
                     const insightItemText = getAvraElement<HTMLAnchorElement>("wiki-insight-item-text", insightItem);
                     insightItemText.textContent = subItem.displayTitle;
                     if (subItem.type === "heading") {
-                        insightItemText.href = sectionItemText.href + `?highlight=${encodeURIComponent(subItem.title)}`;
+                        const baseUrl = new URL(sectionItemText.href, window.location.origin);
+                        baseUrl.searchParams.set("highlight", subItem.title);
+                        insightItemText.href = baseUrl.toString().replace(window.location.origin, "");
                     } else if (subItem.type === "item") {
                         insightItemText.href = subItem.title;
                     }
@@ -110,8 +112,9 @@ const initializeSidebar = () => {
                                 );
                                 insightHeadingItemText.textContent = subSubItem.displayTitle;
                                 if (subSubItem.type === "heading") {
-                                    insightHeadingItemText.href =
-                                        sectionItemText.href + `?highlight=${encodeURIComponent(subSubItem.title)}`;
+                                    const baseUrl = new URL(sectionItemText.href, window.location.origin);
+                                    baseUrl.searchParams.set("highlight", subSubItem.title);
+                                    insightHeadingItemText.href = baseUrl.toString().replace(window.location.origin, "");
                                 } else if (subSubItem.type === "item") {
                                     insightHeadingItemText.href = subSubItem.title;
                                 }
@@ -138,8 +141,9 @@ const initializeSidebar = () => {
                                             );
                                             subInsightHeadingItemText.textContent = subSubSubItem.displayTitle;
                                             if (subSubSubItem.type === "heading") {
-                                                subInsightHeadingItemText.href =
-                                                    sectionItemText.href + `?highlight=${encodeURIComponent(subSubSubItem.title)}`;
+                                                const baseUrl = new URL(sectionItemText.href, window.location.origin);
+                                                baseUrl.searchParams.set("highlight", subSubSubItem.title);
+                                                subInsightHeadingItemText.href = baseUrl.toString().replace(window.location.origin, "");
                                             } else if (subSubSubItem.type === "item") {
                                                 subInsightHeadingItemText.href = subSubSubItem.title;
                                             }

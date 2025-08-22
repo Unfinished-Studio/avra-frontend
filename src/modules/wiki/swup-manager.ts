@@ -7,6 +7,7 @@ import SwupPreloadPlugin from "@swup/preload-plugin";
 import Swup from "swup";
 import { updateSidebarState } from "./sidebar";
 import { initPageNavigation } from "@/modules/wiki/page-navigation";
+import { initializeClickableHeadings } from "@/modules/wiki/clickable-headings";
 
 export const swupLinkSelector =
     'a[href*="/avra-wiki/"], a[href*="/session-insights/"], a[href*="/case-studies/"], a[href*="/audio-video/"]';
@@ -267,6 +268,7 @@ class SwupManager {
             // Initialize page navigation
             setTimeout(() => {
                 initPageNavigation();
+                initializeClickableHeadings();
             }, 100);
         });
 
@@ -302,55 +304,3 @@ export const getSwup = () => swupManager.getSwup();
 export const initSwup = () => swupManager.init();
 export const updateSwupLinks = (newLinkSelector: string) => swupManager.updateLinks(newLinkSelector);
 export const navigateSwup = (url: string) => swupManager.navigate(url);
-
-/**
- * EXAMPLE USAGE
- * Example file showing how to use the Swup Manager from any module
- * This demonstrates the solution to accessing and modifying Swup across multiple files
- */
-// import { swupManager, getSwup, navigateSwup, updateSwupLinks } from "./swup-manager";
-
-// // Example 1: Navigate to a page from any module
-// export const navigateToPage = (url: string) => {
-//     navigateSwup(url);
-// };
-
-// // Example 2: Check if Swup is available
-// export const isSwupReady = () => {
-//     return getSwup() !== null;
-// };
-
-// // Example 3: Add custom hooks from any module
-// export const addCustomBehavior = () => {
-//     swupManager.addHook("visit:start", () => {
-//         console.log("Custom: Navigation started");
-//     });
-
-//     swupManager.addHook("visit:end", () => {
-//         console.log("Custom: Navigation completed");
-//     });
-// };
-
-// // Example 4: Update link selectors from any module
-// export const updateSearchLinks = () => {
-//     const newSelector = 'a[href*="/search/"], a[href*="/results/"]';
-//     updateSwupLinks(newSelector);
-// };
-
-// // Example 5: Access the Swup instance directly for advanced operations
-// export const advancedSwupOperation = () => {
-//     const swup = getSwup();
-//     if (swup) {
-//         // Direct access to Swup API
-//         console.log("Current page:", swup.getCurrentUrl());
-
-//         // Add temporary hooks
-//         const tempCallback = () => console.log("Temporary hook");
-//         swupManager.addHook("content:replace", tempCallback);
-
-//         // Remove hooks later
-//         setTimeout(() => {
-//             swupManager.removeHook("content:replace", tempCallback);
-//         }, 5000);
-//     }
-// };

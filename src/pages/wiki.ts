@@ -28,6 +28,18 @@ export const updateSidebar = () => {
     }
 };
 
+/**
+ * Removes the page parameter from the current URL without triggering navigation
+ */
+const removePageParameter = () => {
+    const url = new URL(window.location.href);
+    if (url.searchParams.has("page")) {
+        url.searchParams.delete("page");
+        window.history.replaceState({}, "", url.toString());
+        console.log("[wiki] Removed page parameter from URL");
+    }
+};
+
 window.Webflow ||= [];
 window.Webflow.push(async () => {
     sidebar();
@@ -51,8 +63,13 @@ window.Webflow.push(async () => {
         initPageNavigation();
     }, 200);
 
-    // Take mobile users to default page after Swup is initialized
-    if (isMobile()) {
+    const page = new URLSearchParams(window.location.search).get("page");
+    removePageParameter();
+    if (page) {
+        // Navigate to specified content page
+        swupManager.navigate(page);
+    } else if (isMobile()) {
+        // Take mobile users to default page (if no page parameter is present)
         swupManager.navigate("/avra-wiki/hiring-and-managing-execs");
     }
 });
