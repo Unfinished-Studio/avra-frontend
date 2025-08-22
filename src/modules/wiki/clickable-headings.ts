@@ -1,5 +1,6 @@
 import { getCurrentPageInfo } from "@/utils/page-info";
 import { CONTENT_TYPE_SLUG_MAPPINGS } from "@/constants";
+import { isMobile } from "@/utils/mobile";
 
 /**
  * Maps PageType to ContentType for URL building
@@ -201,14 +202,16 @@ const addHeadingClickHandler = (heading: HTMLElement) => {
     // Set initial opacity to full
     heading.style.opacity = "1";
 
-    // Add hover effects
-    heading.addEventListener("mouseenter", () => {
-        heading.style.opacity = "0.5";
-    });
+    // Add hover effects only on desktop devices
+    if (!isMobile()) {
+        heading.addEventListener("mouseenter", () => {
+            heading.style.opacity = "0.5";
+        });
 
-    heading.addEventListener("mouseleave", () => {
-        heading.style.opacity = "1";
-    });
+        heading.addEventListener("mouseleave", () => {
+            heading.style.opacity = "1";
+        });
+    }
 };
 
 /**

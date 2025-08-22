@@ -165,11 +165,29 @@ class SwupManager {
                     const headingText = normalizeText(heading.textContent || "");
 
                     if (headingText.includes(searchText)) {
-                        heading.scrollIntoView({
-                            behavior: "smooth",
-                            block: "start",
-                            inline: "nearest",
-                        });
+                        // Check if we should scroll the container or window
+                        const wikiContainer = document.querySelector("[avra-element='wiki-container']") as HTMLElement;
+
+                        if (wikiContainer && wikiContainer.scrollHeight > wikiContainer.clientHeight) {
+                            // Container is scrollable, scroll within container
+                            const containerRect = wikiContainer.getBoundingClientRect();
+                            const headingRect = heading.getBoundingClientRect();
+                            const offsetTop = wikiContainer.scrollTop + (headingRect.top - containerRect.top) - 64;
+
+                            wikiContainer.scrollTo({
+                                top: offsetTop,
+                                behavior: "smooth",
+                            });
+                        } else {
+                            // Fall back to window scrolling
+                            const headingRect = heading.getBoundingClientRect();
+                            const offsetTop = window.pageYOffset + headingRect.top - 64;
+
+                            window.scrollTo({
+                                top: offsetTop,
+                                behavior: "smooth",
+                            });
+                        }
 
                         // Highlight the text temporarily
                         const originalHTML = heading.innerHTML;
