@@ -741,13 +741,13 @@ export const sessionInsightsBatches: SessionInsightsBatch[] = [
                 ],
             },
             {
-                name: "Plaid & Replit",
+                name: "EPD at Plaid & Replit",
                 slug: "plaid-and-replit-on-scaling-engineering",
                 wikiTag: "Scaling Engineering",
                 smartSearchKeywords: ["CTO", "VP of Engineering", "Technical", "Developers"],
             },
             {
-                name: "Lattice & Faire",
+                name: "People at Lattice & Faire ",
                 slug: "lattice-and-faire-on-scaling-people",
                 wikiTag: "Scaling People",
                 smartSearchKeywords: [
@@ -763,7 +763,7 @@ export const sessionInsightsBatches: SessionInsightsBatch[] = [
                 ],
             },
             {
-                name: "Prabir Adarkar (DoorDash)",
+                name: "Finance at DoorDash",
                 slug: "doordash-on-scaling-finance",
                 wikiTag: "Financial Planning and Fundraising",
                 smartSearchKeywords: ["Finance", "CFO", "Fundraising", "Budgeting", "Runway", "Burn", "Forecasting", "Revenue"],
@@ -884,13 +884,13 @@ export const sessionInsightsBatches: SessionInsightsBatch[] = [
                 ],
             },
             {
-                name: "Plaid & Rippling",
+                name: "EPD at Plaid & Rippling",
                 slug: "plaid-and-rippling-on-scaling-engineering",
                 wikiTag: "Scaling Engineering",
                 smartSearchKeywords: ["CTO", "VP of Engineering", "Technical", "Developers"],
             },
             {
-                name: "Lattice & Weebly",
+                name: "People at Lattice & Weebly",
                 slug: "lattice-and-weebly-on-scaling-people",
                 wikiTag: "Scaling People",
                 smartSearchKeywords: [
@@ -923,7 +923,7 @@ export const sessionInsightsBatches: SessionInsightsBatch[] = [
                 ],
             },
             {
-                name: "Checkr & Rubrik",
+                name: "Finance at Checkr & Rubrik",
                 slug: "checkr-and-rubrik-on-financial-planning",
                 wikiTag: "Financial Planning and Fundraising",
                 smartSearchKeywords: ["Finance", "CFO", "Fundraising", "Budgeting", "Runway", "Burn", "Forecasting", "Revenue"],
@@ -1018,13 +1018,13 @@ export const sessionInsightsBatches: SessionInsightsBatch[] = [
                 ],
             },
             {
-                name: "Faire & Segment",
+                name: "EPD at Faire & Segment",
                 slug: "faire-and-segment-on-scaling-engineering",
                 wikiTag: "Scaling Engineering",
                 smartSearchKeywords: ["CTO", "VP of Engineering", "Technical", "Developers"],
             },
             {
-                name: "Claire Hughes Johnson (Stripe)",
+                name: "People at Stripe",
                 slug: "stripe-on-scaling-people",
                 wikiTag: "Scaling People",
                 smartSearchKeywords: [
@@ -1050,7 +1050,7 @@ export const sessionInsightsBatches: SessionInsightsBatch[] = [
                 ],
             },
             {
-                name: "Ravi Inukonda (DoorDash)",
+                name: "Finance at DoorDash",
                 slug: "ravi-on-strategic-planning",
                 wikiTag: "Operating Cadence, Financial Planning and Fundraising",
                 smartSearchKeywords: [
