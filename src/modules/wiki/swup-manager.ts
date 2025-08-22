@@ -401,7 +401,7 @@ class SwupManager {
 
             const backBtn = document.querySelector<HTMLAnchorElement>(".back-button");
             if (backBtn) {
-                backBtn.href = "/avra-wiki-new";
+                backBtn.href = "/avra-wiki";
                 backBtn.textContent = "Return to Wiki";
             }
 
