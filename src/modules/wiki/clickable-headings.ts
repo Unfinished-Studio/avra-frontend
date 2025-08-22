@@ -198,34 +198,16 @@ const addHeadingClickHandler = (heading: HTMLElement) => {
         }
     });
 
-    // Add link icon on hover
-    const linkIcon = document.createElement("span");
-    linkIcon.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" fill="gray" height="12px" viewBox="0 0 576 512"><path d="M0 256C0 167.6 71.6 96 160 96h72c13.3 0 24 10.7 24 24s-10.7 24-24 24H160C98.1 144 48 194.1 48 256s50.1 112 112 112h72c13.3 0 24 10.7 24 24s-10.7 24-24 24H160C71.6 416 0 344.4 0 256zm576 0c0 88.4-71.6 160-160 160H344c-13.3 0-24-10.7-24-24s10.7-24 24-24h72c61.9 0 112-50.1 112-112s-50.1-112-112-112H344c-13.3 0-24-10.7-24-24s10.7-24 24-24h72c88.4 0 160 71.6 160 160zM184 232H392c13.3 0 24 10.7 24 24s-10.7 24-24 24H184c-13.3 0-24-10.7-24-24s10.7-24 24-24z"></path></svg>`;
-    linkIcon.className = "heading-link-icon";
-    linkIcon.style.cssText = `
-        margin-left: 8px;
-        opacity: 0;
-        transition: opacity 0.2s ease;
-        cursor: pointer;
-        font-size: 0.8em;
-        user-select: none;
-    `;
+    // Set initial opacity to full
+    heading.style.opacity = "1";
 
-    heading.appendChild(linkIcon);
-
-    // Show/hide icon on hover
+    // Add hover effects
     heading.addEventListener("mouseenter", () => {
-        linkIcon.style.opacity = "1";
+        heading.style.opacity = "0.5";
     });
 
     heading.addEventListener("mouseleave", () => {
-        linkIcon.style.opacity = "0";
-    });
-
-    // Make the icon clickable too
-    linkIcon.addEventListener("click", (e) => {
-        e.stopPropagation();
-        heading.click();
+        heading.style.opacity = "1";
     });
 };
 
@@ -258,22 +240,7 @@ export const initializeClickableHeadings = () => {
             .clickable-heading {
                 cursor: pointer;
                 position: relative;
-                transition: color 0.2s ease;
-            }
-            
-            .clickable-heading:hover {
-                color: #0066cc;
-            }
-            
-            .clickable-heading .heading-link-icon {
-                display: inline-block;
-                vertical-align: middle;
-            }
-            
-            @media (max-width: 768px) {
-                .clickable-heading .heading-link-icon {
-                    opacity: 0.6 !important; /* Always show on mobile */
-                }
+                transition: opacity 0.2s ease;
             }
         `;
         document.head.appendChild(style);
@@ -289,10 +256,9 @@ export const cleanupClickableHeadings = () => {
         heading.removeAttribute("data-clickable-heading");
         heading.classList.remove("clickable-heading");
 
-        // Remove link icon
-        const linkIcon = heading.querySelector(".heading-link-icon");
-        if (linkIcon) {
-            linkIcon.remove();
+        // Reset opacity
+        if (heading instanceof HTMLElement) {
+            heading.style.opacity = "";
         }
     });
 };

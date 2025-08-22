@@ -79,9 +79,35 @@ class SwupManager {
     /**
      * Navigate to a URL using Swup
      */
-    public navigate(url: string): void {
+    public navigate(url: string, preserveParams: boolean = false): void {
         if (this.swup) {
-            this.swup.navigate(url);
+            let finalUrl = url;
+
+            if (preserveParams) {
+                // Preserve existing URL parameters from current location
+                const currentUrl = new URL(window.location.href);
+                const params = currentUrl.searchParams;
+                const hash = currentUrl.hash;
+
+                // Create URL object for the target URL
+                const targetUrl = new URL(url, window.location.origin);
+
+                // Copy existing parameters that don't already exist in target URL
+                params.forEach((value, key) => {
+                    if (!targetUrl.searchParams.has(key)) {
+                        targetUrl.searchParams.set(key, value);
+                    }
+                });
+
+                // Add hash if target URL doesn't have one and current URL does
+                if (!targetUrl.hash && hash) {
+                    targetUrl.hash = hash;
+                }
+
+                finalUrl = targetUrl.toString().replace(window.location.origin, "");
+            }
+
+            this.swup.navigate(finalUrl);
         }
     }
 

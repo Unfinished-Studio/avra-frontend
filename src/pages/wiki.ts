@@ -67,9 +67,9 @@ window.Webflow.push(async () => {
     removePageParameter();
     if (page) {
         // Navigate to specified content page
-        swupManager.navigate(page);
+        swupManager.navigate(page, true);
     } else if (isMobile()) {
         // Take mobile users to default page (if no page parameter is present)
-        swupManager.navigate("/avra-wiki/hiring-and-managing-execs");
+        swupManager.navigate("/avra-wiki/hiring-and-managing-execs", true);
     }
 });

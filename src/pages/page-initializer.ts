@@ -2,6 +2,7 @@ import { getCurrentPageInfo } from "@/utils/page-info";
 import Player from "@vimeo/player";
 import { PODCAST_CHAPTER_MAPPINGS } from "@/data/sidebar";
 import { initPageNavigation } from "@/modules/wiki/page-navigation";
+import { getAvraElement } from "@/utils/dom/elements";
 
 const fixListSpacing = () => {
     // Add CSS rule for nested unordered lists to have margin-bottom: 0px
@@ -69,15 +70,19 @@ const initPodcastPage = (slug: string) => {
 };
 
 export const initContentPage = async () => {
-    if (window.location.href.includes("/session-insights")) {
-        fixListSpacing();
+    const pageContainer = getAvraElement("wiki-container");
+    if (pageContainer) {
+        pageContainer.style.paddingTop = "50px";
     }
 
     // Check if we're on a podcast page and initialize podcast-specific functionality
     const { currentType, currentSlug } = getCurrentPageInfo();
-
     if (currentType === "podcast" && currentSlug) {
         initPodcastPage(currentSlug);
+    }
+
+    if (currentType === "session") {
+        fixListSpacing();
     }
 
     // Initialize page navigation for all content pages
