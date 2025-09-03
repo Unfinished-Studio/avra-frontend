@@ -38,11 +38,15 @@ const initializeSidebar = () => {
     const sectionTemplate = getAvraElement("wiki-section-template", sectionList).cloneNode(true) as HTMLElement;
     sectionTemplate.remove();
 
+    // Check if wiki-showing element exists to determine if Wiki Topics should be displayed
+    const wikiShowingElement = document.querySelector("[avra-element='wiki-showing']");
+    const shouldShowWikiTopics = wikiShowingElement !== null;
+
     // Sidebar sections data
     const sidebarSections = [
         // TODO: filter for favorited items from user localstorage (see favorites page logic)
         // { title: "Favorited", items: },
-        { title: "Wiki Topics", items: wikiElements },
+        ...(shouldShowWikiTopics ? [{ title: "Wiki Topics", items: wikiElements }] : []),
         // { title: "Case Studies", items: caseStudyItems },
         { title: "Session Insights", items: sessionInsightElements },
         { title: "Podcast Episodes", items: podcastElements },
@@ -534,7 +538,9 @@ const shouldDropdownBeExpanded = (
             return true;
         } else if (sectionText === "wiki topics") {
             // Keep Wiki Topics open by default when not on a specific content page
-            return currentType === null;
+            // Only if wiki-showing element exists
+            const wikiShowingElement = document.querySelector("[avra-element='wiki-showing']");
+            return currentType === null && wikiShowingElement !== null;
         }
     }
 
