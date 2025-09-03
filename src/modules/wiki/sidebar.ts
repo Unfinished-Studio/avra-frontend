@@ -541,6 +541,22 @@ const shouldDropdownBeExpanded = (
             // Only if wiki-showing element exists
             const wikiShowingElement = document.querySelector("[avra-element='wiki-showing']");
             return currentType === null && wikiShowingElement !== null;
+        } else if (currentType === null) {
+            // If Wiki Topics is not available (wiki-showing element doesn't exist),
+            // open the first available section by default
+            const wikiShowingElement = document.querySelector("[avra-element='wiki-showing']");
+            if (wikiShowingElement === null) {
+                // Open Session Insights as the first fallback
+                if (sectionText === "session insights") {
+                    return true;
+                }
+                // If Session Insights is not available, open Podcast Episodes
+                if (sectionText === "podcast episodes") {
+                    // Check if Session Insights section exists before opening Podcast Episodes
+                    const sessionInsightsSection = document.querySelector("[data-title='Session Insights']");
+                    return sessionInsightsSection === null;
+                }
+            }
         }
     }
 
