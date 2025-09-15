@@ -1094,6 +1094,37 @@ export const sessionInsightsBatches: SessionInsightsBatch[] = [
         ],
     },
     {
+        title: "Batch 5",
+        sessionInsights: [
+            {
+                name: "Vanta & Faire",
+                slug: "vanta-and-faire-on-hiring-and-managing-leaders",
+                wikiTag: "Hiring and Managing Leaders",
+                smartSearchKeywords: [
+                    "Hiring Executives",
+                    "Leadership",
+                    "Recruiting",
+                    "Team Building",
+                    "Executive Search",
+                    "Management",
+                    "Onboarding",
+                    "Talent",
+                    "Promotions",
+                    "Firing",
+                    "Org Design",
+                    "Headcount",
+                    "Talent",
+                    "Org Structure",
+                    "Scaling Teams",
+                    "Hiring",
+                    "Managing",
+                    "Leveling",
+                    "Compensation",
+                ],
+            },
+        ],
+    },
+    {
         title: "Alumni Sessions",
         sessionInsights: [
             {
