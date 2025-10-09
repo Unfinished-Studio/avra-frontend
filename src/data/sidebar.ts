@@ -1174,6 +1174,23 @@ export const sessionInsightsBatches: SessionInsightsBatch[] = [
                     "Compensation",
                 ],
             },
+            {
+                name: "Guillermo Rauch (Vercel)",
+                slug: "guillermo-rauch-on-scaling-as-a-ceo",
+                wikiTag: "Operating Cadence",
+                smartSearchKeywords: [
+                    "Operating",
+                    "Scaling",
+                    "Meetings",
+                    "OKRs",
+                    "Goals",
+                    "Planning",
+                    "Metrics",
+                    "Business Reviews",
+                    "Execution",
+                    "Strategic Planning",
+                ],
+            },
         ],
     },
     {
