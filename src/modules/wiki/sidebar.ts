@@ -1,4 +1,4 @@
-import { DROPDOWN_TIERS, podcastArticles, sessionInsightsBatches, wikiItems } from "@/data/sidebar";
+import { DROPDOWN_TIERS, podcastArticles, sessionInsightsBatches, wikiItems, alumniSessionCategories } from "@/data/sidebar";
 import { ACTIVE_CLASS } from "@/utils/constants";
 import { getAvraElement, getElements } from "@/utils/dom/elements";
 import { isMobile } from "@/utils/mobile";
@@ -49,6 +49,7 @@ const initializeSidebar = () => {
         ...(shouldShowWikiTopics ? [{ title: "Wiki Topics", items: wikiElements }] : []),
         // { title: "Case Studies", items: caseStudyItems },
         { title: "Session Insights", items: sessionInsightElements },
+        { title: "Alumni Sessions", items: [] },
         { title: "Podcast Episodes", items: podcastElements },
     ];
     const sectionsToAdd: HTMLElement[] = [];
@@ -217,6 +218,45 @@ const initializeSidebar = () => {
                     // TODO: handle sessionInsightItem properties (wikiTags and smartSearchKeywords)
 
                     // remove template element
+                    const subSubItemTemplateElement = getAvraElement("wiki-insight-heading-item", subItem);
+                    subSubItemTemplateElement.remove();
+                }
+
+                while (sectionItem.children.length > 1) {
+                    sectionItem.removeChild(sectionItem.lastChild!);
+                }
+                for (const subItem of subItemsToAdd) {
+                    sectionItem.appendChild(subItem);
+                }
+
+                subItemTemplate.remove();
+            }
+        } else if (title === "Alumni Sessions") {
+            for (const categoryGroup of alumniSessionCategories) {
+                // Skip empty categories
+                if (categoryGroup.sessions.length === 0) continue;
+
+                const sectionItem = sectionItemTemplate.cloneNode(true) as HTMLAnchorElement;
+                const sectionItemText = getAvraElement<HTMLAnchorElement>("wiki-section-item-text", sectionItem);
+                sectionItemText.textContent = categoryGroup.category;
+                sectionItemText.href = buildContentPageLink("Session Insights", categoryGroup.sessions[0].slug);
+                sectionItemsToAdd.push(sectionItem);
+
+                const subItemTemplate = getAvraElement("wiki-insight-item", sectionItem);
+                const subItemsToAdd: HTMLElement[] = [];
+
+                for (const alumniSession of categoryGroup.sessions) {
+                    const subItem = subItemTemplate.cloneNode(true) as HTMLAnchorElement;
+                    const subItemText = getAvraElement<HTMLAnchorElement>("wiki-insight-item-text", subItem);
+                    subItemText.textContent = alumniSession.name;
+                    subItemText.href = buildContentPageLink("Session Insights", alumniSession.slug);
+
+                    // Store slug as data attribute for later highlighting
+                    subItem.setAttribute("data-alumni-slug", alumniSession.slug);
+
+                    subItemsToAdd.push(subItem);
+
+                    // Remove sub-sub items template
                     const subSubItemTemplateElement = getAvraElement("wiki-insight-heading-item", subItem);
                     subSubItemTemplateElement.remove();
                 }
@@ -533,6 +573,8 @@ const shouldDropdownBeExpanded = (
         if (sectionText === "wiki topics" && (currentType === "wiki" || currentType === "case-study")) {
             return true;
         } else if (sectionText === "session insights" && currentType === "session") {
+            return true;
+        } else if (sectionText === "alumni sessions" && currentType === "session") {
             return true;
         } else if (sectionText === "podcast episodes" && currentType === "podcast") {
             return true;

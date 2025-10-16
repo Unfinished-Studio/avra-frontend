@@ -40,6 +40,16 @@ export type Article = {
     smartSearchKeywords?: string[];
 };
 
+export type AlumniSession = {
+    name: string;
+    slug: string;
+};
+
+export type AlumniSessionCategory = {
+    category: string;
+    sessions: AlumniSession[];
+};
+
 export const wikiItems: WikiItem[] = [
     {
         title: "Hiring & Managing",
@@ -1193,13 +1203,33 @@ export const sessionInsightsBatches: SessionInsightsBatch[] = [
             },
         ],
     },
+];
+
+export const alumniSessionCategories: AlumniSessionCategory[] = [
     {
-        title: "Alumni Sessions",
-        sessionInsights: [
+        category: "CEO",
+        sessions: [
             {
                 name: "Bill Magnuson (Braze)",
                 slug: "bill-magnusons-lessons-from-scaling-braze",
             },
+            {
+                name: "Bipul Sinha (Rubrik)",
+                slug: "bipul-sinha-rubrik-on-ceo-scaling",
+            },
+        ],
+    },
+    {
+        category: "EPD",
+        sessions: [],
+    },
+    {
+        category: "Support",
+        sessions: [],
+    },
+    {
+        category: "GTM",
+        sessions: [
             {
                 name: "Dev Ittycheria (MongoDB)",
                 slug: "scaling-b2b-gtm",
@@ -1208,10 +1238,11 @@ export const sessionInsightsBatches: SessionInsightsBatch[] = [
                 name: "Greg Schott (Mulesoft)",
                 slug: "scaling-enterprise-gtm",
             },
-            {
-                name: "Bipul Sinha (Rubrik)",
-                slug: "bipul-sinha-rubrik-on-ceo-scaling",
-            },
+        ],
+    },
+    {
+        category: "AI",
+        sessions: [
             {
                 name: "Arvind Jain (Glean)",
                 slug: "utilizing-ai-in-your-company",
