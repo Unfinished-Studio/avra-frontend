@@ -1224,8 +1224,13 @@ export const alumniSessionCategories: AlumniSessionCategory[] = [
         sessions: [],
     },
     {
-        category: "Support",
-        sessions: [],
+        category: "Support & Success",
+        sessions: [
+            {
+                name: "Vercel, Zapier, Notion, Monzo",
+                slug: "scaling-support-and-customer-success",
+            },
+        ],
     },
     {
         category: "GTM",
