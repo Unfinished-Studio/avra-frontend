@@ -12,6 +12,7 @@ const ENTRY_POINTS = [
     "src/pages/wiki.ts",
     "src/pages/avra-wiki-template.ts",
     "src/pages/avra-wiki.ts",
+    "src/pages/avra-wiki-chat.ts",
     "src/pages/batch-template.ts",
     "src/pages/favorites-cms.ts",
     "src/pages/favorites.ts",
