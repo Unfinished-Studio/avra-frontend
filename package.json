@@ -48,6 +48,7 @@
         "@swup/preload-plugin": "^3.2.11",
         "@vimeo/player": "^2.29.3",
         "gsap": "^3.13.0",
+        "marked": "^17.0.0",
         "swup": "^4.8.2"
     }
 }

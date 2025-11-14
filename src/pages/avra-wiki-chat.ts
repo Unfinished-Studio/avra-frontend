@@ -2,6 +2,8 @@
 
 import { API } from "@/constants";
 import { sidebar } from "@/modules/wiki/sidebar";
+import { updateBreadcrumbs } from "@/modules/wiki/breadcrumb";
+import { marked } from "marked";
 
 interface ChatChunk {
     delta: string;
@@ -186,6 +188,8 @@ class ChatUI {
     private responseBuffer: string = "";
     private displayedText: string = "";
     private renderInterval: number | null = null;
+    private userHasScrolledUp: boolean = false;
+    private scrollCheckTimeout: number | null = null;
 
     constructor() {
         this.chatClient = new AvraChatClient();
@@ -197,7 +201,131 @@ class ChatUI {
 
         this.setupLayout();
         this.setupEventListeners();
+        this.setupScrollListener();
         this.showSuggestedQuestions();
+        this.addMobileStyles();
+    }
+
+    private addMobileStyles(): void {
+        const style = document.createElement("style");
+        style.textContent = `
+            /* Markdown styling for chat responses */
+            .message-content h1 {
+                font-size: 2.3rem;
+                margin-top: 1rem !important ;
+            }
+            .message-content h1,
+            .message-content h2,
+            .message-content h3,
+            .message-content h4 {
+                font-weight: 600;
+                margin-top: 1.5em;
+                margin-bottom: 0.75em;
+                line-height: 1.3;
+                color: #212121;
+            }
+            
+            .message-content h2 {
+                font-size: 1.5em;
+                border-bottom: 1px solid #e5e5e5;
+                padding-bottom: 0.3em;
+            }
+            
+            .message-content h3 {
+                font-size: 1.25em;
+            }
+            
+            .message-content h4 {
+                font-size: 1.1em;
+            }
+            
+            .message-content p {
+                margin: 0.75em 0;
+                line-height: 1.6;
+            }
+            
+            .message-content ul,
+            .message-content ol {
+                margin: 0.75em 0;
+                padding-left: 2em;
+            }
+            
+            .message-content li {
+                margin: 0.5em 0;
+                line-height: 1.6;
+            }
+            
+            .message-content strong {
+                font-weight: 600;
+                color: #212121;
+            }
+            
+            .message-content em {
+                font-style: italic;
+            }
+            
+            .message-content code {
+                background: #f5f5f5;
+                padding: 0.2em 0.4em;
+                border-radius: 3px;
+                font-family: 'Monaco', 'Courier New', monospace;
+                font-size: 0.9em;
+            }
+            
+            .message-content pre {
+                background: #f5f5f5;
+                padding: 1em;
+                border-radius: 6px;
+                overflow-x: auto;
+                margin: 1em 0;
+            }
+            
+            .message-content pre code {
+                background: none;
+                padding: 0;
+            }
+            
+            .message-content hr {
+                border: none;
+                border-top: 1px solid #e5e5e5;
+                margin: 1.5em 0;
+            }
+            
+            .message-content blockquote {
+                border-left: 3px solid #e5e5e5;
+                padding-left: 1em;
+                margin: 1em 0;
+                color: #666;
+            }
+            
+            .message-content a {
+                color: #212121;
+                text-decoration: underline;
+            }
+            
+            .message-content a:hover {
+                color: #000;
+            }
+            
+            @media (max-width: 767px) {
+                [avra-element='wiki-main-content'] textarea {
+                    font-size: 17px !important;
+                }
+                
+                [avra-element='wiki-main-content'] .message-content {
+                    font-size: 15px !important;
+                }
+                
+                [avra-element='wiki-main-content'] a[href*="/"] {
+                    font-size: 13px !important;
+                }
+                
+                [avra-element='wiki-main-content'] button {
+                    font-size: 14px !important;
+                }
+            }
+        `;
+        document.head.appendChild(style);
     }
 
     private createChatContainer(): HTMLElement {
@@ -340,6 +468,26 @@ class ChatUI {
         });
     }
 
+    private setupScrollListener(): void {
+        const chatContainer = document.querySelector(".wiki-container.is-chat") as HTMLElement;
+        if (!chatContainer) return;
+
+        chatContainer.addEventListener("scroll", () => {
+            // Check if user scrolled away from bottom
+            const scrollPosition = chatContainer.scrollTop + chatContainer.clientHeight;
+            const scrollHeight = chatContainer.scrollHeight;
+            const isAtBottom = scrollHeight - scrollPosition < 10;
+
+            // If not at bottom, user has scrolled up
+            if (!isAtBottom) {
+                this.userHasScrolledUp = true;
+            } else {
+                // If back at bottom, reset flag
+                this.userHasScrolledUp = false;
+            }
+        });
+    }
+
     private startLetterByLetterRender(): void {
         if (this.renderInterval) return; // Already rendering
 
@@ -351,7 +499,9 @@ class ChatUI {
                 if (this.currentAssistantMessage) {
                     const contentEl = this.currentAssistantMessage.querySelector(".message-content") as HTMLElement;
                     if (contentEl) {
-                        contentEl.textContent = this.displayedText;
+                        // Parse and render markdown
+                        const html = marked.parse(this.displayedText, { async: false }) as string;
+                        contentEl.innerHTML = html;
                     }
                 }
                 this.scrollToBottom();
@@ -387,7 +537,7 @@ class ChatUI {
             const button = document.createElement("button");
             button.textContent = question;
             button.style.cssText = `
-                padding: 1rem 1rem;
+                padding: 0.5rem 0.5rem;
                 background: transparent;
                 color: #A3A3A3;
                 border: none;
@@ -442,7 +592,7 @@ class ChatUI {
         // Show standalone loading indicator
         this.loadingIndicatorElement = this.createStandaloneLoadingIndicator();
         this.messagesContainer.appendChild(this.loadingIndicatorElement);
-        this.scrollToBottom();
+        this.scrollToBottom(true); // Force scroll when showing loading indicator
 
         // Reset buffers
         this.responseBuffer = "";
@@ -540,7 +690,7 @@ class ChatUI {
         this.messages.push({ role: "user", content });
         const messageEl = this.createUserMessageElement(content);
         this.messagesContainer.appendChild(messageEl);
-        this.scrollToBottom();
+        this.scrollToBottom(true); // Force scroll when user sends message
     }
 
     private createUserMessageElement(content: string): HTMLElement {
@@ -601,7 +751,6 @@ class ChatUI {
             border: 1px solid #e5e5e5;
             border-radius: 12px;
             border-bottom-left-radius: 0px;
-            white-space: pre-wrap;
             word-wrap: break-word;
             line-height: 1.5;
             position: relative;
@@ -749,10 +898,26 @@ class ChatUI {
         messageWrapper.appendChild(sourcesContainer);
     }
 
-    private scrollToBottom(): void {
+    private scrollToBottom(force: boolean = false): void {
         requestAnimationFrame(() => {
             const chatContainer = document.querySelector(".wiki-container.is-chat") as HTMLElement;
             if (chatContainer) {
+                // If forced (user sent message), reset the scroll flag and scroll
+                if (force) {
+                    this.userHasScrolledUp = false;
+                    chatContainer.scrollTo({
+                        top: chatContainer.scrollHeight,
+                        behavior: "auto",
+                    });
+                    return;
+                }
+
+                // Don't auto-scroll if user has manually scrolled up
+                if (this.userHasScrolledUp) {
+                    return;
+                }
+
+                // Auto-scroll if user hasn't scrolled away
                 chatContainer.scrollTo({
                     top: chatContainer.scrollHeight,
                     behavior: "auto",
@@ -770,6 +935,106 @@ function initChat() {
 // Initialize when Webflow is ready
 window.Webflow ||= [];
 window.Webflow.push(() => {
+    console.log("[avra-wiki-chat] Initializing chat page");
+
     sidebar();
+    updateBreadcrumbs();
+
+    // Set custom breadcrumb for chat page
+    const breadcrumb1 = document.querySelector("[avra-element='breadcrumb-1']") as HTMLElement;
+    const breadcrumb2 = document.querySelector("[avra-element='breadcrumb-2']") as HTMLElement;
+    const breadcrumbArrow = document.querySelector("[avra-element='breadcrumb-arrow']") as HTMLElement;
+
+    if (breadcrumb1) {
+        breadcrumb1.textContent = "Wiki Topics";
+    }
+    if (breadcrumb2) {
+        breadcrumb2.textContent = "Chat";
+        breadcrumb2.style.display = "block";
+    }
+    if (breadcrumbArrow) {
+        breadcrumbArrow.style.display = "block";
+    }
+
+    // Manual sidebar toggle function
+    const openSidebar = () => {
+        const sidebar = document.querySelector("[avra-element='wiki-sidebar']") as HTMLElement;
+        const overlay = document.querySelector("[avra-element='sidebar-overlay']") as HTMLElement;
+
+        console.log("[avra-wiki-chat] Opening sidebar. Sidebar:", sidebar, "Overlay:", overlay);
+
+        if (sidebar) {
+            sidebar.style.transform = "translateX(288px)";
+            sidebar.style.transition = "transform 0.3s ease";
+            console.log("[avra-wiki-chat] Sidebar transform applied");
+        }
+
+        if (overlay) {
+            overlay.style.display = "block";
+            overlay.style.opacity = "1";
+            overlay.style.transition = "opacity 0.3s ease";
+            console.log("[avra-wiki-chat] Overlay shown");
+        }
+    };
+
+    const closeSidebar = () => {
+        const sidebar = document.querySelector("[avra-element='wiki-sidebar']") as HTMLElement;
+        const overlay = document.querySelector("[avra-element='sidebar-overlay']") as HTMLElement;
+
+        console.log("[avra-wiki-chat] Closing sidebar");
+
+        if (sidebar) {
+            sidebar.style.transform = "translateX(0)";
+        }
+
+        if (overlay) {
+            overlay.style.opacity = "0";
+            setTimeout(() => {
+                overlay.style.display = "none";
+            }, 300);
+        }
+    };
+
+    // Check sidebar button
+    const sidebarBtn = document.querySelector("[avra-element='sidebar-btn-open']");
+    console.log("[avra-wiki-chat] Sidebar button found:", sidebarBtn);
+
+    if (sidebarBtn) {
+        console.log("[avra-wiki-chat] Sidebar button has click listener:", sidebarBtn.hasAttribute("data-sidebar-listener"));
+
+        // Add click listener if not already added
+        if (!sidebarBtn.hasAttribute("data-sidebar-listener")) {
+            sidebarBtn.addEventListener("click", (e) => {
+                e.preventDefault();
+                console.log("[avra-wiki-chat] Sidebar button clicked");
+                openSidebar();
+            });
+            sidebarBtn.setAttribute("data-sidebar-listener", "true");
+        }
+    } else {
+        console.warn("[avra-wiki-chat] Sidebar button not found on page");
+    }
+
+    // Add close button handler
+    const sidebarCloseBtn = document.querySelector("[avra-element='sidebar-btn-close']");
+    if (sidebarCloseBtn && !sidebarCloseBtn.hasAttribute("data-close-listener")) {
+        sidebarCloseBtn.addEventListener("click", (e) => {
+            e.preventDefault();
+            console.log("[avra-wiki-chat] Close button clicked");
+            closeSidebar();
+        });
+        sidebarCloseBtn.setAttribute("data-close-listener", "true");
+    }
+
+    // Add overlay click handler to close
+    const overlay = document.querySelector("[avra-element='sidebar-overlay']");
+    if (overlay && !overlay.hasAttribute("data-overlay-listener")) {
+        overlay.addEventListener("click", () => {
+            console.log("[avra-wiki-chat] Overlay clicked");
+            closeSidebar();
+        });
+        overlay.setAttribute("data-overlay-listener", "true");
+    }
+
     initChat();
 });
