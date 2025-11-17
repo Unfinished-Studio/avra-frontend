@@ -506,7 +506,7 @@ class ChatUI {
                 }
                 this.scrollToBottom();
             }
-        }, 15);
+        }, 9);
     }
 
     private stopLetterByLetterRender(): void {
@@ -744,7 +744,7 @@ class ChatUI {
 
         const messageEl = document.createElement("div");
         messageEl.style.cssText = `
-            max-width: 70%;
+            max-width: 90%;
             padding: 1rem 1.25rem;
             background: #fff;
             color: #212121;
