@@ -307,6 +307,24 @@ class ChatUI {
                 color: #000;
             }
             
+            .message-content table {
+                border-collapse: collapse;
+                width: 100%;
+                margin: 1em 0;
+            }
+            
+            .message-content table th,
+            .message-content table td {
+                border: 1px solid #e5e5e5;
+                padding: 0.5em;
+                text-align: left;
+            }
+            
+            .message-content table th {
+                background: #f5f5f5;
+                font-weight: 600;
+            }
+            
             @media (max-width: 767px) {
                 [avra-element='wiki-main-content'] textarea {
                     font-size: 17px !important;
@@ -322,6 +340,16 @@ class ChatUI {
                 
                 [avra-element='wiki-main-content'] button {
                     font-size: 14px !important;
+                }
+                
+                .message-content table,
+                .message-content table th,
+                .message-content table td {
+                    font-size: 9px !important;
+                }
+                
+                .message.assistant {
+                    max-width: 100% !important;
                 }
             }
         `;
