@@ -316,7 +316,7 @@ class ChatUI {
             .message-content table th,
             .message-content table td {
                 border: 1px solid #e5e5e5;
-                padding: 0.5em;
+                padding: 0.4em;
                 text-align: left;
             }
             
@@ -771,6 +771,7 @@ class ChatUI {
         `;
 
         const messageEl = document.createElement("div");
+        messageEl.className = "message assistant";
         messageEl.style.cssText = `
             max-width: 90%;
             padding: 1rem 1.25rem;
