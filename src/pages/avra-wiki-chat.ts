@@ -516,6 +516,47 @@ class ChatUI {
         });
     }
 
+    private removeReferencesColumn(html: string): string {
+        // Create a temporary container to parse HTML
+        const temp = document.createElement("div");
+        temp.innerHTML = html;
+
+        // Find all tables
+        const tables = temp.querySelectorAll("table");
+        tables.forEach((table) => {
+            // Find header row
+            const headerRow = table.querySelector("thead tr") || table.querySelector("tr");
+            if (!headerRow) return;
+
+            // Find all th elements
+            const headers = Array.from(headerRow.querySelectorAll("th, td"));
+
+            // Find index of "References" column (case-insensitive)
+            const referencesIndex = headers.findIndex(
+                (th) => th.textContent?.trim().toLowerCase() === "references" || th.textContent?.trim().toLowerCase() === "source"
+            );
+
+            if (referencesIndex === -1) return; // No References column found
+
+            // Remove the header cell
+            headers[referencesIndex].remove();
+
+            // Remove corresponding cells in all body rows
+            const bodyRows = table.querySelectorAll("tbody tr, tr");
+            bodyRows.forEach((row, rowIndex) => {
+                // Skip the header row if it's not in thead
+                if (row === headerRow) return;
+
+                const cells = row.querySelectorAll("td, th");
+                if (cells[referencesIndex]) {
+                    cells[referencesIndex].remove();
+                }
+            });
+        });
+
+        return temp.innerHTML;
+    }
+
     private startLetterByLetterRender(): void {
         if (this.renderInterval) return; // Already rendering
 
@@ -528,7 +569,9 @@ class ChatUI {
                     const contentEl = this.currentAssistantMessage.querySelector(".message-content") as HTMLElement;
                     if (contentEl) {
                         // Parse and render markdown
-                        const html = marked.parse(this.displayedText, { async: false }) as string;
+                        let html = marked.parse(this.displayedText, { async: false }) as string;
+                        // Remove References column from any tables
+                        html = this.removeReferencesColumn(html);
                         contentEl.innerHTML = html;
                     }
                 }
@@ -546,11 +589,10 @@ class ChatUI {
 
     private showSuggestedQuestions(): void {
         const questions = [
-            "What are your best hiring practices?",
-            "How do you manage executives?",
-            "What strategies do you use for team collaboration?",
-            "How do you measure employee performance?",
-            "What tools do you find most helpful for project management?",
+            "How to hire a Head of Engineering?",
+            "How does Tony at DoorDash calibrate executives?",
+            "When should I hire a Head of Finance?",
+            "How should I run a fundraising process?",
         ];
 
         const container = document.createElement("div");
