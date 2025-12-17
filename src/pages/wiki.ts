@@ -70,12 +70,13 @@ window.Webflow.push(async () => {
 
     // Check if user should skip to first article
     const planRestrictions = await getUserPlanRestrictions();
-    const shouldSkipToFirstArticle = isMobile() || planRestrictions.hideSessionInsights;
 
     if (page) {
         // Navigate to specified content page
         swupManager.navigate(page, true);
-    } else if (shouldSkipToFirstArticle) {
+    } else if (planRestrictions.hideWikiTopics) {
+        swupManager.navigate("/session-insights/bill-magnusons-lessons-from-scaling-braze", true);
+    } else if (isMobile() || planRestrictions.hideSessionInsights) {
         // Take mobile users and founders to default page (if no page parameter is present)
         swupManager.navigate("/avra-wiki/hiring-and-managing-execs", true);
     }
