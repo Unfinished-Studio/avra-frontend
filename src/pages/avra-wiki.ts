@@ -153,7 +153,7 @@ export const smartSearch = () => {
                     resultText.classList.remove("w-dyn-bind-empty");
                 }
 
-                // Add highlighted text as query parameter to anchor links
+                // Add highlighted text as query parameter to anchor links while preserving existing parameters
                 const highlightText = isKeywordMatch ? searchValue : extractCleanHighlightText(result.highlight?.body || "");
                 if (!isKeywordMatch) {
                     console.log("highlightText", highlightText);
@@ -161,9 +161,26 @@ export const smartSearch = () => {
                 const links = matchEl.querySelectorAll<HTMLAnchorElement>("a");
                 links.forEach((link) => {
                     if (highlightText && link.href) {
-                        const url = new URL(link.href);
+                        const url = new URL(link.href, window.location.origin);
+
+                        // Preserve existing URL parameters from current page
+                        const currentUrl = new URL(window.location.href);
+                        currentUrl.searchParams.forEach((value, key) => {
+                            // Don't override parameters that are already in the target URL
+                            if (!url.searchParams.has(key)) {
+                                url.searchParams.set(key, value);
+                            }
+                        });
+
+                        // Set the highlight parameter (this can override existing highlight)
                         url.searchParams.set("highlight", highlightText);
-                        link.href = url.toString();
+
+                        // Preserve hash if target URL doesn't have one
+                        if (!url.hash && currentUrl.hash) {
+                            url.hash = currentUrl.hash;
+                        }
+
+                        link.href = url.toString().replace(window.location.origin, "");
                     }
                 });
 
@@ -354,6 +371,6 @@ export const smartSearch = () => {
 
 window.Webflow ||= [];
 window.Webflow.push(async () => {
-    sidebar();
+    await sidebar();
     smartSearch();
 });

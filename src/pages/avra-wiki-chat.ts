@@ -1005,10 +1005,10 @@ function initChat() {
 
 // Initialize when Webflow is ready
 window.Webflow ||= [];
-window.Webflow.push(() => {
+window.Webflow.push(async () => {
     console.log("[avra-wiki-chat] Initializing chat page");
 
-    sidebar();
+    await sidebar();
     updateBreadcrumbs();
 
     // Set custom breadcrumb for chat page

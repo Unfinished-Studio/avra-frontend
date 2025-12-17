@@ -9,9 +9,11 @@ import { initContentPage } from "@/pages/page-initializer";
 import { getElement, getElements } from "@/utils/dom/elements";
 import { isMobile } from "@/utils/mobile";
 import { initPageNavigation } from "@/modules/wiki/page-navigation";
+import { getUserPlanRestrictions } from "@/utils/memberstack/user";
 
 export const updateSidebar = () => {
-    const sessionInsightsSection = getElement("[data-title='Session Insights']");
+    // Use querySelector to safely check if Session Insights section exists (may be hidden for some users)
+    const sessionInsightsSection = document.querySelector("[data-title='Session Insights']");
     const sessionLinks = getElements("[avra-element='wiki-session-links'] a");
 
     console.log("[wiki] updating sidebar with session links");
@@ -42,7 +44,7 @@ const removePageParameter = () => {
 
 window.Webflow ||= [];
 window.Webflow.push(async () => {
-    sidebar();
+    await sidebar();
     smartSearch();
 
     // Initialize mobile and nav search (both use persistent content elements)
@@ -65,11 +67,16 @@ window.Webflow.push(async () => {
 
     const page = new URLSearchParams(window.location.search).get("page");
     removePageParameter();
+
+    // Check if user should skip to first article
+    const planRestrictions = await getUserPlanRestrictions();
+    const shouldSkipToFirstArticle = isMobile() || planRestrictions.hideSessionInsights;
+
     if (page) {
         // Navigate to specified content page
         swupManager.navigate(page, true);
-    } else if (isMobile()) {
-        // Take mobile users to default page (if no page parameter is present)
+    } else if (shouldSkipToFirstArticle) {
+        // Take mobile users and founders to default page (if no page parameter is present)
         swupManager.navigate("/avra-wiki/hiring-and-managing-execs", true);
     }
 });

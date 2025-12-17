@@ -6,6 +6,7 @@ import { getCurrentPageInfo } from "@/utils/page-info";
 import { gsap } from "gsap";
 import { type ContentType } from "@/data/content";
 import { CONTENT_TYPE_SLUG_MAPPINGS } from "@/constants";
+import { getUserPlanRestrictions } from "@/utils/memberstack/user";
 
 let sidebarInitialized = false;
 
@@ -13,7 +14,7 @@ const buildContentPageLink = (type: ContentType, slug: string) => {
     return `/${CONTENT_TYPE_SLUG_MAPPINGS[type]}/${slug}`;
 };
 
-const initializeSidebar = () => {
+const initializeSidebar = async () => {
     const dataContainer = getAvraElement("data-container");
     const wikiList = getAvraElement("ss-wiki-list", dataContainer);
     const sessionList = getAvraElement("ss-session-list", dataContainer);
@@ -42,13 +43,18 @@ const initializeSidebar = () => {
     const wikiShowingElement = document.querySelector("[avra-element='wiki-showing']");
     const shouldShowWikiTopics = wikiShowingElement !== null;
 
+    // Check user plan restrictions
+    const planRestrictions = await getUserPlanRestrictions();
+    const shouldShowWikiTopicsForUser = shouldShowWikiTopics && !planRestrictions.hideWikiTopics;
+    const shouldShowSessionInsights = !planRestrictions.hideSessionInsights;
+
     // Sidebar sections data
     const sidebarSections = [
         // TODO: filter for favorited items from user localstorage (see favorites page logic)
         // { title: "Favorited", items: },
-        ...(shouldShowWikiTopics ? [{ title: "Wiki Topics", items: wikiElements }] : []),
+        ...(shouldShowWikiTopicsForUser ? [{ title: "Wiki Topics", items: wikiElements }] : []),
         // { title: "Case Studies", items: caseStudyItems },
-        { title: "Session Insights", items: sessionInsightElements },
+        ...(shouldShowSessionInsights ? [{ title: "Session Insights", items: sessionInsightElements }] : []),
         { title: "Alumni Sessions", items: [] },
         { title: "Podcast Episodes", items: podcastElements },
     ];
@@ -704,10 +710,10 @@ const setupMobileLinkHandler = () => {
     });
 };
 
-export const sidebar = () => {
+export const sidebar = async () => {
     if (!sidebarInitialized) {
         sidebarInitialized = true;
-        initializeSidebar();
+        await initializeSidebar();
         setupMobileLinkHandler();
     }
     updateSidebarState();

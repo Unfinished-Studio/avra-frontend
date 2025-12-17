@@ -4,6 +4,8 @@ import { avraSetCookie } from "@/utils/avra-set-cookie";
 import { getUser } from "@/utils/memberstack/user";
 import { initNavigationTracking } from "@/utils/slack-notifier";
 
+console.log("index page, tracking login...");
+
 let loginTracked = false;
 
 async function trackLogin() {
@@ -35,6 +37,13 @@ async function trackLogin() {
 
 window.Webflow ||= [];
 window.Webflow.push(async () => {
+    const page = window.location.pathname;
+    if (page.includes("/avra-gpt")) {
+        console.log("avra-gpt page, skipping login tracking");
+        return;
+    }
+
+    // check if user is logged in
     if (loginTracked) {
         return;
     }
