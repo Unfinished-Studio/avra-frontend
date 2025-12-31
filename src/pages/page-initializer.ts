@@ -64,10 +64,7 @@ const initPodcastPage = (slug: string) => {
 
                 const wikiContainer = document.querySelector<HTMLElement>("[avra-element='wiki-container']");
                 if (wikiContainer) {
-                    const podcastSection = wikiContainer.querySelector(".podcast-middle");
-                    if (podcastSection) {
-                        podcastSection.scrollTo({ top: 0, behavior: "smooth" });
-                    }
+                    wikiContainer.scrollTo({ top: 240, behavior: "smooth" });
                 }
             };
 
