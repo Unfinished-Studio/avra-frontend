@@ -50,9 +50,16 @@ const initPodcastPage = (slug: string) => {
             link.textContent = chapter.time;
             link.onclick = function (event) {
                 event.preventDefault();
-                // Convert timestamp to seconds
+                // Convert timestamp to seconds (supports both MM:SS and HH:MM:SS)
                 const timeParts = chapter.time.split(":");
-                const seconds = parseInt(timeParts[0]) * 60 + parseInt(timeParts[1]);
+                let seconds = 0;
+                if (timeParts.length === 3) {
+                    // HH:MM:SS format
+                    seconds = parseInt(timeParts[0]) * 3600 + parseInt(timeParts[1]) * 60 + parseInt(timeParts[2]);
+                } else {
+                    // MM:SS format
+                    seconds = parseInt(timeParts[0]) * 60 + parseInt(timeParts[1]);
+                }
                 player.setCurrentTime(seconds);
             };
 
