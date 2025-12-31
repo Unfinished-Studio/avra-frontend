@@ -61,6 +61,14 @@ const initPodcastPage = (slug: string) => {
                     seconds = parseInt(timeParts[0]) * 60 + parseInt(timeParts[1]);
                 }
                 player.setCurrentTime(seconds);
+
+                const wikiContainer = document.querySelector<HTMLElement>("[avra-element='wiki-container']");
+                if (wikiContainer) {
+                    const podcastSection = wikiContainer.querySelector(".podcast-middle");
+                    if (podcastSection) {
+                        podcastSection.scrollTo({ top: 0, behavior: "smooth" });
+                    }
+                }
             };
 
             titleCell.textContent = chapter.title;
