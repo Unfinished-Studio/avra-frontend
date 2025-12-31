@@ -1374,6 +1374,10 @@ export const podcastArticles: Article[] = [
         wikiTag: "Financial Planning and Fundraising",
         smartSearchKeywords: ["Fundraising", "VC", "Investors"],
     },
+    {
+        name: "Clay",
+        slug: "episode-5-clay",
+    },
 ];
 
 export const DROPDOWN_TIERS = [
