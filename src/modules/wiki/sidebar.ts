@@ -7,8 +7,10 @@ import { gsap } from "gsap";
 import { type ContentType } from "@/data/content";
 import { CONTENT_TYPE_SLUG_MAPPINGS } from "@/constants";
 import { getUserPlanRestrictions } from "@/utils/memberstack/user";
+import { avraGetCookie } from "@/utils/avra-get-cookie";
 
 let sidebarInitialized = false;
+const developmentCookie = avraGetCookie("development");
 
 const buildContentPageLink = (type: ContentType, slug: string) => {
     return `/${CONTENT_TYPE_SLUG_MAPPINGS[type]}/${slug}`;
@@ -59,6 +61,10 @@ const initializeSidebar = async () => {
         { title: "Podcast Episodes", items: podcastElements },
     ];
     const sectionsToAdd: HTMLElement[] = [];
+
+    if (developmentCookie === "true") {
+        sidebarSections.push({ title: "Partners", items: [] }, { title: "Deals", items: [] });
+    }
 
     // Create the sidebar sections
     for (const sidebarSection of sidebarSections) {
@@ -296,6 +302,32 @@ const initializeSidebar = async () => {
                 while (sectionItem.children.length > 1) {
                     sectionItem.removeChild(sectionItem.lastChild!);
                 }
+            }
+        } else if (title === "Partners" && developmentCookie === "true") {
+            const sectionItem = sectionItemTemplate.cloneNode(true) as HTMLAnchorElement;
+            const sectionItemText = getAvraElement<HTMLAnchorElement>("wiki-section-item-text", sectionItem);
+            sectionItemText.textContent = "Overview";
+            sectionItemText.href = "/partners";
+
+            sectionItem.setAttribute("data-partners-slug", "partners");
+
+            sectionItemsToAdd.push(sectionItem);
+
+            while (sectionItem.children.length > 1) {
+                sectionItem.removeChild(sectionItem.lastChild!);
+            }
+        } else if (title === "Deals" && developmentCookie === "true") {
+            const sectionItem = sectionItemTemplate.cloneNode(true) as HTMLAnchorElement;
+            const sectionItemText = getAvraElement<HTMLAnchorElement>("wiki-section-item-text", sectionItem);
+            sectionItemText.textContent = "Deals from Partners";
+            sectionItemText.href = "/deals";
+
+            sectionItem.setAttribute("data-deals-slug", "deals");
+
+            sectionItemsToAdd.push(sectionItem);
+
+            while (sectionItem.children.length > 1) {
+                sectionItem.removeChild(sectionItem.lastChild!);
             }
         } else {
             for (const item of items) {

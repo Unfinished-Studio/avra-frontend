@@ -10,6 +10,7 @@ import { getElement, getElements } from "@/utils/dom/elements";
 import { isMobile } from "@/utils/mobile";
 import { initPageNavigation } from "@/modules/wiki/page-navigation";
 import { getUserPlanRestrictions } from "@/utils/memberstack/user";
+import { avraSetCookie } from "@/utils/avra-set-cookie";
 
 export const updateSidebar = () => {
     // Use querySelector to safely check if Session Insights section exists (may be hidden for some users)
@@ -44,6 +45,13 @@ const removePageParameter = () => {
 
 window.Webflow ||= [];
 window.Webflow.push(async () => {
+    // Check for development query parameter and set cookie
+    const urlParams = new URLSearchParams(window.location.search);
+    const developmentParam = urlParams.get("development");
+    if (developmentParam === "true") {
+        avraSetCookie("development", "true");
+    }
+
     await sidebar();
     smartSearch();
 

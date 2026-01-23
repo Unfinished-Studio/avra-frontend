@@ -10,7 +10,7 @@ import { initPageNavigation } from "@/modules/wiki/page-navigation";
 import { initializeClickableHeadings } from "@/modules/wiki/clickable-headings";
 
 export const swupLinkSelector =
-    'a[href*="/avra-wiki/"], a[href*="/session-insights/"], a[href*="/case-studies/"], a[href*="/audio-video/"]';
+    'a[href*="/avra-wiki/"], a[href*="/session-insights/"], a[href*="/case-studies/"], a[href*="/audio-video/"], a[href*="/deals"], a[href*="/partners"]';
 
 /**
  * Swup Manager - Centralized access to the Swup instance
