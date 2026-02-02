@@ -8,6 +8,7 @@ import Swup from "swup";
 import { updateSidebarState } from "./sidebar";
 import { initPageNavigation } from "@/modules/wiki/page-navigation";
 import { initializeClickableHeadings } from "@/modules/wiki/clickable-headings";
+import { initializeDealModals } from "@/modules/wiki/deal-modals";
 
 export const swupLinkSelector =
     'a[href*="/avra-wiki/"], a[href*="/session-insights/"], a[href*="/case-studies/"], a[href*="/audio-video/"], a[href*="/deals"], a[href*="/partners"]';
@@ -437,6 +438,10 @@ class SwupManager {
                 initPageNavigation();
                 initializeClickableHeadings();
             }, 100);
+            // Initialize deal modals (numbers fs-modal-element attributes and reinits Finsweet)
+            setTimeout(() => {
+                initializeDealModals();
+            }, 150);
         });
 
         this.swup.hooks.on("page:preload", (_visit, { page }) => {

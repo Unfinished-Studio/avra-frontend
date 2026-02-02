@@ -63,7 +63,7 @@ const initializeSidebar = async () => {
     const sectionsToAdd: HTMLElement[] = [];
 
     if (developmentCookie === "true") {
-        sidebarSections.push({ title: "Partners", items: [] }, { title: "Deals", items: [] });
+        sidebarSections.push({ title: "Partners and Deals", items: [] });
     }
 
     // Create the sidebar sections
@@ -303,32 +303,38 @@ const initializeSidebar = async () => {
                     sectionItem.removeChild(sectionItem.lastChild!);
                 }
             }
-        } else if (title === "Partners" && developmentCookie === "true") {
-            const sectionItem = sectionItemTemplate.cloneNode(true) as HTMLAnchorElement;
-            const sectionItemText = getAvraElement<HTMLAnchorElement>("wiki-section-item-text", sectionItem);
-            sectionItemText.textContent = "Overview";
-            sectionItemText.href = "/partners";
+        } else if (title === "Partners and Deals" && developmentCookie === "true") {
+            // Create "Preferred Partners" item (shows table)
+            const partnersItem = sectionItemTemplate.cloneNode(true) as HTMLAnchorElement;
+            const partnersItemText = getAvraElement<HTMLAnchorElement>("wiki-section-item-text", partnersItem);
+            partnersItemText.textContent = "Preferred Partners";
+            partnersItemText.href = "/partners";
+            partnersItem.setAttribute("data-partners-slug", "partners");
 
-            sectionItem.setAttribute("data-partners-slug", "partners");
+            // Remove sub-item templates
+            const partnersSubItemTemplate = getAvraElement("wiki-insight-item", partnersItem);
+            partnersSubItemTemplate.remove();
 
-            sectionItemsToAdd.push(sectionItem);
-
-            while (sectionItem.children.length > 1) {
-                sectionItem.removeChild(sectionItem.lastChild!);
+            while (partnersItem.children.length > 1) {
+                partnersItem.removeChild(partnersItem.lastChild!);
             }
-        } else if (title === "Deals" && developmentCookie === "true") {
-            const sectionItem = sectionItemTemplate.cloneNode(true) as HTMLAnchorElement;
-            const sectionItemText = getAvraElement<HTMLAnchorElement>("wiki-section-item-text", sectionItem);
-            sectionItemText.textContent = "Deals from Partners";
-            sectionItemText.href = "/deals";
+            sectionItemsToAdd.push(partnersItem);
 
-            sectionItem.setAttribute("data-deals-slug", "deals");
+            // Create "Community Deals" item (shows deals page)
+            const dealsItem = sectionItemTemplate.cloneNode(true) as HTMLAnchorElement;
+            const dealsItemText = getAvraElement<HTMLAnchorElement>("wiki-section-item-text", dealsItem);
+            dealsItemText.textContent = "Community Deals";
+            dealsItemText.href = "/deals";
+            dealsItem.setAttribute("data-deals-slug", "deals");
 
-            sectionItemsToAdd.push(sectionItem);
+            // Remove sub-item templates
+            const dealsSubItemTemplate = getAvraElement("wiki-insight-item", dealsItem);
+            dealsSubItemTemplate.remove();
 
-            while (sectionItem.children.length > 1) {
-                sectionItem.removeChild(sectionItem.lastChild!);
+            while (dealsItem.children.length > 1) {
+                dealsItem.removeChild(dealsItem.lastChild!);
             }
+            sectionItemsToAdd.push(dealsItem);
         } else {
             for (const item of items) {
                 const itemTitle = item.getAttribute("data-avra-title") || "#";
