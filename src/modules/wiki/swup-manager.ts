@@ -11,7 +11,7 @@ import { initializeClickableHeadings } from "@/modules/wiki/clickable-headings";
 import { initializeDealModals } from "@/modules/wiki/deal-modals";
 
 export const swupLinkSelector =
-    'a[href*="/avra-wiki/"], a[href*="/session-insights/"], a[href*="/case-studies/"], a[href*="/audio-video/"], a[href*="/deals"], a[href*="/partners"]';
+    'a[href*="/avra-wiki/"], a[href*="/session-insights/"], a[href*="/case-studies/"], a[href*="/audio-video/"], a[href*="/deals"], a[href*="/partners"], a[href*="/partners-deals-overview"]';
 
 /**
  * Swup Manager - Centralized access to the Swup instance

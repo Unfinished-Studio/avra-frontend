@@ -304,6 +304,22 @@ const initializeSidebar = async () => {
                 }
             }
         } else if (title === "Partners and Deals" && developmentCookie === "true") {
+            // Create "Overview" item (shows overview page)
+            const overviewItem = sectionItemTemplate.cloneNode(true) as HTMLAnchorElement;
+            const overviewItemText = getAvraElement<HTMLAnchorElement>("wiki-section-item-text", overviewItem);
+            overviewItemText.textContent = "Overview";
+            overviewItemText.href = "/partners-deals-overview";
+            overviewItem.setAttribute("data-overview-slug", "partners-deals-overview");
+
+            // Remove sub-item templates
+            const overviewSubItemTemplate = getAvraElement("wiki-insight-item", overviewItem);
+            overviewSubItemTemplate.remove();
+
+            while (overviewItem.children.length > 1) {
+                overviewItem.removeChild(overviewItem.lastChild!);
+            }
+            sectionItemsToAdd.push(overviewItem);
+
             // Create "Preferred Partners" item (shows table)
             const partnersItem = sectionItemTemplate.cloneNode(true) as HTMLAnchorElement;
             const partnersItemText = getAvraElement<HTMLAnchorElement>("wiki-section-item-text", partnersItem);
