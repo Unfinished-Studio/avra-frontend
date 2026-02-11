@@ -1,4 +1,4 @@
-import { DROPDOWN_TIERS, podcastArticles, sessionInsightsBatches, wikiItems, alumniSessionCategories } from "@/data/sidebar";
+import { DROPDOWN_TIERS, podcastArticles, sessionInsightsBatches, wikiItems, alumniSessionCategories, partnerCategories } from "@/data/sidebar";
 import { ACTIVE_CLASS } from "@/utils/constants";
 import { getAvraElement, getElements } from "@/utils/dom/elements";
 import { isMobile } from "@/utils/mobile";
@@ -320,37 +320,25 @@ const initializeSidebar = async () => {
             }
             sectionItemsToAdd.push(overviewItem);
 
-            // Create "Preferred Partners" item (shows table)
-            const partnersItem = sectionItemTemplate.cloneNode(true) as HTMLAnchorElement;
-            const partnersItemText = getAvraElement<HTMLAnchorElement>("wiki-section-item-text", partnersItem);
-            partnersItemText.textContent = "Preferred Partners";
-            partnersItemText.href = "/partners";
-            partnersItem.setAttribute("data-partners-slug", "partners");
+            // Create category links (no sub-items, just flat list)
+            for (const categoryGroup of partnerCategories) {
+                const sectionItem = sectionItemTemplate.cloneNode(true) as HTMLAnchorElement;
+                const sectionItemText = getAvraElement<HTMLAnchorElement>("wiki-section-item-text", sectionItem);
+                sectionItemText.textContent = categoryGroup.category;
+                // Use custom href if provided, otherwise link to partners page with category filter
+                sectionItemText.href = categoryGroup.href || `/partners?category=${encodeURIComponent(categoryGroup.category.toLowerCase())}`;
+                sectionItem.setAttribute("data-partner-category", categoryGroup.category.toLowerCase());
 
-            // Remove sub-item templates
-            const partnersSubItemTemplate = getAvraElement("wiki-insight-item", partnersItem);
-            partnersSubItemTemplate.remove();
+                // Remove sub-item templates (no nested items)
+                const subItemTemplate = getAvraElement("wiki-insight-item", sectionItem);
+                subItemTemplate.remove();
 
-            while (partnersItem.children.length > 1) {
-                partnersItem.removeChild(partnersItem.lastChild!);
+                while (sectionItem.children.length > 1) {
+                    sectionItem.removeChild(sectionItem.lastChild!);
+                }
+
+                sectionItemsToAdd.push(sectionItem);
             }
-            sectionItemsToAdd.push(partnersItem);
-
-            // Create "Community Deals" item (shows deals page)
-            const dealsItem = sectionItemTemplate.cloneNode(true) as HTMLAnchorElement;
-            const dealsItemText = getAvraElement<HTMLAnchorElement>("wiki-section-item-text", dealsItem);
-            dealsItemText.textContent = "Community Deals";
-            dealsItemText.href = "/deals";
-            dealsItem.setAttribute("data-deals-slug", "deals");
-
-            // Remove sub-item templates
-            const dealsSubItemTemplate = getAvraElement("wiki-insight-item", dealsItem);
-            dealsSubItemTemplate.remove();
-
-            while (dealsItem.children.length > 1) {
-                dealsItem.removeChild(dealsItem.lastChild!);
-            }
-            sectionItemsToAdd.push(dealsItem);
         } else {
             for (const item of items) {
                 const itemTitle = item.getAttribute("data-avra-title") || "#";
@@ -637,6 +625,8 @@ const shouldDropdownBeExpanded = (
         } else if (sectionText === "alumni sessions" && currentType === "session") {
             return true;
         } else if (sectionText === "podcast episodes" && currentType === "podcast") {
+            return true;
+        } else if (sectionText === "partners and deals" && (location.pathname.includes("/partners") || location.pathname.includes("/deals"))) {
             return true;
         } else if (sectionText === "wiki topics") {
             // Keep Wiki Topics open by default when not on a specific content page

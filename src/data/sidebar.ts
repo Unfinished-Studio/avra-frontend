@@ -50,6 +50,18 @@ export type AlumniSessionCategory = {
     sessions: AlumniSession[];
 };
 
+export type Partner = {
+    name: string;
+    slug: string;
+};
+
+export type PartnerCategory = {
+    category: string;
+    partners: Partner[];
+    /** Override the default link for this category */
+    href?: string;
+};
+
 export const wikiItems: WikiItem[] = [
     {
         title: "Hiring & Managing",
@@ -1474,3 +1486,51 @@ export const PODCAST_CHAPTER_MAPPINGS = {
         { title: "Leadership closing reflections", time: "1:07:45" },
     ],
 };
+
+export const partnerCategories: PartnerCategory[] = [
+    {
+        category: "Hiring",
+        partners: [
+            { name: "Daversa (Engineering)", slug: "daversa-engineering" },
+            { name: "Daversa (Sales)", slug: "daversa-sales" },
+            { name: "Daversa (Marketing)", slug: "daversa-marketing" },
+            { name: "Cole Group (GTM)", slug: "cole-group" },
+            { name: "Chapter Search (GTM)", slug: "chapter-search" },
+            { name: "One North Talent (People/HR)", slug: "one-north-talent" },
+            { name: "JBM (EMEA Expansion)", slug: "jbm" },
+        ],
+    },
+    {
+        category: "Software",
+        href: "/deals",
+        partners: [
+            { name: "Rippling", slug: "rippling" },
+            { name: "Deel", slug: "deel" },
+            { name: "Checkr", slug: "checkr" },
+            { name: "Vanta", slug: "vanta" },
+        ],
+    },
+    {
+        category: "Legal",
+        partners: [
+            { name: "Lighthouse", slug: "lighthouse" },
+            { name: "Bryant Immigration", slug: "bryant-immigration" },
+            { name: "Presidio", slug: "presidio" },
+        ],
+    },
+    {
+        category: "Offices",
+        partners: [
+            { name: "JLL", slug: "jll" },
+            { name: "Newmark", slug: "newmark" },
+            { name: "LOCH Studios", slug: "loch-studios" },
+            { name: "IDF Studios", slug: "idf-studios" },
+        ],
+    },
+    {
+        category: "Comms",
+        partners: [
+            { name: "SMT Comms", slug: "smt-comms" },
+        ],
+    },
+];

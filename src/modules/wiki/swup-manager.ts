@@ -9,6 +9,7 @@ import { updateSidebarState } from "./sidebar";
 import { initPageNavigation } from "@/modules/wiki/page-navigation";
 import { initializeClickableHeadings } from "@/modules/wiki/clickable-headings";
 import { initializeDealModals } from "@/modules/wiki/deal-modals";
+import { initializePartnersFilter } from "@/modules/wiki/partners-filter";
 import { restartWebflow } from "@finsweet/ts-utils";
 
 export const swupLinkSelector =
@@ -437,6 +438,7 @@ class SwupManager {
             initializePersistentContentElements();
             // Refresh scroll-based table of contents after content change
             refreshScrollToc();
+
             // Initialize page navigation
             setTimeout(() => {
                 initPageNavigation();
@@ -445,6 +447,7 @@ class SwupManager {
             // Initialize deal modals (numbers fs-modal-element attributes and reinits Finsweet)
             setTimeout(() => {
                 initializeDealModals();
+                initializePartnersFilter();
             }, 150);
         });
 
