@@ -304,41 +304,55 @@ const initializeSidebar = async () => {
                 }
             }
         } else if (title === "Partners and Deals" && developmentCookie === "true") {
-            // Create "Overview" item (shows overview page)
+            // Create "Overview" item at top level
             const overviewItem = sectionItemTemplate.cloneNode(true) as HTMLAnchorElement;
             const overviewItemText = getAvraElement<HTMLAnchorElement>("wiki-section-item-text", overviewItem);
             overviewItemText.textContent = "Overview";
             overviewItemText.href = "/partners-deals-overview";
-            overviewItem.setAttribute("data-overview-slug", "partners-deals-overview");
-
+            overviewItem.setAttribute("data-partner-category", "overview");
             // Remove sub-item templates
             const overviewSubItemTemplate = getAvraElement("wiki-insight-item", overviewItem);
             overviewSubItemTemplate.remove();
-
             while (overviewItem.children.length > 1) {
                 overviewItem.removeChild(overviewItem.lastChild!);
             }
             sectionItemsToAdd.push(overviewItem);
 
-            // Create category links (no sub-items, just flat list)
+            // Create "Partners" parent item with categories as sub-items
+            const partnersItem = sectionItemTemplate.cloneNode(true) as HTMLAnchorElement;
+            const partnersItemText = getAvraElement<HTMLAnchorElement>("wiki-section-item-text", partnersItem);
+            partnersItemText.textContent = "Partners";
+            partnersItemText.href = "/partners";
+            partnersItem.setAttribute("data-partners-section", "true");
+            sectionItemsToAdd.push(partnersItem);
+
+            const subItemTemplate = getAvraElement("wiki-insight-item", partnersItem);
+            const subItemsToAdd: HTMLElement[] = [];
+
+            // Add category links as sub-items
             for (const categoryGroup of partnerCategories) {
-                const sectionItem = sectionItemTemplate.cloneNode(true) as HTMLAnchorElement;
-                const sectionItemText = getAvraElement<HTMLAnchorElement>("wiki-section-item-text", sectionItem);
-                sectionItemText.textContent = categoryGroup.category;
+                const subItem = subItemTemplate.cloneNode(true) as HTMLAnchorElement;
+                const subItemText = getAvraElement<HTMLAnchorElement>("wiki-insight-item-text", subItem);
+                subItemText.textContent = categoryGroup.category;
                 // Use custom href if provided, otherwise link to partners page with category filter
-                sectionItemText.href = categoryGroup.href || `/partners?category=${encodeURIComponent(categoryGroup.category.toLowerCase())}`;
-                sectionItem.setAttribute("data-partner-category", categoryGroup.category.toLowerCase());
+                subItemText.href = categoryGroup.href || `/partners?category=${encodeURIComponent(categoryGroup.category.toLowerCase())}`;
+                subItem.setAttribute("data-partner-category", categoryGroup.category.toLowerCase());
 
-                // Remove sub-item templates (no nested items)
-                const subItemTemplate = getAvraElement("wiki-insight-item", sectionItem);
-                subItemTemplate.remove();
+                // Remove sub-sub items template
+                const subSubItemTemplate = getAvraElement("wiki-insight-heading-item", subItem);
+                subSubItemTemplate.remove();
 
-                while (sectionItem.children.length > 1) {
-                    sectionItem.removeChild(sectionItem.lastChild!);
-                }
-
-                sectionItemsToAdd.push(sectionItem);
+                subItemsToAdd.push(subItem);
             }
+
+            while (partnersItem.children.length > 1) {
+                partnersItem.removeChild(partnersItem.lastChild!);
+            }
+            for (const subItem of subItemsToAdd) {
+                partnersItem.appendChild(subItem);
+            }
+
+            subItemTemplate.remove();
         } else {
             for (const item of items) {
                 const itemTitle = item.getAttribute("data-avra-title") || "#";

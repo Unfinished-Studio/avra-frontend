@@ -43,6 +43,13 @@ export const initializePartnersFilter = (): void => {
                 item.style.display = "none";
             }
         });
+    } else {
+        // No category filter - show all items
+        console.log("[partners-filter] No category filter, showing all items");
+        partnerItems.forEach((item) => {
+            item.classList.remove("hide");
+            item.style.display = "";
+        });
     }
 
     // Add border-bottom to the last visible item's header
