@@ -9,6 +9,7 @@ import { updateSidebarState } from "./sidebar";
 import { initPageNavigation } from "@/modules/wiki/page-navigation";
 import { initializeClickableHeadings } from "@/modules/wiki/clickable-headings";
 import { initializeDealModals } from "@/modules/wiki/deal-modals";
+import { restartWebflow } from "@finsweet/ts-utils";
 
 export const swupLinkSelector =
     'a[href*="/avra-wiki/"], a[href*="/session-insights/"], a[href*="/case-studies/"], a[href*="/audio-video/"], a[href*="/deals"], a[href*="/partners"], a[href*="/partners-deals-overview"]';
@@ -421,6 +422,9 @@ class SwupManager {
             } else {
                 setTimeout(() => this.scrollToTopOfWikiContainer(), 150);
             }
+
+            console.log("restarting webflow animations...");
+            restartWebflow(["ix2"]);
         });
 
         // Visit end hook
