@@ -1529,8 +1529,10 @@ export const partnerCategories: PartnerCategory[] = [
     },
     {
         category: "Comms",
-        partners: [
-            { name: "SMT Comms", slug: "smt-comms" },
-        ],
+        partners: [{ name: "SMT Comms", slug: "smt-comms" }],
+    },
+    {
+        category: "Pricing",
+        partners: [{ name: "Crescendo", slug: "crescendo" }],
     },
 ];
