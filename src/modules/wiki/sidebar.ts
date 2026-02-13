@@ -1,4 +1,11 @@
-import { DROPDOWN_TIERS, podcastArticles, sessionInsightsBatches, wikiItems, alumniSessionCategories, partnerCategories } from "@/data/sidebar";
+import {
+    DROPDOWN_TIERS,
+    podcastArticles,
+    sessionInsightsBatches,
+    wikiItems,
+    alumniSessionCategories,
+    partnerCategories,
+} from "@/data/sidebar";
 import { ACTIVE_CLASS } from "@/utils/constants";
 import { getAvraElement, getElements } from "@/utils/dom/elements";
 import { isMobile } from "@/utils/mobile";
@@ -322,7 +329,7 @@ const initializeSidebar = async () => {
             const partnersItem = sectionItemTemplate.cloneNode(true) as HTMLAnchorElement;
             const partnersItemText = getAvraElement<HTMLAnchorElement>("wiki-section-item-text", partnersItem);
             partnersItemText.textContent = "Partners";
-            partnersItemText.href = "/partners";
+            partnersItemText.href = "/partners?category=hiring";
             partnersItem.setAttribute("data-partners-section", "true");
             sectionItemsToAdd.push(partnersItem);
 
@@ -640,7 +647,10 @@ const shouldDropdownBeExpanded = (
             return true;
         } else if (sectionText === "podcast episodes" && currentType === "podcast") {
             return true;
-        } else if (sectionText === "partners and deals" && (location.pathname.includes("/partners") || location.pathname.includes("/deals"))) {
+        } else if (
+            sectionText === "partners and deals" &&
+            (location.pathname.includes("/partners") || location.pathname.includes("/deals"))
+        ) {
             return true;
         } else if (sectionText === "wiki topics") {
             // Keep Wiki Topics open by default when not on a specific content page

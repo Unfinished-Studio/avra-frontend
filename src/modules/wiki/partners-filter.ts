@@ -1,14 +1,25 @@
 /**
  * Filter partners list based on URL query parameters
  * Supports ?category=X and ?highlight=X parameters
- * Expects a flexbox container with div children that have data-category attributes
  */
 export const initializePartnersFilter = (): void => {
     const pathname = window.location.pathname;
 
-    // Only run on partners or deals page
-    if (!pathname.includes("/partners") && !pathname.includes("/deals")) {
+    // Only run on partners page
+    if (!pathname.includes("/partners")) {
         return;
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const categoryFilter = urlParams.get("category");
+    const highlightPartner = urlParams.get("highlight");
+
+    // Get the title element
+    const titleElement = document.querySelector<HTMLElement>("[avra-element='partners-title']");
+    if (titleElement) {
+        titleElement.style.opacity = "0";
+        titleElement.style.transition = "opacity 0.3s ease-in-out";
+        titleElement.classList.remove("hide");
     }
 
     // Find all partner items with data-category attribute
@@ -26,12 +37,7 @@ export const initializePartnersFilter = (): void => {
         item.style.transition = "opacity 0.3s ease-in-out";
     });
 
-    // Apply filtering (only on partners page with category param)
-    const urlParams = new URLSearchParams(window.location.search);
-    const categoryFilter = urlParams.get("category");
-    const highlightPartner = urlParams.get("highlight");
-
-    if (categoryFilter && pathname.includes("/partners")) {
+    if (categoryFilter) {
         console.log(`[partners-filter] Filtering by category: ${categoryFilter}`);
 
         partnerItems.forEach((item) => {
@@ -43,6 +49,8 @@ export const initializePartnersFilter = (): void => {
                 item.style.display = "none";
             }
         });
+
+        updatePartnersTitle(categoryFilter);
     } else {
         // No category filter - show all items
         console.log("[partners-filter] No category filter, showing all items");
@@ -50,12 +58,14 @@ export const initializePartnersFilter = (): void => {
             item.classList.remove("hide");
             item.style.display = "";
         });
+
+        updatePartnersTitle(null);
     }
 
     // Add border-bottom to the last visible item's header
     addLastItemBorder(partnerItems);
 
-    // Fade in visible items after a short delay
+    // Fade in visible items and title after a short delay
     requestAnimationFrame(() => {
         setTimeout(() => {
             partnerItems.forEach((item) => {
@@ -63,6 +73,9 @@ export const initializePartnersFilter = (): void => {
                     item.style.opacity = "1";
                 }
             });
+            if (titleElement) {
+                titleElement.style.opacity = "1";
+            }
         }, 50);
     });
 
@@ -73,10 +86,27 @@ export const initializePartnersFilter = (): void => {
 };
 
 /**
+ * Update the partners page title based on category
+ */
+const updatePartnersTitle = (category: string | null): void => {
+    const titleElement = document.querySelector<HTMLElement>("[avra-element='partners-title']");
+    if (!titleElement) {
+        console.log("[partners-filter] No partners-title element found");
+        return;
+    }
+
+    if (category) {
+        const capitalizedCategory = category.charAt(0).toUpperCase() + category.slice(1).toLowerCase();
+        titleElement.textContent = capitalizedCategory;
+    } else {
+        titleElement.textContent = "Partners";
+    }
+};
+
+/**
  * Add border-bottom to the last visible partner item's accordion header
  */
 const addLastItemBorder = (partnerItems: NodeListOf<HTMLElement>): void => {
-    // Find the last visible item using Array.from to avoid closure typing issues
     const itemsArray = Array.from(partnerItems);
     const lastVisibleItem = itemsArray.filter((item) => item.style.display !== "none").pop();
 
@@ -97,19 +127,14 @@ const highlightPartnerItem = (partnerSlug: string): void => {
         return;
     }
 
-    // Make sure the item is visible
     targetItem.style.display = "";
-
-    // Add highlight styling
     targetItem.style.backgroundColor = "#fff3cd";
     targetItem.style.transition = "background-color 0.5s ease-in-out";
 
-    // Scroll to the item
     setTimeout(() => {
         targetItem.scrollIntoView({ behavior: "smooth", block: "center" });
     }, 100);
 
-    // Fade out highlight after a few seconds
     setTimeout(() => {
         targetItem.style.backgroundColor = "";
     }, 3000);

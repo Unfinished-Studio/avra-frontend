@@ -1502,7 +1502,6 @@ export const partnerCategories: PartnerCategory[] = [
     },
     {
         category: "Software",
-        href: "/deals",
         partners: [
             { name: "Rippling", slug: "rippling" },
             { name: "Deel", slug: "deel" },
@@ -1534,5 +1533,9 @@ export const partnerCategories: PartnerCategory[] = [
     {
         category: "Pricing",
         partners: [{ name: "Crescendo", slug: "crescendo" }],
+    },
+    {
+        category: "Wealth",
+        partners: [{ name: "Morgan Stanley", slug: "morgan-stanley" }],
     },
 ];
