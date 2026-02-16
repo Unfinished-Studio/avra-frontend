@@ -46,10 +46,12 @@ const removePageParameter = () => {
 window.Webflow ||= [];
 window.Webflow.push(async () => {
     // Check for development query parameter and set cookie
-    const urlParams = new URLSearchParams(window.location.search);
-    const developmentParam = urlParams.get("development");
+    const url = new URL(window.location.href);
+    const developmentParam = url.searchParams.get("development");
     if (developmentParam === "true") {
         avraSetCookie("development", "true");
+        url.searchParams.delete("development");
+        window.history.replaceState(null, "", String(url));
     }
 
     await sidebar();

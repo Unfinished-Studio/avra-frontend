@@ -1,3 +1,5 @@
+import { navigateSwup } from "@/modules/wiki/swup-manager";
+
 /**
  * Filter partners list based on URL query parameters
  * Supports ?category=X and ?highlight=X parameters
@@ -6,13 +8,18 @@ export const initializePartnersFilter = (): void => {
     const pathname = window.location.pathname;
 
     // Only run on partners page
-    if (!pathname.includes("/partners")) {
+    if (pathname !== "/partners") {
         return;
     }
 
     const urlParams = new URLSearchParams(window.location.search);
     const categoryFilter = urlParams.get("category");
     const highlightPartner = urlParams.get("highlight");
+
+    if (!categoryFilter) {
+        navigateSwup("/partners-deals-overview");
+        return;
+    }
 
     // Get the title element
     const titleElement = document.querySelector<HTMLElement>("[avra-element='partners-title']");
