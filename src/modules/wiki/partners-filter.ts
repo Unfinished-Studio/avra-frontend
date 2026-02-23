@@ -5,29 +5,36 @@ import { navigateSwup } from "@/modules/wiki/swup-manager";
  * Supports ?category=X and ?highlight=X parameters
  */
 export const initializePartnersFilter = (): void => {
-    const pathname = window.location.pathname;
-
-    // Only run on partners page
-    if (pathname !== "/partners") {
+    if (window.location.pathname !== "/partners") {
         return;
     }
 
     const urlParams = new URLSearchParams(window.location.search);
     const categoryFilter = urlParams.get("category");
-    const highlightPartner = urlParams.get("highlight");
+    // const highlightPartner = urlParams.get("highlight");
 
     if (!categoryFilter) {
         navigateSwup("/partners-deals-overview");
         return;
     }
 
-    // Get the title element
-    const titleElement = document.querySelector<HTMLElement>("[avra-element='partners-title']");
-    if (titleElement) {
-        titleElement.style.opacity = "0";
-        titleElement.style.transition = "opacity 0.3s ease-in-out";
-        titleElement.classList.remove("hide");
+    console.log(`[partners-filter] Filtering by category: ${categoryFilter}`);
+
+    const headingEl = document.querySelector<HTMLElement>("[avra-element='partners-title']");
+    if (headingEl) {
+        headingEl.style.opacity = "0";
+        headingEl.style.transition = "opacity 0.3s ease-in-out";
+        headingEl.classList.remove("hide");
     }
+
+    // const subheadingEls = document.querySelectorAll<HTMLElement>("[avra-element='partners-subheading']");
+    // for (const subheadingEl of subheadingEls) {
+    //     subheadingEl.style.opacity = "0";
+    //     subheadingEl.style.transition = "opacity 0.3s ease-in-out";
+    //     subheadingEl.classList.remove("hide");
+    // }
+
+    const subheadingEls: HTMLElement[] = [];
 
     // Find all partner items with data-category attribute
     const partnerItems = document.querySelectorAll<HTMLElement>("[data-category]");
@@ -39,35 +46,52 @@ export const initializePartnersFilter = (): void => {
     console.log(`[partners-filter] Found ${partnerItems.length} partner items`);
 
     // Start with all items faded out
-    partnerItems.forEach((item) => {
+    for (const item of partnerItems) {
         item.style.opacity = "0";
         item.style.transition = "opacity 0.3s ease-in-out";
-    });
 
-    if (categoryFilter) {
-        console.log(`[partners-filter] Filtering by category: ${categoryFilter}`);
+        const itemCategory = item.getAttribute("data-category");
+        const itemSubCategory = item.getAttribute("data-subheading-category");
 
-        partnerItems.forEach((item) => {
-            const itemCategory = item.getAttribute("data-category");
-            if (itemCategory === categoryFilter.toLowerCase()) {
-                item.classList.remove("hide");
-                item.style.display = "";
-            } else {
-                item.style.display = "none";
+        if (itemCategory === categoryFilter.toLowerCase()) {
+            if (itemSubCategory) {
+                // find subheading
+                // if it doesnt exist, create
+                // move item into subheading parent
+                const subheadingEl = subheadingEls.find((el) => el.textContent.toLowerCase() === itemSubCategory.toLowerCase());
+                if (subheadingEl) {
+                    console.log(`subheading ${itemSubCategory} exists! moving item into`, subheadingEl);
+                    subheadingEl.parentElement?.appendChild(item);
+                } else {
+                    const newSubheadingEl = document.createElement("h3");
+                    newSubheadingEl.classList.add("partners-subheading");
+                    newSubheadingEl.style.opacity = "0";
+                    newSubheadingEl.style.transition = "opacity 0.3s ease-in-out";
+                    newSubheadingEl.textContent = itemSubCategory;
+                    subheadingEls.push(newSubheadingEl);
+
+                    const parent = document.createElement("div");
+                    parent.classList.add("partners-subheading-wrapper");
+
+                    parent.append(newSubheadingEl, item);
+
+                    const ogList = document.querySelector(".accordion-wrapper.is-parent-wrapper");
+                    if (ogList && ogList.parentElement) {
+                        ogList.parentElement.insertBefore(parent, ogList);
+                    }
+
+                    console.log(parent, newSubheadingEl, item);
+                }
             }
-        });
 
-        updatePartnersTitle(categoryFilter);
-    } else {
-        // No category filter - show all items
-        console.log("[partners-filter] No category filter, showing all items");
-        partnerItems.forEach((item) => {
             item.classList.remove("hide");
             item.style.display = "";
-        });
-
-        updatePartnersTitle(null);
+        } else {
+            item.style.display = "none";
+        }
     }
+
+    updatePartnersTitle(categoryFilter);
 
     // Add border-bottom to the last visible item's header
     addLastItemBorder(partnerItems);
@@ -80,16 +104,21 @@ export const initializePartnersFilter = (): void => {
                     item.style.opacity = "1";
                 }
             });
-            if (titleElement) {
-                titleElement.style.opacity = "1";
+            if (headingEl) {
+                headingEl.style.opacity = "1";
             }
+            subheadingEls.forEach((item) => {
+                if (item.style.display !== "none") {
+                    item.style.opacity = "1";
+                }
+            });
         }, 50);
     });
 
-    if (highlightPartner) {
-        console.log(`[partners-filter] Highlighting partner: ${highlightPartner}`);
-        highlightPartnerItem(highlightPartner);
-    }
+    // if (highlightPartner) {
+    //     console.log(`[partners-filter] Highlighting partner: ${highlightPartner}`);
+    //     highlightPartnerItem(highlightPartner);
+    // }
 };
 
 /**
