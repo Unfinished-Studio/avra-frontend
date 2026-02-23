@@ -1498,6 +1498,7 @@ export const partnerCategories: PartnerCategory[] = [
             { name: "Chapter Search (GTM)", slug: "chapter-search" },
             { name: "One North Talent (People/HR)", slug: "one-north-talent" },
             { name: "JBM (EMEA Expansion)", slug: "jbm" },
+            { name: "Wert&Co. (Design)", slug: "wert-co" },
         ],
     },
     {
@@ -1537,9 +1538,5 @@ export const partnerCategories: PartnerCategory[] = [
     {
         category: "Wealth",
         partners: [{ name: "Morgan Stanley", slug: "morgan-stanley" }],
-    },
-    {
-        category: "Design",
-        partners: [{ name: "Wert&Co.", slug: "wert-co" }],
     },
 ];
