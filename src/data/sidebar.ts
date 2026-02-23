@@ -1538,4 +1538,8 @@ export const partnerCategories: PartnerCategory[] = [
         category: "Wealth",
         partners: [{ name: "Morgan Stanley", slug: "morgan-stanley" }],
     },
+    {
+        category: "Design",
+        partners: [{ name: "Wert&Co.", slug: "wert-co" }],
+    },
 ];
