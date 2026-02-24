@@ -91,6 +91,26 @@ export const initializePartnersFilter = (): void => {
         }
     }
 
+    // Sort subheading wrappers A–Z by their heading text
+    if (subheadingEls.length > 0) {
+        const ogList = document.querySelector(".accordion-wrapper.is-parent-wrapper");
+        if (ogList && ogList.parentElement) {
+            const wrappers = subheadingEls
+                .map((el) => el.parentElement)
+                .filter((parent): parent is HTMLElement => parent instanceof HTMLElement);
+
+            wrappers
+                .sort((a, b) => {
+                    const aText = (a.querySelector(".partners-subheading")?.textContent || "").toLowerCase();
+                    const bText = (b.querySelector(".partners-subheading")?.textContent || "").toLowerCase();
+                    return aText.localeCompare(bText);
+                })
+                .forEach((wrapper) => {
+                    ogList.parentElement!.insertBefore(wrapper, ogList);
+                });
+        }
+    }
+
     updatePartnersTitle(categoryFilter);
 
     // Add border-bottom to the last visible item's header
