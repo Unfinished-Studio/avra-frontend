@@ -17,7 +17,7 @@ import { getUserPlanRestrictions } from "@/utils/memberstack/user";
 import { avraGetCookie } from "@/utils/avra-get-cookie";
 
 let sidebarInitialized = false;
-const developmentCookie = avraGetCookie("development");
+// const developmentCookie = avraGetCookie("development");
 
 const buildContentPageLink = (type: ContentType, slug: string) => {
     return `/${CONTENT_TYPE_SLUG_MAPPINGS[type]}/${slug}`;
@@ -66,12 +66,9 @@ const initializeSidebar = async () => {
         ...(shouldShowSessionInsights ? [{ title: "Session Insights", items: sessionInsightElements }] : []),
         { title: "Alumni Sessions", items: [] },
         { title: "Podcast Episodes", items: podcastElements },
+        { title: "Partners and Deals", items: [] },
     ];
     const sectionsToAdd: HTMLElement[] = [];
-
-    if (developmentCookie === "true") {
-        sidebarSections.push({ title: "Partners and Deals", items: [] });
-    }
 
     // Create the sidebar sections
     for (const sidebarSection of sidebarSections) {
@@ -310,7 +307,7 @@ const initializeSidebar = async () => {
                     sectionItem.removeChild(sectionItem.lastChild!);
                 }
             }
-        } else if (title === "Partners and Deals" && developmentCookie === "true") {
+        } else if (title === "Partners and Deals") {
             // Create "Overview" item at top level
             const overviewItem = sectionItemTemplate.cloneNode(true) as HTMLAnchorElement;
             const overviewItemText = getAvraElement<HTMLAnchorElement>("wiki-section-item-text", overviewItem);
