@@ -108,9 +108,13 @@ const initializeSidebar = async () => {
                     const insightItem = insightItemTemplate.cloneNode(true) as HTMLAnchorElement;
                     const insightItemText = getAvraElement<HTMLAnchorElement>("wiki-insight-item-text", insightItem);
                     insightItemText.textContent = subItem.displayTitle;
-                    if (subItem.type === "heading") {
+                    if (subItem.href) {
+                        insightItemText.href = subItem.href;
+                        insightItemText.target = "_blank";
+                    } else if (subItem.type === "heading") {
                         const baseUrl = new URL(sectionItemText.href, window.location.origin);
                         baseUrl.searchParams.set("highlight", subItem.title);
+                        baseUrl.searchParams.set("depth", "2");
                         insightItemText.href = baseUrl.toString().replace(window.location.origin, "");
                     } else if (subItem.type === "item") {
                         insightItemText.href = subItem.title;
@@ -132,9 +136,13 @@ const initializeSidebar = async () => {
                                     insightHeadingItem
                                 );
                                 insightHeadingItemText.textContent = subSubItem.displayTitle;
-                                if (subSubItem.type === "heading") {
+                                if (subSubItem.href) {
+                                    insightHeadingItemText.href = subSubItem.href;
+                                    insightHeadingItemText.target = "_blank";
+                                } else if (subSubItem.type === "heading") {
                                     const baseUrl = new URL(sectionItemText.href, window.location.origin);
                                     baseUrl.searchParams.set("highlight", subSubItem.title);
+                                    baseUrl.searchParams.set("depth", "3");
                                     insightHeadingItemText.href = baseUrl.toString().replace(window.location.origin, "");
                                 } else if (subSubItem.type === "item") {
                                     insightHeadingItemText.href = subSubItem.title;
@@ -161,9 +169,13 @@ const initializeSidebar = async () => {
                                                 subInsightHeadingItem
                                             );
                                             subInsightHeadingItemText.textContent = subSubSubItem.displayTitle;
-                                            if (subSubSubItem.type === "heading") {
+                                            if (subSubSubItem.href) {
+                                                subInsightHeadingItemText.href = subSubSubItem.href;
+                                                subInsightHeadingItemText.target = "_blank";
+                                            } else if (subSubSubItem.type === "heading") {
                                                 const baseUrl = new URL(sectionItemText.href, window.location.origin);
                                                 baseUrl.searchParams.set("highlight", subSubSubItem.title);
+                                                baseUrl.searchParams.set("depth", "4");
                                                 subInsightHeadingItemText.href = baseUrl.toString().replace(window.location.origin, "");
                                             } else if (subSubSubItem.type === "item") {
                                                 subInsightHeadingItemText.href = subSubSubItem.title;

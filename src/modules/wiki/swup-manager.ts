@@ -152,8 +152,8 @@ class SwupManager {
             console.warn("[SWUP-SCROLL] Closed sidebar");
         }
 
-        // Find the target heading
-        const targetHeading = this.findTargetHeading(wikiContent, highlightedText);
+        const depth = parseInt(new URLSearchParams(window.location.search).get("depth") || "0", 10);
+        const targetHeading = this.findTargetHeading(wikiContent, highlightedText, depth > 0 && depth < 4);
         if (!targetHeading) {
             console.warn("[SWUP-SCROLL] No matching heading found for:", highlightedText);
             return;
@@ -165,8 +165,9 @@ class SwupManager {
         this.scrollToHeadingWithRetry(targetHeading, wikiContainer, highlightedText);
     }
 
-    private findTargetHeading(container: HTMLElement, highlightedText: string): HTMLElement | null {
-        const headings = container.querySelectorAll("h1, h2, h3, h4, h5, h6");
+    private findTargetHeading(container: HTMLElement, highlightedText: string, skipH4: boolean = false): HTMLElement | null {
+        const selector = skipH4 ? "h1, h2, h3, h5, h6" : "h1, h2, h3, h4, h5, h6";
+        const headings = container.querySelectorAll(selector);
         console.warn("[SWUP-SCROLL] Searching through", headings.length, "headings");
 
         // Normalize text to handle special characters
@@ -184,10 +185,20 @@ class SwupManager {
         const searchText = normalizeText(highlightedText);
         console.warn("[SWUP-SCROLL] Normalized search text:", searchText);
 
+        // First pass: exact match
+        for (const heading of headings) {
+            const headingText = normalizeText(heading.textContent || "");
+            if (headingText === searchText) {
+                console.warn("[SWUP-SCROLL] Exact match found:", headingText);
+                return heading as HTMLElement;
+            }
+        }
+
+        // Fallback: partial match
         for (const heading of headings) {
             const headingText = normalizeText(heading.textContent || "");
             if (headingText.includes(searchText)) {
-                console.warn("[SWUP-SCROLL] Match found:", headingText);
+                console.warn("[SWUP-SCROLL] Partial match found:", headingText);
                 return heading as HTMLElement;
             }
         }

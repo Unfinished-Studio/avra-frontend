@@ -48,8 +48,7 @@ const buildHeadingURL = (headingText: string): string => {
 
     // Copy existing parameters (excluding page and highlight)
     params.forEach((value, key) => {
-        if (key !== "highlight" && key !== "page") {
-            // Don't copy highlight or page parameters
+        if (key !== "highlight" && key !== "page" && key !== "depth") {
             url.searchParams.set(key, value);
         }
     });

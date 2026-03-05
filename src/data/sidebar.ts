@@ -9,6 +9,7 @@ export type WikiSubItem = {
     title: string;
 
     subItems?: WikiSubItem[];
+    href?: string;
 };
 export type WikiItem = {
     title: string;
@@ -69,134 +70,122 @@ export const wikiItems: WikiItem[] = [
         subItems: [
             {
                 type: "heading",
-                displayTitle: "The CEO's Job",
-                title: "Defining the CEO’s Job",
+                displayTitle: "When to Hire",
+                title: "Knowing When to Hire",
             },
             {
                 type: "heading",
-                displayTitle: "Building Leadership",
-                title: "Building your Leadership Team",
+                displayTitle: "Building your Team",
+                title: "Building Your Team",
             },
             {
                 type: "heading",
-                displayTitle: "Getting Started",
-                title: "How do you get started?",
+                displayTitle: "Hiring Leaders",
+                title: "Hiring Leaders",
             },
             {
                 type: "heading",
-                displayTitle: "Case Studies",
-                title: "Case Studies",
+                displayTitle: "Onboarding Leaders",
+                title: "Onboarding Leaders",
+            },
+            {
+                type: "heading",
+                displayTitle: "Firing Leaders",
+                title: "Firing Leaders",
+            },
+            {
+                type: "heading",
+                displayTitle: "Great Leaders",
+                title: "Great Leaders",
                 subItems: [
                     {
                         type: "heading",
-                        displayTitle: "Head of Engineering",
-                        title: "Head of Engineering",
-                        subItems: [
-                            {
-                                type: "heading",
-                                displayTitle: "Faire",
-                                title: "Faire: VP of Engineering",
-                            },
-                            {
-                                type: "heading",
-                                displayTitle: "Benchling",
-                                title: "Benchling: VP of Engineering",
-                            },
-                        ],
+                        displayTitle: "DoorDash",
+                        title: "DoorDash",
+                        href: "/session-insights/tony-xu-on-hiring-and-operating-cadence",
                     },
                     {
                         type: "heading",
-                        displayTitle: "Head of Sales",
-                        title: "Head of Sales",
-                        subItems: [
-                            {
-                                type: "heading",
-                                displayTitle: "Ironclad",
-                                title: "Ironclad: VP of Sales",
-                            },
-                        ],
-                    },
-                    {
-                        type: "heading",
-                        displayTitle: "Head of Product",
-                        title: "Head of Product",
-                        subItems: [
-                            {
-                                type: "heading",
-                                displayTitle: "Brex",
-                                title: "Brex: Chief Product Officer",
-                            },
-                            {
-                                type: "heading",
-                                displayTitle: "Webflow",
-                                title: "Webflow: Chief Product Officer",
-                            },
-                        ],
-                    },
-                    {
-                        type: "heading",
-                        displayTitle: "Head of Finance",
-                        title: "Head of Finance",
-                        subItems: [
-                            {
-                                type: "heading",
-                                displayTitle: "First Head of Finance",
-                                title: "What to look for in your first Head of Finance hire?",
-                            },
-                            {
-                                type: "heading",
-                                displayTitle: "Scale AI",
-                                title: "Scale AI",
-                            },
-                        ],
-                    },
-                    {
-                        type: "heading",
-                        displayTitle: "Leadership Hires",
-                        title: "Leadership Hires",
-                        subItems: [
-                            {
-                                type: "heading",
-                                displayTitle: "Scale",
-                                title: "‍‍Scale's Executive Hiring Criteria",
-                            },
-                            {
-                                type: "heading",
-                                displayTitle: "DoorDash",
-                                title: "Tony Xu's Criteria for A+ Executives",
-                            },
-                            {
-                                type: "heading",
-                                displayTitle: "Gusto",
-                                title: "What does Joshua Reeves (CEO of Gusto) look for when hiring leaders?",
-                            },
-                            {
-                                type: "heading",
-                                displayTitle: "Generic",
-                                title: "Generic Executive Interview",
-                            },
-                        ],
-                    },
-                    {
-                        type: "heading",
-                        displayTitle: "Chief of Staff",
-                        title: "Considering a Chief of Staff?",
-                    },
-                    {
-                        type: "heading",
-                        displayTitle: "EA",
-                        title: "How to get the most out of your EA?",
+                        displayTitle: "Databricks",
+                        title: "Databricks",
+                        href: "/session-insights/ali-ghodsi-on-leadership",
                     },
                 ],
             },
             {
                 type: "heading",
-                displayTitle: "Managing Leaders",
-                title: "On Managing Leaders",
+                displayTitle: "Case Studies (Hiring)",
+                title: "Case Studies: Hiring",
+                subItems: [
+                    {
+                        type: "heading",
+                        displayTitle: "Engineering",
+                        title: "Engineering",
+                    },
+                    {
+                        type: "heading",
+                        displayTitle: "Sales",
+                        title: "Sales",
+                    },
+                    {
+                        type: "heading",
+                        displayTitle: "Product",
+                        title: "Product",
+                    },
+                    {
+                        type: "heading",
+                        displayTitle: "Finance",
+                        title: "Finance",
+                    },
+                ],
             },
             {
                 type: "heading",
-                displayTitle: "FAQs",
+                displayTitle: "Case Studies (Onboarding)",
+                title: "Case Studies: Onboarding",
+                subItems: [
+                    {
+                        type: "heading",
+                        displayTitle: "Webflow (~700 employees)",
+                        title: "Webflow (~700 employees)",
+                    },
+                    {
+                        type: "heading",
+                        displayTitle: "Faire (~1000 employees)",
+                        title: "Faire (~1000 employees)",
+                    },
+                    {
+                        type: "heading",
+                        displayTitle: "Jean-Denis (Plaid)",
+                        title: "Jean-Denis Greze (Plaid)",
+                    },
+                    {
+                        type: "heading",
+                        displayTitle: "Gusto (~4000 employees)",
+                        title: "Gusto (~4000 employees)",
+                    },
+                    {
+                        type: "heading",
+                        displayTitle: "Shishir (Coda)",
+                        title: "Shishir Mehrotra (Coda)",
+                    },
+                ],
+            },
+            {
+                type: "heading",
+                displayTitle: "Case Studies (EAs)",
+                title: "Case Studies: EA",
+                subItems: [
+                    {
+                        type: "heading",
+                        displayTitle: "Wade Foster (Zapier)",
+                        title: "Wade Foster (Zapier)",
+                    },
+                ],
+            },
+            {
+                type: "heading",
+                displayTitle: "FAQ",
                 title: "Frequently Asked Questions",
             },
         ],
