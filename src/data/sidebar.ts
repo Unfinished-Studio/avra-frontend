@@ -211,47 +211,35 @@ export const wikiItems: WikiItem[] = [
             },
             {
                 type: "heading",
-                displayTitle: "Communicating MSM",
-                title: "4. Communicating your mission, strategy, and key metrics",
+                displayTitle: "Example MSM Docs",
+                title: "4. Example MSM Docs",
                 subItems: [
                     {
                         type: "heading",
-                        displayTitle: "Whatnot",
-                        title: "5. Example I: Whatnot's Mission-to-Metrics",
+                        displayTitle: "Segment",
+                        title: "Segment\u2019s 100 Week Plan",
                     },
                     {
                         type: "heading",
-                        displayTitle: "Segment",
-                        title: "5. Example II: Segment’s 100 Week Plan",
+                        displayTitle: "Whatnot",
+                        title: "Whatnot's Mission-to-Metrics",
                     },
                 ],
             },
             {
                 type: "heading",
-                displayTitle: "Case Studies",
-                title: "6. Case Studies",
-                subItems: [
-                    {
-                        type: "heading",
-                        displayTitle: "Gusto",
-                        title: "Gusto: Driving Alignment",
-                    },
-                    {
-                        type: "heading",
-                        displayTitle: "Twitch",
-                        title: "Twitch: How to Write a Monthly Report",
-                    },
-                    {
-                        type: "heading",
-                        displayTitle: "Brex",
-                        title: "Brex: Monthly Email to the Board",
-                    },
-                    {
-                        type: "heading",
-                        displayTitle: "Whatnot",
-                        title: "Whatnot: Mission, Outcomes, Competencies",
-                    },
-                ],
+                displayTitle: "Driving Cadence",
+                title: "5. Cadence",
+            },
+            {
+                type: "heading",
+                displayTitle: "Communicating MSM",
+                title: "6. Communicating your mission, strategy, and key metrics",
+            },
+            {
+                type: "heading",
+                displayTitle: "FAQ",
+                title: "7. FAQ",
             },
         ],
     },
